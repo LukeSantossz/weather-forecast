@@ -1,0 +1,14 @@
+pandas
+numpy
+matplotlib
+seaborn
+scikit-learn
+prophet
+lightgbm
+shap
+folium
+plotly
+nbformat>=4.2.0
+kaggle
+pyarrow
+pytest>=7.0.0
