@@ -4,15 +4,26 @@ Cleaning and preprocessing utilities for the weather dataset.
 Pipeline: impute missing values → IQR bounds + clip → MinMax scale numerics → one-hot encode categoricals.
 """
 
-
 from __future__ import annotations
-from typing import Any
+from typing import Any, Literal
 import pandas as pd
 from sklearn.preprocessing import MinMaxScaler
 
 
+OutlierStrategy = Literal["clip"]
+
+
 def split_feature_types(df: pd.DataFrame) -> tuple[pd.Index, pd.Index]:
-    """Split columns into categorical (object/category) and numeric (integer/float)."""
+    """
+    Split DataFrame columns by data type.
+
+    Args:
+        df: Input DataFrame to analyze.
+
+    Returns:
+        Tuple of (categorical_columns, numerical_columns) as pandas Index objects.
+        Categorical includes object and category dtypes; numerical includes all numeric dtypes.
+    """
     categorical = df.select_dtypes(include=["object", "category"]).columns
     numerical = df.select_dtypes(include=["number"]).columns
     return categorical, numerical
@@ -23,7 +34,21 @@ def impute_missing_values(
     numerical_cols: pd.Index | list[str],
     categorical_cols: pd.Index | list[str],
 ) -> pd.DataFrame:
-    """Impute numeric columns with median; categorical with mode (fallback to empty string)."""
+    """
+    Impute missing values in a DataFrame.
+
+    Numeric columns are filled with their median; categorical columns
+    are filled with their mode (fallback to empty string if no mode exists).
+
+    Args:
+        df: Input DataFrame (not modified in place).
+        numerical_cols: Columns to impute with median.
+        categorical_cols: Columns to impute with mode.
+
+    Returns:
+        New DataFrame with missing values imputed.
+    """
+    df = df.copy()
     for col in numerical_cols:
         if col not in df.columns:
             continue
@@ -42,7 +67,18 @@ def detect_outliers_iqr(
     numerical_cols: pd.Index | list[str],
     iqr_multiplier: float = 1.5,
 ) -> dict[str, tuple[float, float]]:
-    """Return per-column IQR fences as (lower, upper)."""
+    """
+    Compute IQR-based outlier fences for numeric columns.
+
+    Args:
+        df: Input DataFrame.
+        numerical_cols: Columns to compute bounds for.
+        iqr_multiplier: Multiplier for IQR range (default 1.5).
+
+    Returns:
+        Dictionary mapping column names to (lower_bound, upper_bound) tuples.
+        Bounds are computed as Q1 - multiplier*IQR and Q3 + multiplier*IQR.
+    """
     bounds: dict[str, tuple[float, float]] = {}
     for col in numerical_cols:
         if col not in df.columns:
@@ -59,11 +95,25 @@ def detect_outliers_iqr(
 def treat_outliers_iqr(
     df: pd.DataFrame,
     bounds: dict[str, tuple[float, float]],
-    strategy: str = "clip",
+    strategy: OutlierStrategy = "clip",
 ) -> pd.DataFrame:
-    """Cap values to IQR fences when strategy is ``clip``."""
+    """
+    Treat outliers by capping values to IQR fences.
+
+    Args:
+        df: Input DataFrame (not modified in place).
+        bounds: Per-column (lower, upper) bounds from detect_outliers_iqr.
+        strategy: Treatment strategy. Currently only "clip" is supported.
+
+    Returns:
+        New DataFrame with outliers clipped to bounds.
+
+    Raises:
+        ValueError: If strategy is not supported.
+    """
     if strategy != "clip":
         raise ValueError(f"Unsupported outlier strategy: {strategy!r}. Use 'clip'.")
+    df = df.copy()
     for col, (low, high) in bounds.items():
         if col not in df.columns:
             continue
@@ -77,9 +127,16 @@ def normalize_numeric_features(
     exclude_cols: list[str] | None = None,
 ) -> tuple[pd.DataFrame, MinMaxScaler | None, list[str]]:
     """
-    Scale numeric columns to [0, 1] with MinMaxScaler.
+    Scale numeric columns to [0, 1] using MinMaxScaler.
 
-    Columns in ``exclude_cols`` are left unchanged (e.g. coordinates or epoch ids).
+    Args:
+        df: Input DataFrame (not modified in place).
+        numerical_cols: Candidate columns for scaling.
+        exclude_cols: Columns to skip (e.g., coordinates, epoch timestamps).
+
+    Returns:
+        Tuple of (scaled_df, fitted_scaler, list_of_scaled_columns).
+        Returns (df, None, []) if no columns were scaled.
     """
     exclude_cols = exclude_cols or []
     cols_to_scale = [
@@ -98,7 +155,16 @@ def encode_categorical_features(
     df: pd.DataFrame,
     categorical_cols: pd.Index | list[str],
 ) -> pd.DataFrame:
-    """One-hot encode categorical columns; original columns are replaced by dummies."""
+    """
+    One-hot encode categorical columns.
+
+    Args:
+        df: Input DataFrame (not modified in place).
+        categorical_cols: Columns to encode.
+
+    Returns:
+        New DataFrame with original categorical columns replaced by dummy variables.
+    """
     cols = [c for c in categorical_cols if c in df.columns]
     if not cols:
         return df
@@ -107,14 +173,31 @@ def encode_categorical_features(
 
 def run_preprocessing_pipeline(
     df: pd.DataFrame,
-    outliers_strategy: str = "clip",
+    outliers_strategy: OutlierStrategy = "clip",
     exclude_from_normalize: list[str] | None = None,
 ) -> tuple[pd.DataFrame, dict[str, Any]]:
     """
-    Run full preprocessing and return cleaned frame plus metadata for auditing.
+    Run the full preprocessing pipeline.
 
-    Default excludes from MinMax: ``last_updated_epoch``, ``latitude``, ``longitude``
-    (keeps geographic scale interpretable; adjust as needed).
+    Steps: impute missing → detect/treat outliers → normalize numerics → encode categoricals.
+
+    Args:
+        df: Raw input DataFrame (not modified in place).
+        outliers_strategy: Strategy for outlier treatment (default "clip").
+        exclude_from_normalize: Columns to exclude from MinMax scaling.
+            Defaults to ["last_updated_epoch", "latitude", "longitude"].
+
+    Returns:
+        Tuple of (cleaned_df, artifacts_dict).
+
+        artifacts_dict contains:
+            - categorical_cols: Original categorical column names.
+            - numerical_cols: Original numerical column names.
+            - iqr_bounds: Per-column (lower, upper) outlier bounds.
+            - exclude_from_normalize: Columns excluded from scaling.
+            - minmax_scaler: Fitted MinMaxScaler instance (or None).
+            - minmax_columns: List of columns that were scaled.
+            - output_columns: Final column names after encoding.
     """
     artifacts: dict[str, Any] = {}
     df_clean = df.copy()
