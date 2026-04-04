@@ -6,6 +6,14 @@
 
 > End-to-end weather analytics and forecasting pipeline using global climate data.
 
+## About PM Accelerator
+
+This project is part of the **Product Manager Accelerator Program**.
+
+> The PM Accelerator Program is designed to support PM professionals through every stage of their career. From students looking for entry-level jobs to Directors looking to take on a leadership role, our program has helped over hundreds of students fulfill their career aspirations.
+
+Learn more: [PM Accelerator](https://www.pmaccelerator.io/)
+
 ## 1. Project Overview
 
 This repository contains a complete data workflow for weather analysis and short-term temperature forecasting.
@@ -68,15 +76,32 @@ Key field:
    - train with weekly and yearly seasonality;
    - generate a 30-day forecast and evaluate metrics.
 
+6. **Advanced Forecasting** (`06_advanced_forecasting.ipynb`)
+   - stationarity analysis (ADF test, ACF/PACF plots);
+   - multiple models: ARIMA, SARIMA, LightGBM, GradientBoosting;
+   - simple average and weighted ensemble methods;
+   - model comparison vs Prophet baseline.
+
+7. **Environmental Impact Analysis** (`07_environmental_analysis.ipynb`)
+   - air quality distribution analysis;
+   - weather vs air quality correlation;
+   - regional air quality comparison;
+   - feature importance: Random Forest, LightGBM, SHAP.
+
 ## 5. Results and Metrics
 
-### Forecast Performance (Prophet Baseline)
+### Forecast Performance
 
-| Metric | Value |
-|--------|-------|
-| RMSE | 0.77°C |
-| MAE | 0.69°C |
-| MAPE | 3.95% |
+| Model | RMSE (°C) | MAE (°C) | MAPE (%) |
+|-------|-----------|----------|----------|
+| Prophet (Baseline) | 0.77 | 0.69 | 3.95 |
+| ARIMA(5,1,0) | - | - | - |
+| SARIMA(1,1,1)(1,1,1,7) | - | - | - |
+| LightGBM | - | - | - |
+| GradientBoosting | - | - | - |
+| Ensemble (Weighted) | - | - | - |
+
+> Note: Model metrics (marked with `-`) are populated after running notebook 06.
 
 ### Anomaly Detection
 
@@ -126,6 +151,8 @@ jupyter notebook notebooks/
 3. `03_eda.ipynb` — Exploratory analysis and visualizations
 4. `04_anomaly_detection.ipynb` — Z-score and Isolation Forest
 5. `05_prophet_baseline.ipynb` — Prophet forecast and metrics
+6. `06_advanced_forecasting.ipynb` — Multiple models and ensemble
+7. `07_environmental_analysis.ipynb` — Air quality and feature importance
 
 ### Project Structure
 
@@ -139,7 +166,9 @@ pma-weather-forecasting/
 │   ├── 02_preprocessing.ipynb
 │   ├── 03_eda.ipynb
 │   ├── 04_anomaly_detection.ipynb
-│   └── 05_prophet_baseline.ipynb
+│   ├── 05_prophet_baseline.ipynb
+│   ├── 06_advanced_forecasting.ipynb
+│   └── 07_environmental_analysis.ipynb
 ├── src/
 │   ├── __init__.py           # Package exports
 │   ├── data_loader.py        # Data loading utilities
