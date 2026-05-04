@@ -63,3 +63,4 @@ reports/*
 .env.*
 kaggle.json
 /tutor.md
+git_vendas.pdf
