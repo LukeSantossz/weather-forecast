@@ -20,6 +20,7 @@
 |---|------|------|--------------|-----------------|-----------|-------------|
 | 1 | 2026-05-03 | TASK-001 — Organizar repositório para apresentação profissional | major | 5 arquivos — documentação, metadados e regras | aprovado | Checklist agêntico: aplicado. Regra 12 (README guidelines) criada. |
 | 2 | 2026-05-03 | TASK-002 — Configurar CI/CD com GitHub Actions | minor | 2 arquivos — .github/workflows/ci.yml, README.md (badge) | aprovado | Checklist agêntico: aplicado. Matrix Python 3.10 + 3.11, cache pip. |
+| 3 | 2026-05-03 | TASK-003 — Corrigir teste missing columns | patch | 1 arquivo — tests/test_data_loader.py | aprovado | Bug pre-existente revelado pelo CI. |
 
 ## Estado da Codebase
 
@@ -31,7 +32,7 @@
 - **Dependências alteradas recentemente:** nenhuma
 - **Testes passando:** sim — 37 testes (pytest)
 - **Divergências externas pendentes:** nenhuma
-- **Última task concluída:** TASK-002 — Configurar CI/CD com GitHub Actions
+- **Última task concluída:** TASK-003 — Corrigir teste missing columns
 
 ## Pendências Conhecidas
 

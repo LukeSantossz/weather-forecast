@@ -44,12 +44,16 @@ class TestLoadRawWeather:
             load_raw_weather(tmp_path)
 
     def test_raises_on_missing_columns(self, tmp_path: Path) -> None:
-        # Create a CSV without required columns
+        # Create a CSV with last_updated (so parse_dates works) but without
+        # temperature_celsius, triggering the project's own validation.
         data_dir = tmp_path / "data" / "raw"
         data_dir.mkdir(parents=True)
         csv_path = data_dir / "GlobalWeatherRepository.csv"
 
-        df = pd.DataFrame({"other_column": [1, 2, 3]})
+        df = pd.DataFrame({
+            "last_updated": ["2024-01-01", "2024-01-02"],
+            "other_column": [1, 2],
+        })
         df.to_csv(csv_path, index=False)
 
         with pytest.raises(ValueError, match="Missing required columns"):

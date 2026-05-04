@@ -84,6 +84,35 @@ A complexidade determina o nível de cerimônia na avaliação pós-implementaç
 > Tasks em andamento ou pendentes de implementação. O agente só pode trabalhar em tasks listadas aqui.
 > **Regra de ordenação:** A primeira task listada é a task ativa. O agente trabalha nela até conclusão, descarte ou bloqueio explícito pelo usuário. Para mudar a prioridade, o usuário reordena as tasks nesta seção.
 
+### TASK-003
+- **Status:** concluida
+- **Modo:** desenvolvimento
+- **Complexidade:** patch
+- **Data de criacao:** 2026-05-03
+
+#### Objetivo (!obrigatório)
+Corrigir teste `test_raises_on_missing_columns` que falha no CI por incompatibilidade de mensagem de erro com pandas.
+
+#### Contexto (!obrigatório)
+O teste cria um CSV sem a coluna `last_updated`, mas `pd.read_csv(parse_dates=["last_updated"])` levanta ValueError antes da validacao do projeto. O teste deve usar um CSV com `last_updated` mas sem `temperature_celsius` para testar a validacao do codigo, nao do pandas. Bug pre-existente revelado pelo CI (TASK-002).
+
+#### Escopo Tecnico (!obrigatório)
+- **Arquivos/modulos envolvidos:** `tests/test_data_loader.py`
+- **Dependencias necessarias:** nenhuma
+- **Impacto em funcionalidades existentes:** nenhum — correcao de teste
+
+#### Criterios de Aceite (!obrigatório)
+- [x] Teste `test_raises_on_missing_columns` passa no CI
+- [x] 37+ testes passando
+- [x] Logica do teste verifica a validacao do projeto, nao do pandas
+
+#### Resultado (preenchido ao concluir)
+- **Data de conclusao:** 2026-05-03
+- **Branch:** feat/TASK-001-organizar-repositorio
+- **Commit(s):** fix(tests): correct missing columns test to validate project logic
+- **Avaliacao pos-implementacao:** aprovado
+- **Observacoes:** Bug pre-existente — teste validava comportamento do pandas em vez da logica do projeto.
+
 ### TASK-002
 - **Status:** concluida
 - **Modo:** desenvolvimento
