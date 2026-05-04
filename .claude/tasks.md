@@ -84,54 +84,66 @@ A complexidade determina o nível de cerimônia na avaliação pós-implementaç
 > Tasks em andamento ou pendentes de implementação. O agente só pode trabalhar em tasks listadas aqui.
 > **Regra de ordenação:** A primeira task listada é a task ativa. O agente trabalha nela até conclusão, descarte ou bloqueio explícito pelo usuário. Para mudar a prioridade, o usuário reordena as tasks nesta seção.
 
-### TASK-001
-- **Status:** concluída
+### TASK-002
+- **Status:** concluida
 - **Modo:** desenvolvimento
-- **Complexidade:** major
+- **Complexidade:** minor
 - **Data de criação:** 2026-05-03
 
 #### Objetivo (!obrigatório)
-Reorganizar o repositório para apresentação profissional a recrutadores internacionais, seguindo o framework "GitHub como Ferramenta de Vendas".
+Configurar CI/CD com GitHub Actions para execucao automatizada de testes a cada push e PR.
 
 #### Contexto (!obrigatório)
-O repositório está funcional mas com README genérico e sem posicionamento profissional. A reorganização visa transformar o repo em portfólio técnico apresentável, com métricas reais, diagrama de arquitetura e decisões de engenharia documentadas.
+O projeto possui 37 testes (pytest) mas nenhuma automacao de CI. Configurar GitHub Actions antes do merge da branch feat/TASK-001 para que a PR ja rode os testes automaticamente.
 
-#### Escopo Técnico (!obrigatório)
-- **Arquivos/módulos envolvidos:** `README.md`, `.gitignore`, `.claude/registry.md`, `.claude/tasks.md`, `.claude/rules/12-readme-guidelines.md`, metadados GitHub (descrição e topics)
-- **Dependências necessárias:** nenhuma
-- **Impacto em funcionalidades existentes:** nenhum — apenas documentação e metadados
+#### Escopo Tecnico (!obrigatório)
+- **Arquivos/modulos envolvidos:** `.github/workflows/ci.yml`, `README.md` (badge de CI)
+- **Dependencias necessarias:** nenhuma (GitHub Actions nativo)
+- **Impacto em funcionalidades existentes:** nenhum — apenas adiciona automacao
 
-#### Critérios de Aceite (!obrigatório)
-- [x] README.md reescrito com: header profissional, contexto de negócio, diagrama Mermaid, decisões de engenharia, métricas reais preenchidas
-- [x] `.gitignore` inclui `git_vendas.pdf`
-- [x] Descrição e topics do repositório GitHub atualizados
-- [x] `registry.md` preenchido com estado atual do projeto
-- [x] Nenhum arquivo de código (`src/`, `tests/`, `notebooks/`) foi alterado
-- [x] Seção PM Accelerator removida do README
-- [x] Diretrizes de README documentadas em `.claude/rules/12-readme-guidelines.md`
+#### Criterios de Aceite (!obrigatório)
+- [x] Workflow `.github/workflows/ci.yml` criado e funcional
+- [x] Pipeline roda `pytest tests/ -v` em Python 3.10 e 3.11
+- [x] Badge de CI adicionado ao README
+- [x] Nenhum arquivo de codigo (`src/`, `tests/`, `notebooks/`) foi alterado
 
-#### Restrições
-- Não alterar nenhum arquivo em `src/`, `tests/`, `notebooks/` ou `data/`.
-- README em inglês, tom profissional, sem emojis.
+#### Restricoes
+- Nao alterar arquivos em `src/`, `tests/`, `notebooks/` ou `data/`.
+- Testes devem rodar sem dados reais (ja sao auto-contidos via fixtures).
 
 #### Log de Andamento (atualizado pelo agente)
 
-| Data | Sessão | Ação Realizada | Status ao Final |
+| Data | Sessao | Acao Realizada | Status ao Final |
 |------|--------|----------------|-----------------|
-| 2026-05-03 | 1 | Início da implementação — reconhecimento da codebase concluído | em andamento |
-| 2026-05-03 | 1 | README reescrito, .gitignore atualizado, GitHub metadata atualizado, registry.md preenchido | em andamento |
-| 2026-05-03 | 1 | Seção PMA removida do README, diretrizes de README adicionadas como regra 12 | concluída |
+| 2026-05-03 | 1 | Reconhecimento concluido — testes auto-contidos, sem .github/ existente | em andamento |
+| 2026-05-03 | 1 | Workflow ci.yml criado, badge adicionado ao README | concluida |
 
 #### Resultado (preenchido ao concluir)
-- **Data de conclusão:** 2026-05-03
-- **Branch:** main
-- **Commit(s):** feat/TASK-001-organizar-repositorio
-- **Avaliação pós-implementação:** aprovado
-- **Observações:** Métricas de forecast extraídas do notebook 06. Diagrama Mermaid validado. Nenhum arquivo de código alterado.
+- **Data de conclusao:** 2026-05-03
+- **Branch:** feat/TASK-001-organizar-repositorio
+- **Commit(s):** ci(tests): add GitHub Actions workflow
+- **Avaliacao pos-implementacao:** aprovado
+- **Observacoes:** Testes auto-contidos via fixtures, sem dependencia de dados reais. Cache pip configurado. Matrix Python 3.10 + 3.11.
 
-## Tasks Concluídas
+## Tasks Concluidas
 
-> Tasks finalizadas. Movidas para cá após conclusão e atualização do Registro de Projeto (`registry.md`). Nunca remova entradas — o histórico é cumulativo.
+> Tasks finalizadas. Movidas para ca apos conclusao e atualizacao do Registro de Projeto (`registry.md`). Nunca remova entradas — o historico e cumulativo.
+
+### TASK-001
+- **Status:** concluida
+- **Modo:** desenvolvimento
+- **Complexidade:** major
+- **Data de criacao:** 2026-05-03
+
+#### Objetivo
+Reorganizar o repositorio para apresentacao profissional a recrutadores internacionais, seguindo o framework "GitHub como Ferramenta de Vendas".
+
+#### Resultado
+- **Data de conclusao:** 2026-05-03
+- **Branch:** feat/TASK-001-organizar-repositorio
+- **Commit(s):** 16adbc0 — feat(docs): reorganize repo for professional presentation
+- **Avaliacao pos-implementacao:** aprovado
+- **Observacoes:** Metricas de forecast extraidas do notebook 06. Diagrama Mermaid validado. Secao PMA removida. Regra 12 (README guidelines) criada. Nenhum arquivo de codigo alterado.
 
 ---
 

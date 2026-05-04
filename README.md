@@ -1,3 +1,4 @@
+![CI](https://github.com/LukeSantossz/pma-weather-forecasting/actions/workflows/ci.yml/badge.svg)
 ![Python](https://img.shields.io/badge/Python-3.10%2B-blue?logo=python&logoColor=white)
 ![Status](https://img.shields.io/badge/status-complete-brightgreen)
 ![Tests](https://img.shields.io/badge/tests-37%20passed-brightgreen)
