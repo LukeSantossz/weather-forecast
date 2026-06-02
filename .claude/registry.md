@@ -44,6 +44,7 @@
 
 1. **Adoção do sistema de governança `.claude/`** (2026-05-03): Regras 00-11 ativas para controle de qualidade de implementações com agentes de IA. Tasks em `tasks.md`, estado em `registry.md`.
 2. **README orientado a recrutadores** (2026-05-03): Estrutura segue framework "GitHub como Ferramenta de Vendas" — contexto de negócio antes de detalhes técnicos, métricas reais, diagrama de arquitetura Mermaid, decisões de engenharia com justificativa.
+3. **Adoção do template `readme_model.md`** (2026-06-02): README reestruturado para a ordem canônica do template de portfólio (What It Does → What It Is → Tech Stack → Architecture → Engineering Decisions → Results → Getting Started → Project Structure → Project Status → Known Issues). Regra 12 reescrita para refletir o novo padrão. Seções sem respaldo no projeto (API Reference, Contributing, License) omitidas por não haver artefatos correspondentes. Métricas reais preservadas dos notebooks.
 
 ## Padrões Recorrentes Observados
 
@@ -58,3 +59,4 @@
 > Espaço para anotações pontuais sobre contextos que influenciam futuras sessões.
 
 - **2026-05-03:** Primeira sessão de desenvolvimento com sistema de regras ativo. Reconhecimento de codebase concluído. Métricas de forecast extraídas do notebook 06 e preenchidas no README.
+- **2026-06-02:** Atualização de documentação (sem código) a partir do template `readme_model.md`. README e regra 12 alinhados ao novo padrão de portfólio. Conflito entre o template e a regra 12 anterior reportado e resolvido com o usuário: optou-se por reescrever ambos. Seções não-aplicáveis omitidas a pedido do usuário.

@@ -1,17 +1,36 @@
-![CI](https://github.com/LukeSantossz/pma-weather-forecasting/actions/workflows/ci.yml/badge.svg)
 ![Python](https://img.shields.io/badge/Python-3.10%2B-blue?logo=python&logoColor=white)
-![Status](https://img.shields.io/badge/status-complete-brightgreen)
+![CI](https://github.com/LukeSantossz/pma-weather-forecasting/actions/workflows/ci.yml/badge.svg)
 ![Tests](https://img.shields.io/badge/tests-37%20passed-brightgreen)
+![Status](https://img.shields.io/badge/status-complete-brightgreen)
 
-# Global Temperature Forecasting Pipeline
+# Global Temperature Forecasting Pipeline — daily temperature prediction across 211 countries
 
-> Predicting daily temperatures across 211 countries with 0.19 C RMSE using statistical and ML ensemble methods — built for agricultural planning, energy optimization, and climate alert systems.
+> Predicting daily temperatures across 211 countries with 0.19 °C RMSE using statistical and ML ensemble methods — built for agricultural planning, energy optimization, and climate alert systems.
 
-## Business Context
+---
 
-Accurate short-term temperature forecasting directly impacts sectors where planning depends on weather conditions: agriculture (frost/heat alerts, irrigation scheduling), energy (demand prediction, grid balancing), and public safety (extreme weather warnings).
+## What It Does
 
-This project builds a complete forecasting pipeline that processes 133,000+ daily weather observations across 211 countries over 2 years, compares 5 forecasting approaches, and delivers a weighted ensemble that achieves **0.19 C RMSE** — a **75% improvement** over the Prophet baseline.
+A complete data-science pipeline that forecasts daily temperatures and flags anomalous weather events from raw global weather data.
+
+- **Temperature forecasting** — daily prediction at 0.19 °C RMSE via a weighted ensemble of statistical and ML models
+- **Anomaly detection** — flags extreme weather with Z-score and Isolation Forest, plus overlap analysis between methods
+- **Reproducible preprocessing** — cleans 133,000+ raw observations into type-safe, compressed Parquet
+- **Environmental analysis** — air-quality study and SHAP feature-importance attribution
+
+## What It Is
+
+Global Temperature Forecasting Pipeline is a **research codebase** — sequential Jupyter notebooks backed by a tested `src/` utility package — that turns raw weather CSVs into temperature forecasts and anomaly reports. It targets teams whose planning depends on short-term weather: agriculture (frost/heat alerts, irrigation scheduling), energy (demand prediction, grid balancing), and public safety (extreme-weather warnings).
+
+## Tech Stack
+
+| Layer | Technology |
+| --- | --- |
+| Language | Python 3.10+ |
+| Data processing | pandas, NumPy, PyArrow (Parquet) |
+| Forecasting | LightGBM, scikit-learn (GradientBoosting), statsmodels (ARIMA/SARIMA), Prophet |
+| Anomaly detection | scikit-learn (Isolation Forest), SciPy / NumPy (Z-score) |
+| Testing / CI | pytest, GitHub Actions |
 
 ## Architecture
 
@@ -40,6 +59,8 @@ flowchart LR
     end
 ```
 
+The data pipeline cleans raw CSV into compressed Parquet once; both the forecasting and anomaly-detection pipelines read from that single shared artifact. Forecasting fans out into four models that feed an inverse-RMSE weighted ensemble, while anomaly detection runs two independent methods and reports their overlap rather than either result alone.
+
 ## Engineering Decisions
 
 | Decision | Alternative considered | Why this approach |
@@ -55,8 +76,8 @@ flowchart LR
 
 ### Forecast Performance
 
-| Model | RMSE (C) | MAE (C) | MAPE (%) |
-|-------|----------|---------|----------|
+| Model | RMSE (°C) | MAE (°C) | MAPE (%) |
+|-------|-----------|----------|----------|
 | Prophet (Baseline) | 0.77 | 0.69 | 3.95 |
 | ARIMA(5,1,0) | 1.71 | 1.45 | 10.63 |
 | SARIMA(1,1,1)(1,1,1,7) | 1.13 | 0.97 | 7.11 |
@@ -65,7 +86,7 @@ flowchart LR
 | Ensemble (Simple Avg) | 0.72 | 0.61 | 4.49 |
 | Ensemble (Weighted) | 0.24 | 0.20 | 1.51 |
 
-LightGBM achieves the best individual performance. The weighted ensemble (inverse-RMSE weights: LightGBM 0.455, GradientBoosting 0.415, SARIMA 0.078, ARIMA 0.051) provides risk diversification at a marginal accuracy cost.
+LightGBM achieves the best individual performance — a 75% RMSE improvement over the Prophet baseline. The weighted ensemble (inverse-RMSE weights: LightGBM 0.455, GradientBoosting 0.415, SARIMA 0.078, ARIMA 0.051) trades a marginal accuracy cost for risk diversification.
 
 ### Anomaly Detection
 
@@ -75,14 +96,14 @@ LightGBM achieves the best individual performance. The weighted ensemble (invers
 | Isolation Forest (contamination=2%) | 2,667 | 2.00% |
 | Both methods agree | 219 | 0.16% |
 
-## How to Run
+## Getting Started
 
 ### Prerequisites
 
 - Python 3.10+
 - pip
 
-### Setup
+### Installation
 
 ```bash
 git clone https://github.com/LukeSantossz/pma-weather-forecasting.git
@@ -91,15 +112,9 @@ python -m venv .venv && source .venv/bin/activate  # Windows: .venv\Scripts\acti
 pip install -r requirements.txt
 ```
 
-### Tests
+### Running
 
-```bash
-pytest tests/ -v
-```
-
-### Notebooks
-
-Execute in order (each depends on outputs from previous steps):
+Execute the notebooks in order — each depends on outputs from previous steps:
 
 ```bash
 jupyter notebook notebooks/
@@ -114,6 +129,12 @@ jupyter notebook notebooks/
 | 5 | `05_prophet_baseline.ipynb` | Prophet forecast baseline |
 | 6 | `06_advanced_forecasting.ipynb` | ARIMA, SARIMA, LightGBM, ensemble |
 | 7 | `07_environmental_analysis.ipynb` | Air quality and SHAP feature importance |
+
+### Tests
+
+```bash
+pytest tests/ -v
+```
 
 ## Project Structure
 
@@ -142,3 +163,28 @@ pma-weather-forecasting/
 ├── requirements.txt
 └── README.md
 ```
+
+## Project Status
+
+**Status: complete**
+
+### Done
+
+- [x] Preprocessing pipeline — IQR clipping, imputation, type-safe Parquet export
+- [x] Five forecasting approaches plus weighted ensemble (best: 0.19 °C RMSE)
+- [x] Anomaly detection — Z-score and Isolation Forest with overlap analysis
+- [x] Environmental and SHAP feature-importance analysis
+- [x] 37 passing unit tests with GitHub Actions CI
+
+### Pending
+
+- [ ] Serving layer for scheduled or on-demand inference
+- [ ] Validation on data beyond the current 2-year window
+
+## Known Issues & Limitations
+
+- **Datasets are not bundled** — raw and processed data are gitignored; reproducing the results requires the source Kaggle CSV placed under `data/raw/`.
+- **Temporal and geographic scope** — models are fit on roughly 2 years across 211 countries; accuracy on longer horizons or unseen climate regimes is unverified.
+- **Ensemble trades accuracy for stability** — the inverse-RMSE ensemble (0.24 °C RMSE) is slightly less accurate than LightGBM alone (0.19 °C); the trade-off buys risk diversification across models.
+- **No serving layer** — the pipeline runs as notebooks; there is no API or scheduled-inference component yet.
+- **Test coverage is partial** — automated tests cover `data_loader` and `preprocessing`; forecasting and anomaly logic live in notebooks and are validated manually.
