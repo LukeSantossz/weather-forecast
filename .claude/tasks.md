@@ -84,6 +84,88 @@ A complexidade determina o nível de cerimônia na avaliação pós-implementaç
 > Tasks em andamento ou pendentes de implementação. O agente só pode trabalhar em tasks listadas aqui.
 > **Regra de ordenação:** A primeira task listada é a task ativa. O agente trabalha nela até conclusão, descarte ou bloqueio explícito pelo usuário. Para mudar a prioridade, o usuário reordena as tasks nesta seção.
 
+### TASK-004
+- **Status:** concluída
+- **Modo:** desenvolvimento
+- **Complexidade:** minor
+- **Data de criação:** 2026-06-02
+
+#### Objetivo (!obrigatório)
+Alinhar as URLs do repositório no README e no registry ao remote real `LukeSantossz/weather-forecast`.
+
+#### Contexto (!obrigatório)
+O README (badge de CI, comando de clone, raiz da árvore em Project Structure) e o `registry.md` (campo Repositório) referenciam `LukeSantossz/pma-weather-forecasting`, mas o remote configurado é `LukeSantossz/weather-forecast`. Consequência: o badge de CI pode não renderizar e o comando de clone aponta para um repositório que pode não existir. Divergência pré-existente detectada na sessão de 2026-06-02 (reestruturação do README).
+
+#### Escopo Técnico (!obrigatório)
+- **Arquivos/módulos envolvidos:** `README.md` (badge CI, URL de clone, `cd`, raiz da árvore em Project Structure), `.claude/registry.md` (campo Repositório)
+- **Dependências necessárias:** nenhuma
+- **Impacto em funcionalidades existentes:** nenhum — apenas documentação
+
+#### Critérios de Aceite (!obrigatório)
+- [x] Todas as URLs/referências apontam para o remote real `LukeSantossz/weather-forecast`
+- [x] Badge de CI renderiza corretamente
+- [x] Nenhuma referência remanescente a `pma-weather-forecasting` (no escopo: README e registry)
+
+#### Restrições (opcional)
+Confirmar com o usuário qual é o nome canônico antes de aplicar — pode haver rename planejado de `weather-forecast` para `pma-weather-forecasting`. Se for o caso, o sentido da correção se inverte (renomear o repo, não as URLs).
+
+#### Log de Andamento (atualizado pelo agente)
+
+| Data | Sessão | Ação Realizada | Status ao Final |
+|------|--------|----------------|-----------------|
+| 2026-06-02 | — | Task registrada a partir de divergência detectada na reestruturação do README | pendente |
+| 2026-06-02 | 2 | Usuário confirmou nome canônico `weather-forecast`. README (4 ocorrências) e registry (campo Repositório) corrigidos | concluída |
+
+#### Resultado (preenchido ao concluir)
+- **Data de conclusão:** 2026-06-02
+- **Branch:** docs/readme-portfolio-template
+- **Commit(s):** fix(docs): align repository URLs to actual remote
+- **Avaliação pós-implementação:** aprovado
+- **Observações:** Ocorrências de `pma-weather-forecasting` em outputs de `notebooks/*.ipynb` (caminhos locais antigos) ficaram fora de escopo — documentadas para eventual limpeza de outputs.
+
+### TASK-005
+- **Status:** pendente
+- **Modo:** desenvolvimento
+- **Complexidade:** minor
+- **Data de criação:** 2026-06-02
+
+#### Objetivo (!obrigatório)
+Ativar e validar os git hooks de enforcement já presentes em `.claude/hooks/`.
+
+#### Contexto (!obrigatório)
+Os scripts `commit-msg`, `pre-commit`, `pre-push` e `post-merge` existem em `.claude/hooks/`, mas `core.hooksPath` não está configurado — o git usa o diretório padrão `.git/hooks` e o enforcement da regra 09 não roda. Detectado na sessão de 2026-06-02. A regra 09.3 prevê a ativação via `git config core.hooksPath .claude/hooks`.
+
+#### Escopo Técnico (!obrigatório)
+- **Arquivos/módulos envolvidos:** configuração git (`core.hooksPath`), scripts em `.claude/hooks/`, possível `.claude/enforcement.conf`
+- **Dependências necessárias:** bash, git, grep, sed (já disponíveis — hooks stack-agnósticos)
+- **Impacto em funcionalidades existentes:** passa a validar commits/push de todos os desenvolvedores — risco de bloquear fluxos se algum hook estiver mal calibrado
+
+#### Critérios de Aceite (!obrigatório)
+- [ ] `core.hooksPath` aponta para `.claude/hooks`
+- [ ] `commit-msg` rejeita mensagem fora do formato `type(scope): subject` e aceita mensagem válida
+- [ ] `pre-commit` detecta debug logs em arquivos staged
+- [ ] `pre-push` valida o formato da branch sem bloquear em caso de dúvida (regra 09.2)
+- [ ] Nenhum hook bloqueia por falso positivo em fluxo legítimo
+
+#### Restrições (opcional)
+Hooks devem permanecer stack-agnósticos (bash puro) e não-bloqueantes em caso de dúvida (regra 09.2). Não alterar a lógica dos scripts existentes além do necessário para validação.
+
+#### Referências (opcional)
+Regra 09 (`.claude/rules/09-enforcement.md`), em especial 09.3 (instalação via TASK-000).
+
+#### Log de Andamento (atualizado pelo agente)
+
+| Data | Sessão | Ação Realizada | Status ao Final |
+|------|--------|----------------|-----------------|
+| 2026-06-02 | — | Task registrada a partir de divergência detectada na reestruturação do README | pendente |
+
+#### Resultado (preenchido ao concluir)
+- **Data de conclusão:** —
+- **Branch:** —
+- **Commit(s):** —
+- **Avaliação pós-implementação:** —
+- **Observações:** —
+
 ### TASK-003
 - **Status:** concluida
 - **Modo:** desenvolvimento

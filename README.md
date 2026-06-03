@@ -1,5 +1,5 @@
 ![Python](https://img.shields.io/badge/Python-3.10%2B-blue?logo=python&logoColor=white)
-![CI](https://github.com/LukeSantossz/pma-weather-forecasting/actions/workflows/ci.yml/badge.svg)
+![CI](https://github.com/LukeSantossz/weather-forecast/actions/workflows/ci.yml/badge.svg)
 ![Tests](https://img.shields.io/badge/tests-37%20passed-brightgreen)
 ![Status](https://img.shields.io/badge/status-complete-brightgreen)
 
@@ -106,8 +106,8 @@ LightGBM achieves the best individual performance — a 75% RMSE improvement ove
 ### Installation
 
 ```bash
-git clone https://github.com/LukeSantossz/pma-weather-forecasting.git
-cd pma-weather-forecasting
+git clone https://github.com/LukeSantossz/weather-forecast.git
+cd weather-forecast
 python -m venv .venv && source .venv/bin/activate  # Windows: .venv\Scripts\activate
 pip install -r requirements.txt
 ```
@@ -139,7 +139,7 @@ pytest tests/ -v
 ## Project Structure
 
 ```text
-pma-weather-forecasting/
+weather-forecast/
 ├── data/
 │   ├── raw/                  # Raw CSV (gitignored)
 │   └── processed/            # Cleaned Parquet (gitignored)
