@@ -84,6 +84,44 @@ A complexidade determina o nível de cerimônia na avaliação pós-implementaç
 > Tasks em andamento ou pendentes de implementação. O agente só pode trabalhar em tasks listadas aqui.
 > **Regra de ordenação:** A primeira task listada é a task ativa. O agente trabalha nela até conclusão, descarte ou bloqueio explícito pelo usuário. Para mudar a prioridade, o usuário reordena as tasks nesta seção.
 
+### TASK-006
+- **Status:** pendente
+- **Modo:** desenvolvimento
+- **Complexidade:** minor
+- **Data de criação:** 2026-06-02
+
+#### Objetivo (!obrigatório)
+Remover dos outputs dos notebooks os caminhos absolutos locais obsoletos (`...\pma-weather-forecasting\...` e `C:\Users\lucas\...`).
+
+#### Contexto (!obrigatório)
+Os outputs salvos nas células de 6 notebooks contêm caminhos absolutos da máquina local de uma execução anterior, quando a pasta se chamava `pma-weather-forecasting`. Além de obsoletos (o remote canônico é `weather-forecast`), expõem o caminho de sistema do desenvolvedor (`C:\Users\lucas\...`). Detectado na sessão de 2026-06-02 (TASK-004), mantido fora de escopo por estar em arquivos de código (notebooks).
+
+#### Escopo Técnico (!obrigatório)
+- **Arquivos/módulos envolvidos:** `notebooks/02_preprocessing.ipynb`, `notebooks/03_eda.ipynb`, `notebooks/04_anomaly_detection.ipynb`, `notebooks/05_prophet_baseline.ipynb`, `notebooks/06_advanced_forecasting.ipynb`, `notebooks/07_environmental_analysis.ipynb`
+- **Dependências necessárias:** nenhuma (limpeza de outputs); reexecução exigiria o dataset, que é gitignored
+- **Impacto em funcionalidades existentes:** nenhum — apenas células de output; o código das células não muda
+
+#### Critérios de Aceite (!obrigatório)
+- [ ] Nenhuma ocorrência de `pma-weather-forecasting` nos notebooks
+- [ ] Nenhum caminho absoluto `C:\Users\lucas\...` remanescente nos outputs
+- [ ] O código-fonte das células (inputs) permanece inalterado — apenas outputs afetados
+
+#### Restrições (opcional)
+Decidir a abordagem antes de implementar: (a) limpar todos os outputs das células, ou (b) editar apenas as strings de caminho nos outputs. A opção (a) é mais limpa mas remove gráficos/resultados renderizados; a (b) preserva os outputs mas é cirúrgica. Não reexecutar notebooks sem o dataset disponível.
+
+#### Log de Andamento (atualizado pelo agente)
+
+| Data | Sessão | Ação Realizada | Status ao Final |
+|------|--------|----------------|-----------------|
+| 2026-06-02 | — | Task registrada a partir de achado fora de escopo na TASK-004 | pendente |
+
+#### Resultado (preenchido ao concluir)
+- **Data de conclusão:** —
+- **Branch:** —
+- **Commit(s):** —
+- **Avaliação pós-implementação:** —
+- **Observações:** —
+
 ### TASK-004
 - **Status:** concluída
 - **Modo:** desenvolvimento
