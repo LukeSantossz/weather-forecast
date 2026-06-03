@@ -124,7 +124,7 @@ Confirmar com o usuário qual é o nome canônico antes de aplicar — pode have
 - **Observações:** Ocorrências de `pma-weather-forecasting` em outputs de `notebooks/*.ipynb` (caminhos locais antigos) ficaram fora de escopo — documentadas para eventual limpeza de outputs.
 
 ### TASK-005
-- **Status:** pendente
+- **Status:** concluída
 - **Modo:** desenvolvimento
 - **Complexidade:** minor
 - **Data de criação:** 2026-06-02
@@ -141,11 +141,11 @@ Os scripts `commit-msg`, `pre-commit`, `pre-push` e `post-merge` existem em `.cl
 - **Impacto em funcionalidades existentes:** passa a validar commits/push de todos os desenvolvedores — risco de bloquear fluxos se algum hook estiver mal calibrado
 
 #### Critérios de Aceite (!obrigatório)
-- [ ] `core.hooksPath` aponta para `.claude/hooks`
-- [ ] `commit-msg` rejeita mensagem fora do formato `type(scope): subject` e aceita mensagem válida
-- [ ] `pre-commit` detecta debug logs em arquivos staged
-- [ ] `pre-push` valida o formato da branch sem bloquear em caso de dúvida (regra 09.2)
-- [ ] Nenhum hook bloqueia por falso positivo em fluxo legítimo
+- [x] `core.hooksPath` aponta para `.claude/hooks`
+- [x] `commit-msg` rejeita mensagem fora do formato `type(scope): subject` e aceita mensagem válida
+- [x] `pre-commit` detecta debug logs em arquivos staged
+- [x] `pre-push` valida o formato da branch sem bloquear em caso de dúvida (regra 09.2)
+- [x] Nenhum hook bloqueia por falso positivo em fluxo legítimo
 
 #### Restrições (opcional)
 Hooks devem permanecer stack-agnósticos (bash puro) e não-bloqueantes em caso de dúvida (regra 09.2). Não alterar a lógica dos scripts existentes além do necessário para validação.
@@ -158,13 +158,14 @@ Regra 09 (`.claude/rules/09-enforcement.md`), em especial 09.3 (instalação via
 | Data | Sessão | Ação Realizada | Status ao Final |
 |------|--------|----------------|-----------------|
 | 2026-06-02 | — | Task registrada a partir de divergência detectada na reestruturação do README | pendente |
+| 2026-06-02 | 2 | `core.hooksPath` ativado. Hooks validados: commit-msg (rejeita inválido/co-autoria, aceita válido), pre-commit (detecta `print(`), pre-push (apenas avisa) | concluída |
 
 #### Resultado (preenchido ao concluir)
-- **Data de conclusão:** —
-- **Branch:** —
-- **Commit(s):** —
-- **Avaliação pós-implementação:** —
-- **Observações:** —
+- **Data de conclusão:** 2026-06-02
+- **Branch:** docs/readme-portfolio-template
+- **Commit(s):** chore(hooks): record enforcement hooks activation
+- **Avaliação pós-implementação:** aprovado
+- **Observações:** `enforcement.conf` e os scripts já estavam versionados — só faltava a ativação. `git config core.hooksPath .claude/hooks` é config local por-clone, **não versionável**: cada desenvolvedor (e o usuário) deve executá-la uma vez. Não foi necessário criar `enforcement.conf` (já existente e completo para Python).
 
 ### TASK-003
 - **Status:** concluida
