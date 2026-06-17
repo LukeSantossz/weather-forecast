@@ -17,8 +17,7 @@ and the documents it lists. Treat them as binding:
   Composition hierarchy (R1 internal, R2 cross-provider, R3 automated PR).
 - Follow `.standards/docs/standards/github.md` for Conventional Commits, branch naming,
   and the PR, Issue, and README templates. No co-author or AI-attribution lines in commits.
-- Token economy per `.standards/token_economy.md` (this file lives at the submodule root,
-  not under `docs/standards/`, and is not listed in that index): terse mode is allowed in
+- Token economy per `.standards/docs/standards/token_economy.md`: terse mode is allowed in
   conversation but never in `SPEC.md`, PR, Issue, or commit artifacts, and it never
   overrides Safety or Correctness.
 - All output in English.
