@@ -114,6 +114,26 @@ class TestDetectOutliersIqr:
         assert bounds_wide["value1"][0] < bounds_default["value1"][0]
         assert bounds_wide["value1"][1] > bounds_default["value1"][1]
 
+    def test_detect_outliers_iqr_omits_zero_width_columns(self) -> None:
+        df = pd.DataFrame({
+            "zero_inflated": [0, 0, 0, 0, 0, 0, 0, 0, 0, 5.0, 10.0],
+        })
+
+        bounds = detect_outliers_iqr(df, ["zero_inflated"])
+
+        assert "zero_inflated" not in bounds
+
+    def test_zero_inflated_column_survives_outlier_treatment(self) -> None:
+        df = pd.DataFrame({
+            "zero_inflated": [0, 0, 0, 0, 0, 0, 0, 0, 0, 5.0, 10.0],
+        })
+
+        bounds = detect_outliers_iqr(df, ["zero_inflated"])
+        result = treat_outliers_iqr(df, bounds)
+
+        assert result["zero_inflated"].max() == 10.0
+        assert 5.0 in result["zero_inflated"].values
+
 
 class TestTreatOutliersIqr:
     """Tests for treat_outliers_iqr function."""
