@@ -1,0 +1,102 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://weather-forecast.local/schema/forecast.schema.json",
+  "title": "Dashboard forecast contract",
+  "description": "Global daily-mean temperature forecast: history, held-out actuals, and per-model predictions.",
+  "type": "object",
+  "required": ["schema_version", "generated_at", "data_status", "series"],
+  "additionalProperties": false,
+  "$defs": {
+    "point": {
+      "type": "object",
+      "required": ["date", "value"],
+      "additionalProperties": false,
+      "properties": {
+        "date": {
+          "type": "string"
+        },
+        "value": {
+          "type": "number"
+        }
+      }
+    },
+    "model_series": {
+      "type": "object",
+      "required": ["id", "name", "predictions"],
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "predictions": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/point"
+          }
+        }
+      }
+    }
+  },
+  "properties": {
+    "schema_version": {
+      "type": "string",
+      "const": "1.0"
+    },
+    "generated_at": {
+      "type": "string"
+    },
+    "data_status": {
+      "type": "string",
+      "enum": ["sample", "real"]
+    },
+    "series": {
+      "type": "object",
+      "required": [
+        "granularity",
+        "unit",
+        "train_end",
+        "test_window_days",
+        "history",
+        "actual",
+        "models"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "granularity": {
+          "type": "string",
+          "const": "daily_global_mean"
+        },
+        "unit": {
+          "type": "string"
+        },
+        "train_end": {
+          "type": "string"
+        },
+        "test_window_days": {
+          "type": "integer"
+        },
+        "history": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/point"
+          }
+        },
+        "actual": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/point"
+          }
+        },
+        "models": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/model_series"
+          }
+        }
+      }
+    }
+  }
+}

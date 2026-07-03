@@ -1,0 +1,35 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://weather-forecast.local/schema/meta.schema.json",
+  "title": "Dashboard meta contract",
+  "description": "Top-level generation metadata shared by the dashboard data contract.",
+  "type": "object",
+  "required": ["schema_version", "generated_at", "data_status", "pipeline", "disclaimer"],
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": {
+      "type": "string",
+      "const": "1.0"
+    },
+    "generated_at": {
+      "type": "string"
+    },
+    "data_status": {
+      "type": "string",
+      "enum": ["sample", "real"]
+    },
+    "pipeline": {
+      "type": "object",
+      "required": ["source"],
+      "additionalProperties": false,
+      "properties": {
+        "source": {
+          "type": "string"
+        }
+      }
+    },
+    "disclaimer": {
+      "type": "string"
+    }
+  }
+}

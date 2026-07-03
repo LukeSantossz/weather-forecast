@@ -1,0 +1,87 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://weather-forecast.local/schema/shap.schema.json",
+  "title": "Dashboard SHAP contract",
+  "description": "Feature-importance and beeswarm data explaining the PM2.5 air-quality model.",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "generated_at",
+    "data_status",
+    "model",
+    "target",
+    "sample_n",
+    "features",
+    "beeswarm"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": {
+      "type": "string",
+      "const": "1.0"
+    },
+    "generated_at": {
+      "type": "string"
+    },
+    "data_status": {
+      "type": "string",
+      "enum": ["sample", "real"]
+    },
+    "model": {
+      "type": "string"
+    },
+    "target": {
+      "type": "string",
+      "const": "pm2_5"
+    },
+    "sample_n": {
+      "type": "integer"
+    },
+    "features": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["name", "mean_abs_shap"],
+        "additionalProperties": false,
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "mean_abs_shap": {
+            "type": "number"
+          }
+        }
+      }
+    },
+    "beeswarm": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["feature", "points"],
+        "additionalProperties": false,
+        "properties": {
+          "feature": {
+            "type": "string"
+          },
+          "points": {
+            "type": "array",
+            "maxItems": 200,
+            "items": {
+              "type": "object",
+              "required": ["shap", "feature_value_norm"],
+              "additionalProperties": false,
+              "properties": {
+                "shap": {
+                  "type": "number"
+                },
+                "feature_value_norm": {
+                  "type": "number"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
