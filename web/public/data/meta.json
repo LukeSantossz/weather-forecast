@@ -3,7 +3,8 @@
   "generated_at": "1970-01-01T00:00:00Z",
   "data_status": "sample",
   "pipeline": {
-    "source": "notebooks 04/06/07"
+    "source": "notebooks 04/06/07",
+    "repo_commit": null
   },
   "disclaimer": "Sample snapshot for layout; not model output."
 }

@@ -64,7 +64,7 @@ def build_meta(
         "schema_version": _SCHEMA_VERSION,
         "generated_at": generated_at,
         "data_status": data_status,
-        "pipeline": {"source": "notebooks 04/06/07"},
+        "pipeline": {"source": "notebooks 04/06/07", "repo_commit": None},
         "disclaimer": "Sample snapshot for layout; not model output.",
     }
 

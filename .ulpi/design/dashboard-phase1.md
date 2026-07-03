@@ -108,7 +108,9 @@ Honesty-forward: the section title reads **"What drives air-quality (PM2.5) pred
 - **Design system:** Astryx `0.1.2` pre-compiled CSS. **Setup note:** override Astryx's color/type CSS-variable
   tokens with DESIGN.md values (a `web/app/theme.css` layered after Astryx's `astryx.css` + `theme-neutral`);
   self-host Cabinet Grotesk / General Sans / IBM Plex Mono via `next/font`; pull exact component props from
-  `docs/specs/astryx-manifest-0.1.2.json` (never guess). Charts + MapLibre are custom; MapLibre lazy-loaded.
+  `docs/specs/astryx-manifest-0.1.2.json` (never guess). Wrap the app in Astryx's Theme provider
+  (`neutralTheme`) plus the link provider per the manifest before rendering Astryx components — the
+  phase-1 scaffold does not yet, since it renders plain HTML only. Charts + MapLibre are custom; MapLibre lazy-loaded.
 - **Data:** read `web/public/data/*.json` (SPEC 0006 contract); render the honesty states verbatim; the
   retracted 0.19 must never appear.
 - **Instruction:** *Implement exactly this spec. Theme Astryx with our locked tokens; do NOT redesign or

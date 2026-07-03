@@ -25,6 +25,10 @@
       "properties": {
         "source": {
           "type": "string"
+        },
+        "repo_commit": {
+          "type": ["string", "null"],
+          "description": "Git commit the real data was generated from; null for sample."
         }
       }
     },
