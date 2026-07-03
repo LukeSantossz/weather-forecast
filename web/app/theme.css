@@ -1,0 +1,187 @@
+/*
+ * theme.css — binds Astryx's CSS-variable tokens to the locked design
+ * language in `.ulpi/design/DESIGN.md`. Layered AFTER astryx.css and
+ * theme-neutral/theme.css (see import order in app/layout.tsx).
+ *
+ * These declarations are unlayered (plain author CSS), which always wins
+ * over Astryx's `@layer astryx-theme` rules regardless of import order
+ * (see the "Layer order" note in @astryxdesign/core/reset.css). They target
+ * `:root`, the same element that carries `data-astryx-theme="neutral"`.
+ *
+ * Hex values below are the ONLY off-token hex in this codebase — they are
+ * DESIGN.md's locked palette, transcribed verbatim.
+ */
+
+/*
+ * Force color-scheme from the `data-theme` attribute Theme.tsx/ThemeToggle
+ * set on <html>. Astryx's own theme-neutral/theme.css sets an unconditional
+ * `:root { color-scheme: light dark }` inside `@layer astryx-theme`, which
+ * outranks reset.css's `html[data-theme]` mapping (also layered, but in the
+ * lower-priority `reset` layer) regardless of specificity — CSS layers beat
+ * specificity. These two rules are unlayered (this file has no @layer), so
+ * they win over both and actually force the mode. Verified in-browser: the
+ * toggle silently no-op'd on background/surface colors without this.
+ */
+html[data-theme='light'] {
+  color-scheme: light;
+}
+
+html[data-theme='dark'] {
+  color-scheme: dark;
+}
+
+:root {
+  /* --- Color: background / surface / elevated (DESIGN.md § Color) --- */
+  --color-background-body: light-dark(#f6f8fa, #14171c);
+  --color-background-surface: light-dark(#ffffff, #1b1f26);
+  --color-background-card: light-dark(#ffffff, #1b1f26);
+  --color-background-muted: light-dark(#f6f8fa, #14171c);
+  --color-background-popover: light-dark(#fbfcfe, #242a33);
+
+  /* --- Color: text (primary / muted / subtle) --- */
+  --color-text-primary: light-dark(#1c2128, #eef1f5);
+  --color-icon-primary: light-dark(#1c2128, #eef1f5);
+  --color-text-secondary: light-dark(#5b6672, #a3adba);
+  --color-icon-secondary: light-dark(#5b6672, #a3adba);
+  /* "subtle": large/decorative only per DESIGN.md; essential small text uses
+     the "muted" tier above. Mapped onto Astryx's disabled tier, the closest
+     built-in de-emphasis role (assumption, cheap to revisit). */
+  --color-text-disabled: light-dark(#8592a0, #71808f);
+  --color-icon-disabled: light-dark(#8592a0, #71808f);
+
+  /* --- Color: border (hairlines, precision ticks) --- */
+  --color-border: light-dark(#dde2e9, #343c47);
+  --color-border-emphasized: light-dark(#dde2e9, #343c47);
+
+  /* --- Color: the single amber accent --- */
+  --color-accent: #e0942e;
+  --color-text-accent: #e0942e;
+  --color-icon-accent: #e0942e;
+  /* alpha tint of the same locked accent hex, following Astryx's own
+     `accent-muted` convention (hex + alpha suffix), not a new color. */
+  --color-accent-muted: light-dark(#e0942e33, #e0942e3f);
+  --color-on-accent: #1c2128;
+
+  /* --- Color: semantic warning/pending (needed by DataStatusBanner) --- */
+  --color-warning: light-dark(#b8902a, #d8b23a);
+  --color-warning-muted: light-dark(#b8902a33, #d8b23a3f);
+  --color-on-warning: #1c2128;
+
+  /* --- Type: the three locked font roles (next/font vars from fonts.ts) --- */
+  --font-family-heading: var(--font-display);
+  --font-family-body: var(--font-body);
+  --font-family-code: var(--font-mono);
+
+  /* --- Radius scale (DESIGN.md § Structural scales, favor the small end) --- */
+  --radius-none: 0px;
+  --radius-inner: 4px;
+  --radius-element: 8px;
+  --radius-container: 12px;
+  --radius-page: 16px;
+  --radius-full: 9999px;
+}
+
+/*
+ * Signature elements (DESIGN.md § Signature) and minimal shell layout.
+ * Custom, non-Astryx structural classes used by the app shell components.
+ */
+
+.shell-container {
+  max-width: 1200px;
+  margin-inline: auto;
+  padding-inline: 20px;
+}
+
+@media (min-width: 768px) {
+  .shell-container {
+    padding-inline: 32px;
+  }
+}
+
+/* Precision tick / graticule: a ruled line with short perpendicular ticks,
+   the console-bezel signature. Used under the header and every section
+   header instead of a plain rule. */
+.tick-rule {
+  height: 5px;
+  border-bottom: 1px solid var(--color-border);
+  background-image: linear-gradient(to right, var(--color-border) 1px, transparent 1px);
+  background-repeat: repeat-x;
+  background-position: bottom left;
+  background-size: 12px 5px;
+}
+
+.console-header {
+  position: sticky;
+  top: 0;
+  z-index: 30; /* DESIGN.md z-index scale: "sticky" */
+  background: var(--color-background-surface);
+}
+
+.console-header-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding-block: 12px;
+}
+
+.console-mark {
+  font-family: var(--font-display);
+  font-size: 16px;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  color: var(--color-text-primary);
+}
+
+.console-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.data-status-banner {
+  position: sticky;
+  top: 0;
+  z-index: 30;
+  font-family: var(--font-mono);
+  font-size: 14px;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  text-align: center;
+  padding-block: 8px;
+  padding-inline: 16px;
+  border-bottom: 1px solid var(--color-border);
+  background: var(--color-background-surface);
+}
+
+.console-footer {
+  margin-top: 40px;
+}
+
+.console-footer-row {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 8px;
+  padding-block: 16px;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--color-text-secondary);
+}
+
+.console-panel {
+  padding-block: 32px;
+}
+
+.console-panel-placeholder {
+  font-family: var(--font-body);
+  color: var(--color-text-secondary);
+  margin-top: 8px;
+}
+
+.section-header-row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+}
