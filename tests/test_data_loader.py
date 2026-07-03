@@ -110,6 +110,17 @@ class TestAddRegionColumn:
         assert result.loc[0, "region"] == "North America"
         assert result.loc[1, "region"] == "Europe"
 
+    def test_partial_null_continent_falls_back_to_timezone_per_row(self) -> None:
+        df = pd.DataFrame({
+            "continent": ["North America", None, "Europe"],
+            "timezone": ["America/New_York", "Asia/Tokyo", "Europe/London"],
+        })
+        result = add_region_column(df)
+
+        assert result.loc[0, "region"] == "North America"
+        assert result.loc[1, "region"] == "Asia"
+        assert result.loc[2, "region"] == "Europe"
+
     def test_uses_unknown_when_no_columns(self) -> None:
         df = pd.DataFrame({"temperature": [20.0, 22.0]})
         result = add_region_column(df)
