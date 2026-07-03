@@ -1,0 +1,81 @@
+{
+  "schema_version": "1.0",
+  "generated_at": "1970-01-01T00:00:00Z",
+  "data_status": "sample",
+  "evaluation": {
+    "method": "holdout",
+    "window_days": 30
+  },
+  "models": [
+    {
+      "id": "prophet",
+      "name": "Prophet",
+      "rmse_c": 0.77,
+      "mae_c": 0.69,
+      "mape_pct": 3.95,
+      "ensemble_weight": null,
+      "status": "final"
+    },
+    {
+      "id": "arima",
+      "name": "ARIMA",
+      "rmse_c": 1.71,
+      "mae_c": 1.45,
+      "mape_pct": 10.63,
+      "ensemble_weight": null,
+      "status": "final"
+    },
+    {
+      "id": "sarima",
+      "name": "SARIMA",
+      "rmse_c": 1.13,
+      "mae_c": 0.97,
+      "mape_pct": 7.11,
+      "ensemble_weight": null,
+      "status": "final"
+    },
+    {
+      "id": "lightgbm",
+      "name": "LightGBM",
+      "rmse_c": null,
+      "mae_c": null,
+      "mape_pct": null,
+      "ensemble_weight": null,
+      "status": "pending_rerun",
+      "note": "Withdrawn pending evaluation-leakage fix (#20)"
+    },
+    {
+      "id": "gradientboosting",
+      "name": "GradientBoosting",
+      "rmse_c": null,
+      "mae_c": null,
+      "mape_pct": null,
+      "ensemble_weight": null,
+      "status": "pending_rerun",
+      "note": "Withdrawn pending evaluation-leakage fix (#20)"
+    },
+    {
+      "id": "ensemble_simple",
+      "name": "Ensemble (simple average)",
+      "rmse_c": null,
+      "mae_c": null,
+      "mape_pct": null,
+      "ensemble_weight": null,
+      "status": "pending_rerun",
+      "note": "Withdrawn pending evaluation-leakage fix (#20)"
+    },
+    {
+      "id": "ensemble_weighted",
+      "name": "Ensemble (weighted)",
+      "rmse_c": null,
+      "mae_c": null,
+      "mape_pct": null,
+      "ensemble_weight": null,
+      "status": "pending_rerun",
+      "note": "Withdrawn pending evaluation-leakage fix (#20)"
+    }
+  ],
+  "caveats": [
+    "LightGBM, GradientBoosting, and both ensemble variants were retracted due to an evaluation-leakage bug (train/test overlap); see issue #20. Their metrics and ensemble weights are withheld (status: pending_rerun) until a leakage-free re-run is published."
+  ]
+}
