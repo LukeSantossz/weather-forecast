@@ -78,6 +78,7 @@ def detect_outliers_iqr(
     Returns:
         Dictionary mapping column names to (lower_bound, upper_bound) tuples.
         Bounds are computed as Q1 - multiplier*IQR and Q3 + multiplier*IQR.
+        Columns with IQR == 0 are omitted (no IQR-defined outliers to bound).
     """
     bounds: dict[str, tuple[float, float]] = {}
     for col in numerical_cols:
@@ -86,6 +87,8 @@ def detect_outliers_iqr(
         q1 = df[col].quantile(0.25)
         q3 = df[col].quantile(0.75)
         iqr = q3 - q1
+        if iqr == 0:
+            continue
         lower = float(q1 - iqr_multiplier * iqr)
         upper = float(q3 + iqr_multiplier * iqr)
         bounds[str(col)] = (lower, upper)
