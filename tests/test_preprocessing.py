@@ -1,5 +1,7 @@
 """Unit tests for src/preprocessing.py."""
 
+import warnings
+
 import numpy as np
 import pandas as pd
 import pytest
@@ -58,6 +60,22 @@ class TestSplitFeatureTypes:
 
         assert len(categorical) == 0
         assert len(numerical) == 2
+
+    def test_split_feature_types_does_not_warn_on_text_columns(self) -> None:
+        df = pd.DataFrame({"text": ["a", "b"], "num": [1, 2]})
+        with warnings.catch_warnings(record=True) as caught:
+            warnings.simplefilter("always")
+            split_feature_types(df)
+        assert not any("select_dtypes" in str(w.message) for w in caught), [
+            str(w.message) for w in caught
+        ]
+
+    def test_split_feature_types_classifies_text_as_categorical(self) -> None:
+        df = pd.DataFrame({"text": ["a", "b"], "num": [1, 2]})
+        categorical, numerical = split_feature_types(df)
+
+        assert "text" in categorical
+        assert "num" in numerical
 
 
 class TestImputeMissingValues:
