@@ -145,6 +145,18 @@ class TestHonestyAcrossContract:
             assert "0.19" not in dumped
             assert "0.24" not in dumped
 
+    def test_builders_reject_non_sample_status(self) -> None:
+        # Public build_* are sample-only; they must not label synthetic output real.
+        for build in (
+            build_meta,
+            build_forecast,
+            build_metrics,
+            build_anomalies,
+            build_shap,
+        ):
+            with pytest.raises(ValueError, match="sample"):
+                build(data_status="real")
+
 
 class TestWriteContract:
     """Tests for write_contract."""

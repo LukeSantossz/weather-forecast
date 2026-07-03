@@ -13,6 +13,7 @@ stable across runs and safe to assert on in tests.
 
 from __future__ import annotations
 
+import functools
 import json
 import math
 from pathlib import Path
@@ -24,6 +25,26 @@ SCHEMA_DIR = Path(__file__).resolve().parent.parent / "web" / "public" / "data" 
 _SCHEMA_VERSION = "1.0"
 
 
+def _sample_only(build):
+    """Guard: build_* produce sample data only. Reject any attempt to label their
+    synthetic output as real (the real-data reader is not implemented)."""
+
+    @functools.wraps(build)
+    def wrapper(
+        data_status: str = "sample",
+        generated_at: str = "1970-01-01T00:00:00Z",
+    ) -> dict:
+        if data_status != "sample":
+            raise ValueError(
+                "build_* produce sample data only; data_status must be 'sample' "
+                "(the real-data reader is not implemented)."
+            )
+        return build(data_status=data_status, generated_at=generated_at)
+
+    return wrapper
+
+
+@_sample_only
 def build_meta(
     data_status: str = "sample",
     generated_at: str = "1970-01-01T00:00:00Z",
@@ -85,6 +106,7 @@ def _series_value(day_index: int) -> float:
     return round(16.03 + seasonal + ripple, 2)
 
 
+@_sample_only
 def build_forecast(
     data_status: str = "sample",
     generated_at: str = "1970-01-01T00:00:00Z",
@@ -157,6 +179,7 @@ _PENDING_RERUN_MODELS = (
 )
 
 
+@_sample_only
 def build_metrics(
     data_status: str = "sample",
     generated_at: str = "1970-01-01T00:00:00Z",
@@ -247,6 +270,7 @@ _ANOMALY_DETECTION_CYCLE = ("zscore", "isolation_forest", "both")
 _ANOMALY_SAMPLE_COUNT = 30
 
 
+@_sample_only
 def build_anomalies(
     data_status: str = "sample",
     generated_at: str = "1970-01-01T00:00:00Z",
@@ -303,6 +327,7 @@ _SHAP_FEATURES = (
 _SHAP_POINTS_PER_FEATURE = 20
 
 
+@_sample_only
 def build_shap(
     data_status: str = "sample",
     generated_at: str = "1970-01-01T00:00:00Z",
