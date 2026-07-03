@@ -62,12 +62,17 @@ def add_region_column(df: pd.DataFrame) -> pd.DataFrame:
     """
     df = df.copy()
 
-    if "continent" in df.columns and df["continent"].notna().any():
-        df["region"] = df["continent"].astype(str)
-    elif "timezone" in df.columns:
-        df["region"] = df["timezone"].astype(str).str.split("/").str[0]
+    if "timezone" in df.columns:
+        tz_region = df["timezone"].astype(str).str.split("/").str[0]
     else:
-        df["region"] = "Unknown"
+        tz_region = pd.Series("Unknown", index=df.index)
+
+    if "continent" in df.columns:
+        df["region"] = df["continent"].where(df["continent"].notna(), tz_region)
+    else:
+        df["region"] = tz_region
+
+    df["region"] = df["region"].astype(str)
 
     return df
 
