@@ -64,6 +64,8 @@ def add_region_column(df: pd.DataFrame) -> pd.DataFrame:
 
     if "timezone" in df.columns:
         tz_region = df["timezone"].astype(str).str.split("/").str[0]
+        # A null timezone value stringifies to a non-region token; treat it as Unknown.
+        tz_region = tz_region.where(df["timezone"].notna(), "Unknown")
     else:
         tz_region = pd.Series("Unknown", index=df.index)
 
