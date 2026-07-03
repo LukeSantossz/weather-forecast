@@ -1,0 +1,108 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://weather-forecast.local/schema/anomalies.schema.json",
+  "title": "Dashboard anomalies contract",
+  "description": "Anomaly-detection method summary plus point-level records for the map explorer.",
+  "type": "object",
+  "required": ["schema_version", "generated_at", "data_status", "methods", "records"],
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": {
+      "type": "string",
+      "const": "1.0"
+    },
+    "generated_at": {
+      "type": "string"
+    },
+    "data_status": {
+      "type": "string",
+      "enum": ["sample", "real"]
+    },
+    "methods": {
+      "type": "object",
+      "required": ["zscore", "isolation_forest", "overlap_count"],
+      "additionalProperties": false,
+      "properties": {
+        "zscore": {
+          "type": "object",
+          "required": ["threshold", "count", "share_pct"],
+          "additionalProperties": false,
+          "properties": {
+            "threshold": {
+              "type": "number"
+            },
+            "count": {
+              "type": "integer"
+            },
+            "share_pct": {
+              "type": "number"
+            }
+          }
+        },
+        "isolation_forest": {
+          "type": "object",
+          "required": ["contamination", "count", "share_pct"],
+          "additionalProperties": false,
+          "properties": {
+            "contamination": {
+              "type": "number"
+            },
+            "count": {
+              "type": "integer"
+            },
+            "share_pct": {
+              "type": "number"
+            }
+          }
+        },
+        "overlap_count": {
+          "type": "integer"
+        }
+      }
+    },
+    "records": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "ts",
+          "country",
+          "lat",
+          "lon",
+          "temp_c",
+          "z",
+          "if_score",
+          "detected_by"
+        ],
+        "additionalProperties": false,
+        "properties": {
+          "ts": {
+            "type": "string"
+          },
+          "country": {
+            "type": "string"
+          },
+          "lat": {
+            "type": "number"
+          },
+          "lon": {
+            "type": "number"
+          },
+          "temp_c": {
+            "type": "number"
+          },
+          "z": {
+            "type": "number"
+          },
+          "if_score": {
+            "type": "number"
+          },
+          "detected_by": {
+            "type": "string",
+            "enum": ["zscore", "isolation_forest", "both"]
+          }
+        }
+      }
+    }
+  }
+}

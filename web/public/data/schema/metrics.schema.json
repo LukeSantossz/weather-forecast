@@ -1,0 +1,84 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://weather-forecast.local/schema/metrics.schema.json",
+  "title": "Dashboard metrics contract",
+  "description": "Per-model evaluation metrics for the global temperature forecast, honesty-gated: models affected by the evaluation-leakage retraction (#20) carry null metrics and a pending_rerun status.",
+  "type": "object",
+  "required": ["schema_version", "generated_at", "data_status", "evaluation", "models", "caveats"],
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": {
+      "type": "string",
+      "const": "1.0"
+    },
+    "generated_at": {
+      "type": "string"
+    },
+    "data_status": {
+      "type": "string",
+      "enum": ["sample", "real"]
+    },
+    "evaluation": {
+      "type": "object",
+      "required": ["method", "window_days"],
+      "additionalProperties": false,
+      "properties": {
+        "method": {
+          "type": "string"
+        },
+        "window_days": {
+          "type": "integer"
+        }
+      }
+    },
+    "models": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "id",
+          "name",
+          "rmse_c",
+          "mae_c",
+          "mape_pct",
+          "ensemble_weight",
+          "status"
+        ],
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "rmse_c": {
+            "type": ["number", "null"]
+          },
+          "mae_c": {
+            "type": ["number", "null"]
+          },
+          "mape_pct": {
+            "type": ["number", "null"]
+          },
+          "ensemble_weight": {
+            "type": ["number", "null"]
+          },
+          "status": {
+            "type": "string",
+            "enum": ["final", "pending_rerun"]
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "caveats": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    }
+  }
+}

@@ -1,0 +1,368 @@
+{
+  "schema_version": "1.0",
+  "generated_at": "1970-01-01T00:00:00Z",
+  "data_status": "sample",
+  "model": "lightgbm",
+  "target": "pm2_5",
+  "sample_n": 1000,
+  "features": [
+    {
+      "name": "humidity",
+      "mean_abs_shap": 4.82
+    },
+    {
+      "name": "temperature_celsius",
+      "mean_abs_shap": 3.15
+    },
+    {
+      "name": "wind_kph",
+      "mean_abs_shap": 2.07
+    },
+    {
+      "name": "pressure_mb",
+      "mean_abs_shap": 1.42
+    }
+  ],
+  "beeswarm": [
+    {
+      "feature": "humidity",
+      "points": [
+        {
+          "shap": 0.421,
+          "feature_value_norm": 0.0
+        },
+        {
+          "shap": 0.455,
+          "feature_value_norm": 0.053
+        },
+        {
+          "shap": 0.071,
+          "feature_value_norm": 0.105
+        },
+        {
+          "shap": -0.378,
+          "feature_value_norm": 0.158
+        },
+        {
+          "shap": -0.479,
+          "feature_value_norm": 0.211
+        },
+        {
+          "shap": -0.14,
+          "feature_value_norm": 0.263
+        },
+        {
+          "shap": 0.328,
+          "feature_value_norm": 0.316
+        },
+        {
+          "shap": 0.495,
+          "feature_value_norm": 0.368
+        },
+        {
+          "shap": 0.206,
+          "feature_value_norm": 0.421
+        },
+        {
+          "shap": -0.272,
+          "feature_value_norm": 0.474
+        },
+        {
+          "shap": -0.5,
+          "feature_value_norm": 0.526
+        },
+        {
+          "shap": -0.268,
+          "feature_value_norm": 0.579
+        },
+        {
+          "shap": 0.21,
+          "feature_value_norm": 0.632
+        },
+        {
+          "shap": 0.495,
+          "feature_value_norm": 0.684
+        },
+        {
+          "shap": 0.325,
+          "feature_value_norm": 0.737
+        },
+        {
+          "shap": -0.144,
+          "feature_value_norm": 0.789
+        },
+        {
+          "shap": -0.481,
+          "feature_value_norm": 0.842
+        },
+        {
+          "shap": -0.375,
+          "feature_value_norm": 0.895
+        },
+        {
+          "shap": 0.075,
+          "feature_value_norm": 0.947
+        },
+        {
+          "shap": 0.456,
+          "feature_value_norm": 1.0
+        }
+      ]
+    },
+    {
+      "feature": "temperature_celsius",
+      "points": [
+        {
+          "shap": 0.909,
+          "feature_value_norm": 0.0
+        },
+        {
+          "shap": -0.757,
+          "feature_value_norm": 0.053
+        },
+        {
+          "shap": -0.279,
+          "feature_value_norm": 0.105
+        },
+        {
+          "shap": 0.989,
+          "feature_value_norm": 0.158
+        },
+        {
+          "shap": -0.544,
+          "feature_value_norm": 0.211
+        },
+        {
+          "shap": -0.537,
+          "feature_value_norm": 0.263
+        },
+        {
+          "shap": 0.991,
+          "feature_value_norm": 0.316
+        },
+        {
+          "shap": -0.288,
+          "feature_value_norm": 0.368
+        },
+        {
+          "shap": -0.751,
+          "feature_value_norm": 0.421
+        },
+        {
+          "shap": 0.913,
+          "feature_value_norm": 0.474
+        },
+        {
+          "shap": -0.009,
+          "feature_value_norm": 0.526
+        },
+        {
+          "shap": -0.906,
+          "feature_value_norm": 0.579
+        },
+        {
+          "shap": 0.763,
+          "feature_value_norm": 0.632
+        },
+        {
+          "shap": 0.271,
+          "feature_value_norm": 0.684
+        },
+        {
+          "shap": -0.988,
+          "feature_value_norm": 0.737
+        },
+        {
+          "shap": 0.551,
+          "feature_value_norm": 0.789
+        },
+        {
+          "shap": 0.529,
+          "feature_value_norm": 0.842
+        },
+        {
+          "shap": -0.992,
+          "feature_value_norm": 0.895
+        },
+        {
+          "shap": 0.296,
+          "feature_value_norm": 0.947
+        },
+        {
+          "shap": 0.745,
+          "feature_value_norm": 1.0
+        }
+      ]
+    },
+    {
+      "feature": "wind_kph",
+      "points": [
+        {
+          "shap": 0.212,
+          "feature_value_norm": 0.0
+        },
+        {
+          "shap": -0.419,
+          "feature_value_norm": 0.053
+        },
+        {
+          "shap": 0.618,
+          "feature_value_norm": 0.105
+        },
+        {
+          "shap": -0.805,
+          "feature_value_norm": 0.158
+        },
+        {
+          "shap": 0.975,
+          "feature_value_norm": 0.211
+        },
+        {
+          "shap": -1.126,
+          "feature_value_norm": 0.263
+        },
+        {
+          "shap": 1.255,
+          "feature_value_norm": 0.316
+        },
+        {
+          "shap": -1.358,
+          "feature_value_norm": 0.368
+        },
+        {
+          "shap": 1.435,
+          "feature_value_norm": 0.421
+        },
+        {
+          "shap": -1.482,
+          "feature_value_norm": 0.474
+        },
+        {
+          "shap": 1.5,
+          "feature_value_norm": 0.526
+        },
+        {
+          "shap": -1.488,
+          "feature_value_norm": 0.579
+        },
+        {
+          "shap": 1.446,
+          "feature_value_norm": 0.632
+        },
+        {
+          "shap": -1.375,
+          "feature_value_norm": 0.684
+        },
+        {
+          "shap": 1.276,
+          "feature_value_norm": 0.737
+        },
+        {
+          "shap": -1.152,
+          "feature_value_norm": 0.789
+        },
+        {
+          "shap": 1.005,
+          "feature_value_norm": 0.842
+        },
+        {
+          "shap": -0.838,
+          "feature_value_norm": 0.895
+        },
+        {
+          "shap": 0.654,
+          "feature_value_norm": 0.947
+        },
+        {
+          "shap": -0.457,
+          "feature_value_norm": 1.0
+        }
+      ]
+    },
+    {
+      "feature": "pressure_mb",
+      "points": [
+        {
+          "shap": -1.514,
+          "feature_value_norm": 0.0
+        },
+        {
+          "shap": 1.979,
+          "feature_value_norm": 0.053
+        },
+        {
+          "shap": -1.073,
+          "feature_value_norm": 0.105
+        },
+        {
+          "shap": -0.576,
+          "feature_value_norm": 0.158
+        },
+        {
+          "shap": 1.826,
+          "feature_value_norm": 0.211
+        },
+        {
+          "shap": -1.811,
+          "feature_value_norm": 0.263
+        },
+        {
+          "shap": 0.542,
+          "feature_value_norm": 0.316
+        },
+        {
+          "shap": 1.103,
+          "feature_value_norm": 0.368
+        },
+        {
+          "shap": -1.984,
+          "feature_value_norm": 0.421
+        },
+        {
+          "shap": 1.49,
+          "feature_value_norm": 0.474
+        },
+        {
+          "shap": 0.035,
+          "feature_value_norm": 0.526
+        },
+        {
+          "shap": -1.537,
+          "feature_value_norm": 0.579
+        },
+        {
+          "shap": 1.973,
+          "feature_value_norm": 0.632
+        },
+        {
+          "shap": -1.043,
+          "feature_value_norm": 0.684
+        },
+        {
+          "shap": -0.61,
+          "feature_value_norm": 0.737
+        },
+        {
+          "shap": 1.84,
+          "feature_value_norm": 0.789
+        },
+        {
+          "shap": -1.796,
+          "feature_value_norm": 0.842
+        },
+        {
+          "shap": 0.508,
+          "feature_value_norm": 0.895
+        },
+        {
+          "shap": 1.132,
+          "feature_value_norm": 0.947
+        },
+        {
+          "shap": -1.988,
+          "feature_value_norm": 1.0
+        }
+      ]
+    }
+  ]
+}

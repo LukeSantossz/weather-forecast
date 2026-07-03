@@ -13,3 +13,4 @@ kaggle
 pyarrow
 pytest>=7.0.0
 statsmodels
+jsonschema

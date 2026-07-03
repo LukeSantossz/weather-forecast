@@ -64,3 +64,10 @@ reports/*
 kaggle.json
 /tutor.md
 git_vendas.pdf
+
+# Web app (phase-1 dashboard)
+web/node_modules/
+web/.next/
+web/out/
+web/next-env.d.ts
+web/tsconfig.tsbuildinfo
