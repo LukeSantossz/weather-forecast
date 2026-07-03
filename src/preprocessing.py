@@ -12,6 +12,11 @@ from sklearn.preprocessing import MinMaxScaler
 
 OutlierStrategy = Literal["clip"]
 
+_PANDAS_MAJOR = int(pd.__version__.split(".")[0])
+_CATEGORICAL_INCLUDE = (
+    ["object", "category", "str"] if _PANDAS_MAJOR >= 3 else ["object", "category"]
+)
+
 
 def split_feature_types(df: pd.DataFrame) -> tuple[pd.Index, pd.Index]:
     """
@@ -24,7 +29,7 @@ def split_feature_types(df: pd.DataFrame) -> tuple[pd.Index, pd.Index]:
         Tuple of (categorical_columns, numerical_columns) as pandas Index objects.
         Categorical includes object and category dtypes; numerical includes all numeric dtypes.
     """
-    categorical = df.select_dtypes(include=["object", "category"]).columns
+    categorical = df.select_dtypes(include=_CATEGORICAL_INCLUDE).columns
     numerical = df.select_dtypes(include=["number"]).columns
     return categorical, numerical
 
