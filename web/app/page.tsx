@@ -12,7 +12,7 @@ export default function Page() {
         <Text>Astryx static-export spike</Text>
         <Card>
           <Text>This card is rendered with Astryx pre-compiled CSS.</Text>
-          <Badge>sample</Badge>
+          <Badge label="sample" />
         </Card>
       </Stack>
     </main>
