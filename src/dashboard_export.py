@@ -13,6 +13,7 @@ stable across runs and safe to assert on in tests.
 
 from __future__ import annotations
 
+import copy
 import functools
 import json
 import math
@@ -310,7 +311,7 @@ def build_anomalies(
         "schema_version": _SCHEMA_VERSION,
         "generated_at": generated_at,
         "data_status": data_status,
-        "methods": _ANOMALY_METHODS,
+        "methods": copy.deepcopy(_ANOMALY_METHODS),
         "records": records,
     }
 

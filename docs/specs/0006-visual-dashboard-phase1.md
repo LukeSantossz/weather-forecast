@@ -111,7 +111,7 @@ JSON Schemas committed under `web/public/data/schema/`.
 
 - Front: `cd web && npm ci && npm run build` (Node LTS; exact deps via committed
   lockfile). Serve `web/out/` statically.
-- Data: `python -m src.export_dashboard --out web/public/data` regenerates the JSON
+- Data: `python -m src.dashboard_export --out web/public/data` regenerates the JSON
   (sample fixtures deterministic; real run requires `data/raw/` + a notebook/pipeline
   run post-#20).
 

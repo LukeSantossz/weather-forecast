@@ -112,6 +112,12 @@ class TestBuildAnomalies:
         detected_by_values = {r["detected_by"] for r in anomalies["records"]}
         assert detected_by_values == {"zscore", "isolation_forest", "both"}
 
+    def test_build_anomalies_methods_is_not_shared_mutable_state(self) -> None:
+        first = build_anomalies()
+        first["methods"]["zscore"]["count"] = 0
+        second = build_anomalies()
+        assert second["methods"]["zscore"]["count"] == 930
+
 
 class TestBuildShap:
     """Tests for build_shap."""
