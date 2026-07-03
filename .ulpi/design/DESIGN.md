@@ -84,12 +84,15 @@ Distribution ~60-30-10: graphite surfaces (60) / mid neutrals + gridlines (30) /
 
 ## Type — paired on a contrast axis (none are the banned reflex defaults)
 
-- **Display** (section headers, the hero stat): **Cabinet Grotesk** — geometric-industrial, confident;
+- **Display** (section headers, the hero stat): **Archivo** — a technical grotesk with signage character;
   used with restraint, tight tracking (≈ −0.02em at large sizes), `text-wrap: balance`.
-- **Body / UI:** **General Sans** — humanist-geometric, quiet, readable (measure 65–75ch).
+- **Body / UI:** **Hanken Grotesk** — humanist-geometric, quiet, readable (measure 65–75ch).
 - **Data / mono:** **IBM Plex Mono** — ALL numbers, axis ticks, footnotes, and the provenance/status
   chips. The mono is the honesty voice: exact figures wear mono.
-- Self-hosted via `next/font` (no external CDN); metric-matched fallbacks to avoid layout shift.
+- Loaded via `next/font/google` (Archivo, Hanken Grotesk, IBM Plex Mono — self-hosted at build, no runtime
+  CDN, metric-matched fallbacks). Chosen over the Fontshare picks (Cabinet Grotesk / General Sans) so the
+  static build needs no committed font binaries, keeping the same industrial-grotesk + humanist + mono
+  contrast axis and still avoiding the banned reflex defaults.
 - We override Astryx's font tokens with these three roles.
 
 **Modular scale** (product-tight, 1.20): 12 · 14 · 16(base) · 19 · 23 · 28 · 34 · 41 · 49 px. Numbers in
