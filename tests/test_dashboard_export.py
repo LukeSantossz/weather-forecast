@@ -3,6 +3,8 @@
 import json
 from pathlib import Path
 
+import pytest
+
 from src.dashboard_export import (
     build_anomalies,
     build_forecast,
@@ -157,6 +159,13 @@ class TestWriteContract:
             data = json.loads(path.read_text())
             assert data["data_status"] == "sample"
             validate(path.stem, data)
+
+    def test_write_contract_refuses_non_sample_status(self, tmp_path: Path) -> None:
+        # The real-data reader is not implemented, so labeling sample output "real"
+        # would present synthetic values as model output. The writer must refuse.
+        with pytest.raises(ValueError, match="sample"):
+            write_contract(tmp_path, data_status="real")
+        assert not list(tmp_path.glob("*.json"))
 
 
 class TestCommittedSample:

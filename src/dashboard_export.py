@@ -400,6 +400,13 @@ def write_contract(
     Raises:
         jsonschema.ValidationError: If any built section fails schema validation.
     """
+    if data_status != "sample":
+        raise ValueError(
+            "Only 'sample' data can be exported. The real-data reader is not "
+            "implemented, so recording data_status='real' would present synthetic "
+            "sample values as real model output."
+        )
+
     out_dir = Path(out_dir)
     out_dir.mkdir(parents=True, exist_ok=True)
 
@@ -431,8 +438,9 @@ def _main() -> None:
     parser.add_argument(
         "--data-status",
         default="sample",
-        choices=["sample", "real"],
-        help="Value recorded in each file's data_status field.",
+        choices=["sample"],
+        help="data_status recorded in each file (only 'sample' until the "
+        "real-data reader lands).",
     )
     parser.add_argument(
         "--generated-at",
