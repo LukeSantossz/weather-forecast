@@ -116,7 +116,7 @@ pip install -r requirements.txt
 
 ### Running
 
-Execute the notebooks in order — each depends on outputs from previous steps:
+Run the notebooks. Each reads the raw CSV directly, so they run independently; the numbering is only a suggested reading order, and notebook 02's Parquet export is optional (EVO-1(b)):
 
 ```bash
 jupyter notebook notebooks/
@@ -192,4 +192,4 @@ weather-forecast/
 - **Temporal and geographic scope** — the model forecasts a global daily-mean series built from roughly 2 years of data across 211 countries; it is not a per-country forecast, and accuracy on longer horizons or unseen climate regimes is unverified.
 - **Evaluation leakage in the gradient-boosted and ensemble scores (retracted)** — the previously reported LightGBM, GradientBoosting, and ensemble metrics, including the headline figure once quoted in this README, were produced under evaluation leakage and have been withdrawn. Only the Prophet, ARIMA, and SARIMA rows remain in the results table. A leakage-free re-run is tracked in [#20](https://github.com/LukeSantossz/weather-forecast/issues/20).
 - **No serving layer** — the pipeline runs as notebooks; there is no API or scheduled-inference component yet.
-- **Test coverage is partial** — automated tests cover `data_loader` and `preprocessing`; forecasting and anomaly logic live in notebooks and are validated manually.
+- **Test coverage is partial** — automated tests cover `data_loader`, `preprocessing`, `parquet_io`, and `dashboard_export`; forecasting and anomaly logic live in notebooks and are validated manually.
