@@ -9,10 +9,39 @@ import DataStatusBanner from '../components/DataStatusBanner';
 import ThemeToggle from '../components/ThemeToggle';
 import meta from '../public/data/meta.json';
 
+const SITE_NAME = 'Weather · Forecast Console';
+const SITE_DESCRIPTION =
+  'A meteorological instrument console for global daily-mean temperature: forecast, anomalies, and drivers, with every number\'s provenance shown.';
+
+// Absolute base for Open Graph / Twitter image URLs. Vercel exposes the real
+// production domain at build time (VERCEL_PROJECT_PRODUCTION_URL), so the
+// static export resolves the self-contained OG image to a correct absolute URL
+// on deploy without hardcoding a guessed domain; local builds fall back to
+// localhost. Override with NEXT_PUBLIC_SITE_URL if a custom domain is assigned.
+const SITE_URL =
+  process.env.NEXT_PUBLIC_SITE_URL ??
+  (process.env.VERCEL_PROJECT_PRODUCTION_URL
+    ? `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}`
+    : 'http://localhost:3000');
+
 export const metadata: Metadata = {
-  title: 'Weather · Forecast Console',
-  description:
-    'A meteorological instrument console: global daily-mean temperature forecast, anomalies, and drivers.',
+  metadataBase: new URL(SITE_URL),
+  title: SITE_NAME,
+  description: SITE_DESCRIPTION,
+  applicationName: SITE_NAME,
+  openGraph: {
+    type: 'website',
+    siteName: SITE_NAME,
+    title: SITE_NAME,
+    description: SITE_DESCRIPTION,
+    locale: 'en_US',
+    // Image is contributed by app/opengraph-image.tsx (generated at build).
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: SITE_NAME,
+    description: SITE_DESCRIPTION,
+  },
 };
 
 const REPO_URL = 'https://github.com/LukeSantossz/weather-forecast#readme';
