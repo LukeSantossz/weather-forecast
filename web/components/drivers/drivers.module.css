@@ -1,0 +1,252 @@
+/*
+ * drivers.module.css — scoped styles for the Environmental drivers (SHAP)
+ * section (.ulpi/design/dashboard-phase1.md § Section 3). Every value below
+ * is either a structural constant already established elsewhere (spacing,
+ * radius) or a reference to a DESIGN.md token exposed as a CSS var in
+ * app/theme.css. No new hex literals are introduced here: the amber/cyan
+ * ramps are built from `--color-accent` / `--color-info` via `color-mix()`
+ * at render time in ShapBar.tsx / ShapBeeswarm.tsx.
+ */
+
+.driversSection {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.loadingBlock {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin-top: 16px;
+}
+
+.driversContent {
+  display: flex;
+  flex-direction: column;
+  gap: 40px;
+  margin-top: 16px;
+}
+
+/* --- ShapBar ------------------------------------------------------------ */
+
+.barChart {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.barChartCaption {
+  color: var(--color-text-secondary);
+}
+
+.barList {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.barRow {
+  display: grid;
+  grid-template-columns: minmax(96px, 160px) 1fr auto;
+  align-items: center;
+  gap: 12px;
+}
+
+.barLabel {
+  font-family: var(--font-body);
+  font-size: 14px;
+  color: var(--color-text-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.barTrack {
+  position: relative;
+  height: 16px;
+  background: var(--color-background-muted);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-inner);
+  overflow: hidden;
+}
+
+.barFill {
+  display: block;
+  height: 100%;
+  border-radius: var(--radius-inner);
+}
+
+.barValue {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  font-size: 14px;
+  color: var(--color-text-primary);
+  min-width: 4ch;
+  text-align: right;
+}
+
+@media (max-width: 480px) {
+  .barRow {
+    grid-template-columns: 80px 1fr auto;
+    gap: 8px;
+  }
+
+  .barLabel,
+  .barValue {
+    font-size: 12px;
+  }
+}
+
+/* --- ShapBeeswarm --------------------------------------------------------- */
+
+.beeswarmSection {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.beeswarmHeaderRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.beeswarmCaption {
+  color: var(--color-text-secondary);
+}
+
+.beeswarmDetailToggle {
+  display: none;
+}
+
+.beeswarmDetailBody {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.beeswarmReading {
+  font-family: var(--font-body);
+  font-size: 16px;
+  color: var(--color-text-primary);
+  margin: 0;
+}
+
+.beeswarmLegend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px 24px;
+  font-family: var(--font-body);
+  font-size: 13px;
+  color: var(--color-text-secondary);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-element);
+  padding: 12px 16px;
+  background: var(--color-background-muted);
+  margin: 0;
+}
+
+.beeswarmLegendItem {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  margin: 0;
+}
+
+.beeswarmLegendSwatch {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  border-radius: var(--radius-full);
+  flex-shrink: 0;
+  border: 1px solid var(--color-border);
+}
+
+.beeswarmAxis {
+  display: flex;
+  justify-content: space-between;
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  font-size: 12px;
+  color: var(--color-text-secondary);
+  padding-inline: 4px;
+}
+
+.beeswarmRows {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.beeswarmRow {
+  display: grid;
+  grid-template-columns: minmax(96px, 150px) 1fr auto;
+  align-items: center;
+  gap: 12px;
+}
+
+.beeswarmRowLabel {
+  font-family: var(--font-body);
+  font-size: 13px;
+  color: var(--color-text-secondary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.beeswarmRowPlot {
+  position: relative;
+  width: 100%;
+}
+
+.beeswarmZeroLine {
+  position: absolute;
+  left: 50%;
+  top: 0;
+  bottom: 0;
+  width: 1px;
+  background: var(--color-border);
+  transform: translateX(-50%);
+}
+
+.beeswarmDot {
+  position: absolute;
+  width: 8px;
+  height: 8px;
+  border-radius: var(--radius-full);
+  border: 1px solid var(--color-background-surface);
+  transform: translate(-50%, -50%);
+}
+
+.beeswarmRowSummary {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  font-size: 12px;
+  color: var(--color-text-secondary);
+  white-space: nowrap;
+}
+
+@media (max-width: 767px) {
+  .beeswarmDetailToggle {
+    display: inline-flex;
+  }
+
+  .beeswarmDetailBody[data-open='false'] {
+    display: none;
+  }
+}
+
+@media (max-width: 480px) {
+  .beeswarmRow {
+    grid-template-columns: 80px 1fr;
+  }
+
+  .beeswarmRowSummary {
+    display: none;
+  }
+}
