@@ -1,0 +1,284 @@
+/*
+ * anomalies.css — section-local styling for the Anomaly explorer.
+ *
+ * Component-local per the task: theme.css is NOT edited here. Every value binds
+ * to a DESIGN.md token exposed as an Astryx CSS variable in app/theme.css. The
+ * only new token is `--color-violet` (the anomaly-methods dataviz violet
+ * `#8b7fd6` from DESIGN.md § Dataviz), which theme.css does not define; it is
+ * re-derived darker for light mode so it clears AA contrast on the light
+ * surface, matching how DESIGN.md re-derives (not inverts) the light palette.
+ */
+
+:root {
+  --color-violet: light-dark(#6f61c4, #8b7fd6);
+}
+
+/* --- Method stat-strip -------------------------------------------------- */
+
+.anomalies-method-strip {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+@media (min-width: 640px) {
+  .anomalies-method-strip {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+/* Each method carries its map-legend colour as a left accent, so the strip and
+   the map share one colour key (DESIGN.md: methods carry a label + colour, and
+   never colour alone — the label text names the method). */
+.method-strip-item {
+  padding-left: 16px;
+  border-left: 3px solid var(--color-border);
+}
+
+.method-strip-item--zscore {
+  border-left-color: var(--color-info);
+}
+
+.method-strip-item--iforest {
+  border-left-color: var(--color-violet);
+}
+
+.method-strip-item--overlap {
+  border-left-color: var(--color-danger);
+}
+
+/* Overlap is the agreed, strongest signal: danger tone on the figure itself. */
+.method-strip-item--overlap .stat-block-value-num {
+  color: var(--color-danger);
+}
+
+/* --- Explorer layout: map dominant, records beside / below ------------- */
+
+.anomalies-explorer {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 16px;
+}
+
+@media (min-width: 1024px) {
+  .anomalies-explorer {
+    grid-template-columns: minmax(0, 1fr) 340px;
+    align-items: start;
+  }
+}
+
+/* --- Map --------------------------------------------------------------- */
+
+.anomaly-map-wrap {
+  position: relative;
+  height: clamp(360px, 60vh, 560px);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-container);
+  overflow: hidden;
+  background: var(--color-background-surface);
+}
+
+/* MapLibre adds `.maplibregl-map { position: relative }` to this same element;
+   its stylesheet loads after this one, so the two-class selector is needed to
+   out-specify it and keep the container filling the wrap (otherwise it
+   collapses to height 0 and the map renders blank). */
+.anomaly-map-wrap .anomaly-map {
+  position: absolute;
+  inset: 0;
+}
+
+/* Legend doubles as the method filter (DESIGN.md § Anomaly explorer). */
+.anomaly-map-legend {
+  position: absolute;
+  left: 12px;
+  bottom: 12px;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 6px;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  background: var(--color-background-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-element);
+}
+
+.anomaly-legend-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 28px;
+  padding: 4px 6px;
+  border: 0;
+  border-radius: var(--radius-inner);
+  background: none;
+  color: var(--color-text-primary);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+/* Off state is not colour-only: dimmed + struck through. */
+.anomaly-legend-btn[aria-pressed='false'] {
+  opacity: 0.45;
+  text-decoration: line-through;
+}
+
+.anomaly-legend-btn:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+}
+
+.anomaly-legend-swatch {
+  flex: none;
+  width: 10px;
+  height: 10px;
+  border-radius: var(--radius-full);
+}
+
+.anomaly-legend-swatch--zscore {
+  background: var(--color-info);
+}
+
+.anomaly-legend-swatch--iforest {
+  background: var(--color-violet);
+}
+
+.anomaly-legend-swatch--both {
+  background: var(--color-danger);
+}
+
+.anomaly-legend-count {
+  margin-left: auto;
+  padding-left: 8px;
+  color: var(--color-text-secondary);
+  font-variant-numeric: tabular-nums;
+}
+
+/* --- MapLibre popup + controls, themed to the console --------------------
+   MapLibre injects its own DOM; these override just enough to match the
+   theme. WebGL marker colours cannot read CSS variables, so AnomalyMap
+   resolves the same tokens to concrete rgb() at runtime (see resolveColor). */
+
+.anomaly-popup .maplibregl-popup-content {
+  padding: 8px 10px;
+  background: var(--color-background-popover);
+  color: var(--color-text-primary);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-element);
+  box-shadow: none;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+/* The CSS-triangle tip cannot inherit the popover colour cleanly across
+   anchors, so it is hidden and the popup floats with an offset instead. */
+.anomaly-popup .maplibregl-popup-tip {
+  display: none;
+}
+
+.anomaly-popup-country {
+  font-family: var(--font-body);
+  font-weight: 600;
+  color: var(--color-text-primary);
+}
+
+.anomaly-popup-row {
+  color: var(--color-text-secondary);
+}
+
+.anomaly-map-wrap .maplibregl-ctrl-group {
+  background: var(--color-background-surface);
+  border: 1px solid var(--color-border);
+  box-shadow: none;
+}
+
+.anomaly-map-wrap .maplibregl-ctrl-group button + button {
+  border-top: 1px solid var(--color-border);
+}
+
+.anomaly-map-wrap .maplibregl-ctrl-attrib {
+  background: var(--color-background-surface);
+  color: var(--color-text-secondary);
+}
+
+.anomaly-map-wrap .maplibregl-ctrl-attrib a {
+  color: var(--color-text-secondary);
+}
+
+/* --- Records list (map's accessible equivalent) ----------------------- */
+
+.records-list-wrap {
+  max-height: clamp(360px, 60vh, 560px);
+  overflow: auto;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-container);
+  background: var(--color-background-surface);
+}
+
+.records-desc {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  color: var(--color-text-secondary);
+}
+
+.records-method {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--color-text-secondary);
+}
+
+.records-method-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: var(--radius-full);
+  flex: none;
+}
+
+.records-method-dot--zscore {
+  background: var(--color-info);
+}
+
+.records-method-dot--iforest {
+  background: var(--color-violet);
+}
+
+.records-method-dot--both {
+  background: var(--color-danger);
+}
+
+/* --- Loading + error states ------------------------------------------- */
+
+.anomalies-skeleton-strip {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+@media (min-width: 640px) {
+  .anomalies-skeleton-strip {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+.anomalies-error {
+  padding: 20px;
+  border: 1px solid var(--color-danger);
+  border-radius: var(--radius-container);
+  background: var(--color-danger-muted);
+}
+
+.anomalies-error-actions {
+  margin-top: 12px;
+}
+
+.anomalies-error-file {
+  font-family: var(--font-mono);
+}
