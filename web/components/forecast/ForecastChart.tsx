@@ -37,8 +37,11 @@ const fmtDateStr = (iso: string): string => fmtDate(parseDate(iso));
 interface SeriesSpec {
   id: string;
   label: string;
-  /** A `var(--viz-*)` reference — chart colors come from the dataviz tokens. */
+  /** A `var(--viz-*)` reference for the LINE stroke (bright, UI/marker >=3:1). */
   color: string;
+  /** A `var(--viz-*-text)` reference for the direct end-LABEL text: small colored
+   * text, so it is darkened in light mode to reach >=4.5:1 (DESIGN.md § Dataviz). */
+  labelColor: string;
   width: number;
   points: ForecastPoint[];
 }
@@ -82,18 +85,27 @@ export default function ForecastChart({ series }: ForecastChartProps) {
 
   const allSeries = useMemo<SeriesSpec[]>(() => {
     const byId = new Map(series.models.map((m) => [m.id, m]));
-    const model = (id: string, label: string, color: string, width: number): SeriesSpec | null => {
+    const model = (
+      id: string,
+      label: string,
+      color: string,
+      labelColor: string,
+      width: number,
+    ): SeriesSpec | null => {
       const m = byId.get(id);
-      return m ? { id, label, color, width, points: m.predictions } : null;
+      return m ? { id, label, color, labelColor, width, points: m.predictions } : null;
     };
     const list: Array<SeriesSpec | null> = [
-      { id: 'actual', label: 'Actual', color: 'var(--viz-actual)', width: 2.5, points: series.actual },
-      model('ensemble_weighted', 'Ensemble', 'var(--viz-ensemble)', 2.5),
-      model('lightgbm', 'LightGBM', 'var(--viz-lightgbm)', 1.5),
-      model('sarima', 'SARIMA', 'var(--viz-sarima)', 1.5),
-      model('arima', 'ARIMA', 'var(--viz-arima)', 1.5),
-      model('prophet', 'Prophet', 'var(--viz-prophet)', 1.5),
-      { id: 'history', label: 'History', color: 'var(--viz-history)', width: 1, points: series.history },
+      // actual/history are neutral text-tier colors (already >=4.5:1), so the
+      // label reuses the line color; the five model series carry a darker
+      // `-text` label variant for light-mode contrast.
+      { id: 'actual', label: 'Actual', color: 'var(--viz-actual)', labelColor: 'var(--viz-actual)', width: 2.5, points: series.actual },
+      model('ensemble_weighted', 'Ensemble', 'var(--viz-ensemble)', 'var(--viz-ensemble-text)', 2.5),
+      model('lightgbm', 'LightGBM', 'var(--viz-lightgbm)', 'var(--viz-lightgbm-text)', 1.5),
+      model('sarima', 'SARIMA', 'var(--viz-sarima)', 'var(--viz-sarima-text)', 1.5),
+      model('arima', 'ARIMA', 'var(--viz-arima)', 'var(--viz-arima-text)', 1.5),
+      model('prophet', 'Prophet', 'var(--viz-prophet)', 'var(--viz-prophet-text)', 1.5),
+      { id: 'history', label: 'History', color: 'var(--viz-history)', labelColor: 'var(--viz-history)', width: 1, points: series.history },
     ];
     return list.filter((s): s is SeriesSpec => s !== null);
   }, [series]);
@@ -160,7 +172,7 @@ export default function ForecastChart({ series }: ForecastChartProps) {
       .map((e) => ({
         id: e.s.id,
         label: e.s.label,
-        color: e.s.color,
+        labelColor: e.s.labelColor,
         y0: round(y(e.last.value)),
         yLabel: round(y(e.last.value)),
       }))
@@ -292,21 +304,23 @@ export default function ForecastChart({ series }: ForecastChartProps) {
           {/* Direct end-labels with short leader lines. */}
           {endLabels.map((l) => (
             <g key={`end-${l.id}`}>
+              {/* Leader + label share the darker `-text` variant so both clear
+                  contrast (label >=4.5:1 text, leader >=3:1 UI stroke) in light
+                  mode; the plotted line above keeps the bright series color. */}
               <line
                 x1={PLOT_RIGHT}
                 y1={l.y0}
                 x2={PLOT_RIGHT + 5}
                 y2={l.yLabel}
-                style={{ stroke: l.color }}
+                style={{ stroke: l.labelColor }}
                 strokeWidth={1}
-                opacity={0.6}
               />
               <text
                 className="forecast-endlabel"
                 x={PLOT_RIGHT + 8}
                 y={l.yLabel + 3}
                 textAnchor="start"
-                style={{ fill: l.color }}
+                style={{ fill: l.labelColor }}
               >
                 {l.label}
               </text>
