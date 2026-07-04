@@ -1,0 +1,14 @@
+#!/bin/sh
+# Pre-push R2 gate: advisory cross-provider review by Codex CLI.
+# See .standards/docs/standards/codex_review.md.
+#
+# Enable locally (one-time, not committed):
+#   git config core.hooksPath .githooks
+#
+# The review is advisory by default and does not block the push. Bypass with
+# SKIP_CODEX_REVIEW=1 git push, or make it blocking with CODEX_REVIEW_BLOCKING=1.
+
+set -e
+
+repo_root="$(git rev-parse --show-toplevel)"
+exec "$repo_root/scripts/codex-review.sh"
