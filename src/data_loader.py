@@ -33,13 +33,14 @@ def load_raw_weather(
     if not raw_path.exists():
         raise FileNotFoundError(f"Raw data not found: {raw_path}")
 
-    df = pd.read_csv(raw_path, parse_dates=["last_updated"])
-    df["last_updated"] = pd.to_datetime(df["last_updated"], errors="coerce")
+    df = pd.read_csv(raw_path)
 
     required = ["last_updated", "temperature_celsius"]
     missing = [c for c in required if c not in df.columns]
     if missing:
         raise ValueError(f"Missing required columns: {missing}")
+
+    df["last_updated"] = pd.to_datetime(df["last_updated"], errors="coerce")
 
     df = df.dropna(subset=["last_updated"]).copy()
     df = df.sort_values("last_updated").reset_index(drop=True)
