@@ -4,6 +4,8 @@ import { useCallback, useEffect, useState } from 'react';
 import { TabList, Tab } from '@astryxdesign/core/TabList';
 import SectionHeader from '../components/SectionHeader';
 import ForecastSection from '../components/forecast/ForecastSection';
+import AnomaliesSection from '../components/anomalies/AnomaliesSection';
+import DriversSection from '../components/drivers/DriversSection';
 
 type SectionId = 'forecast' | 'anomalies' | 'drivers';
 
@@ -74,11 +76,9 @@ export default function Page() {
           hidden={active !== section.id}
         >
           <SectionHeader title={section.label} headingId={`heading-${section.id}`} />
-          {section.id === 'forecast' ? (
-            <ForecastSection />
-          ) : (
-            <p className="console-panel-placeholder">Built in a later task.</p>
-          )}
+          {section.id === 'forecast' && <ForecastSection />}
+          {section.id === 'anomalies' && <AnomaliesSection />}
+          {section.id === 'drivers' && <DriversSection />}
         </section>
       ))}
     </div>
