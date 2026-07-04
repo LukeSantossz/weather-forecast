@@ -1,22 +1,22 @@
 ![Python](https://img.shields.io/badge/Python-3.10%2B-blue?logo=python&logoColor=white)
 ![CI](https://github.com/LukeSantossz/weather-forecast/actions/workflows/ci.yml/badge.svg)
-![Tests](https://img.shields.io/badge/tests-37%20passed-brightgreen)
+![Tests](https://img.shields.io/badge/tests-70%20passed-brightgreen)
 ![Status](https://img.shields.io/badge/status-complete-brightgreen)
 
-# Global Temperature Forecasting Pipeline — daily temperature prediction across 211 countries
+# Global Temperature Forecasting Pipeline
 
-> Predicting daily temperatures across 211 countries with 0.19 °C RMSE using statistical and ML ensemble methods — built for agricultural planning, energy optimization, and climate alert systems.
+> Forecasting a global daily-mean temperature signal built from 211 countries' data, using statistical and machine-learning ensemble methods, for agricultural, energy, and public-safety planning.
 
 ---
 
 ## What It Does
 
-A complete data-science pipeline that forecasts daily temperatures and flags anomalous weather events from raw global weather data.
+A data-science pipeline that forecasts a global daily-mean temperature series and flags anomalous weather events from raw global weather data.
 
-- **Temperature forecasting** — daily prediction at 0.19 °C RMSE via a weighted ensemble of statistical and ML models
+- **Temperature forecasting** — a global daily-mean temperature series from a weighted ensemble of statistical and machine-learning models (built from 211 countries' data, not per-country forecasts)
 - **Anomaly detection** — flags extreme weather with Z-score and Isolation Forest, plus overlap analysis between methods
 - **Reproducible preprocessing** — cleans 133,000+ raw observations into type-safe, compressed Parquet
-- **Environmental analysis** — air-quality study and SHAP feature-importance attribution
+- **Environmental analysis** — an air-quality (PM2.5) study with SHAP feature-importance attribution, separate from the temperature forecaster
 
 ## What It Is
 
@@ -36,14 +36,16 @@ Global Temperature Forecasting Pipeline is a **research codebase** — sequentia
 
 ```mermaid
 flowchart LR
-    subgraph Data Pipeline
-        A[Raw CSV\n133K rows x 41 cols] --> B[data_loader]
+    A[Raw CSV\n133K rows x 41 cols]
+
+    subgraph Preprocessing utilities
+        A --> B[data_loader]
         B --> C[preprocessing\nIQR clipping + imputation]
-        C --> D[Parquet\ntype-safe + compressed]
+        C -. optional export .-> D[Parquet\ntype-safe + compressed]
     end
 
     subgraph Forecasting Pipeline
-        D --> E[Daily aggregation]
+        A --> E[Daily-mean aggregation]
         E --> F[ARIMA]
         E --> G[SARIMA]
         E --> H[LightGBM]
@@ -53,13 +55,13 @@ flowchart LR
     end
 
     subgraph Anomaly Detection
-        D --> L[Z-score\nthreshold=3]
-        D --> M[Isolation Forest\ncontamination=2%]
+        A --> L[Z-score\nthreshold=3]
+        A --> M[Isolation Forest\ncontamination=2%]
         L & M --> N[Overlap analysis\n219 agreed anomalies]
     end
 ```
 
-The data pipeline cleans raw CSV into compressed Parquet once; both the forecasting and anomaly-detection pipelines read from that single shared artifact. Forecasting fans out into four models that feed an inverse-RMSE weighted ensemble, while anomaly detection runs two independent methods and reports their overlap rather than either result alone.
+The preprocessing utilities can export a cleaned, compressed Parquet, but that file is an optional export: the forecasting and anomaly-detection notebooks read the raw CSV directly (architecture decision EVO-1(b)). Forecasting fans out into four models that feed an inverse-RMSE weighted ensemble, while anomaly detection runs two independent methods and reports their overlap rather than either result alone.
 
 ## Engineering Decisions
 
@@ -69,7 +71,7 @@ The data pipeline cleans raw CSV into compressed Parquet once; both the forecast
 | Parquet for processed data | CSV | Type safety, 3-5x compression, schema enforcement via PyArrow |
 | Column candidates pattern in data_loader | Hardcoded column names | Handles schema variation across Kaggle dataset versions gracefully |
 | PyArrow engine directly | pandas `to_parquet` wrapper | Avoids known Jupyter kernel crash with pandas PyArrow backend |
-| Lag + rolling features (1-21 days) | Raw values only | Captures autoregressive structure; drove 75% RMSE improvement for ML models |
+| Lag + rolling features (1-21 days) | Raw values only | Captures autoregressive structure for the ML models; the size of the gain is pending a leakage-free re-run (#20) |
 | Inverse-RMSE weighted ensemble | Simple average / single best model | Risk diversification; weights reflect demonstrated model accuracy |
 
 ## Results
@@ -81,12 +83,12 @@ The data pipeline cleans raw CSV into compressed Parquet once; both the forecast
 | Prophet (Baseline) | 0.77 | 0.69 | 3.95 |
 | ARIMA(5,1,0) | 1.71 | 1.45 | 10.63 |
 | SARIMA(1,1,1)(1,1,1,7) | 1.13 | 0.97 | 7.11 |
-| LightGBM | **0.19** | **0.16** | **1.25** |
-| GradientBoosting | 0.21 | 0.16 | 1.28 |
-| Ensemble (Simple Avg) | 0.72 | 0.61 | 4.49 |
-| Ensemble (Weighted) | 0.24 | 0.20 | 1.51 |
+| LightGBM | withdrawn | withdrawn | withdrawn |
+| GradientBoosting | withdrawn | withdrawn | withdrawn |
+| Ensemble (Simple Avg) | withdrawn | withdrawn | withdrawn |
+| Ensemble (Weighted) | withdrawn | withdrawn | withdrawn |
 
-LightGBM achieves the best individual performance — a 75% RMSE improvement over the Prophet baseline. The weighted ensemble (inverse-RMSE weights: LightGBM 0.455, GradientBoosting 0.415, SARIMA 0.078, ARIMA 0.051) trades a marginal accuracy cost for risk diversification.
+The LightGBM, GradientBoosting, and both ensemble rows are withdrawn: their previously reported scores were produced under evaluation leakage and are not trustworthy. A leakage-free re-run is tracked in issue [#20](https://github.com/LukeSantossz/weather-forecast/issues/20); see Known Issues below. Among the statistically validated models, Prophet is the strongest at 0.77 °C RMSE, ahead of SARIMA (1.13) and ARIMA (1.71).
 
 ### Anomaly Detection
 
@@ -114,7 +116,7 @@ pip install -r requirements.txt
 
 ### Running
 
-Execute the notebooks in order — each depends on outputs from previous steps:
+Run the notebooks. Each reads the raw CSV directly, so they run independently; the numbering is only a suggested reading order, and notebook 02's Parquet export is optional (EVO-1(b)):
 
 ```bash
 jupyter notebook notebooks/
@@ -155,10 +157,13 @@ weather-forecast/
 │   ├── __init__.py           # Package exports
 │   ├── data_loader.py        # Data loading utilities
 │   ├── preprocessing.py      # Cleaning pipeline
-│   └── parquet_io.py         # Parquet I/O helper
+│   ├── parquet_io.py         # Parquet I/O helper
+│   └── dashboard_export.py   # Dashboard JSON data-contract export
 ├── tests/
-│   ├── test_data_loader.py   # 15 tests
-│   └── test_preprocessing.py # 22 tests
+│   ├── test_data_loader.py      # 20 tests
+│   ├── test_preprocessing.py    # 27 tests
+│   ├── test_parquet_io.py       # 5 tests
+│   └── test_dashboard_export.py # 18 tests
 ├── reports/                  # Exported charts (gitignored)
 ├── requirements.txt
 └── README.md
@@ -171,10 +176,10 @@ weather-forecast/
 ### Done
 
 - [x] Preprocessing pipeline — IQR clipping, imputation, type-safe Parquet export
-- [x] Five forecasting approaches plus weighted ensemble (best: 0.19 °C RMSE)
+- [x] Five forecasting approaches plus weighted ensemble (gradient-boosted and ensemble scores withdrawn pending a leakage-free re-run, #20)
 - [x] Anomaly detection — Z-score and Isolation Forest with overlap analysis
-- [x] Environmental and SHAP feature-importance analysis
-- [x] 37 passing unit tests with GitHub Actions CI
+- [x] Environmental analysis with SHAP feature-importance for a PM2.5 air-quality model
+- [x] 70 passing unit tests with GitHub Actions CI
 
 ### Pending
 
@@ -184,7 +189,7 @@ weather-forecast/
 ## Known Issues & Limitations
 
 - **Datasets are not bundled** — raw and processed data are gitignored; reproducing the results requires the source Kaggle CSV placed under `data/raw/`.
-- **Temporal and geographic scope** — models are fit on roughly 2 years across 211 countries; accuracy on longer horizons or unseen climate regimes is unverified.
-- **Ensemble trades accuracy for stability** — the inverse-RMSE ensemble (0.24 °C RMSE) is slightly less accurate than LightGBM alone (0.19 °C); the trade-off buys risk diversification across models.
+- **Temporal and geographic scope** — the model forecasts a global daily-mean series built from roughly 2 years of data across 211 countries; it is not a per-country forecast, and accuracy on longer horizons or unseen climate regimes is unverified.
+- **Evaluation leakage in the gradient-boosted and ensemble scores (retracted)** — the previously reported LightGBM, GradientBoosting, and ensemble metrics, including the headline figure once quoted in this README, were produced under evaluation leakage and have been withdrawn. Only the Prophet, ARIMA, and SARIMA rows remain in the results table. A leakage-free re-run is tracked in [#20](https://github.com/LukeSantossz/weather-forecast/issues/20).
 - **No serving layer** — the pipeline runs as notebooks; there is no API or scheduled-inference component yet.
-- **Test coverage is partial** — automated tests cover `data_loader` and `preprocessing`; forecasting and anomaly logic live in notebooks and are validated manually.
+- **Test coverage is partial** — automated tests cover `data_loader`, `preprocessing`, `parquet_io`, and `dashboard_export`; forecasting and anomaly logic live in notebooks and are validated manually.
