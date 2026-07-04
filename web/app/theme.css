@@ -540,6 +540,16 @@ nav[aria-label='Tabs'] button:not([aria-current='page']):hover {
   font-variant-numeric: tabular-nums;
 }
 
+/* Narrow: stack the title over its chip so a wide provenance chip (e.g. the
+   drivers "MODEL: PM2.5 · NOT TEMPERATURE" tag) drops to its own line and never
+   forces the page to scroll sideways. */
+@media (max-width: 560px) {
+  .section-header-row {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}
+
 /*
  * ProvenanceChip (DESIGN.md § Signature): mono, uppercase, bordered wrapper
  * around Astryx's Badge (components/ProvenanceChip.tsx). Badge's own base
