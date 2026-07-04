@@ -197,27 +197,62 @@ def transform_numeric_features(
 def encode_categorical_features(
     df: pd.DataFrame,
     categorical_cols: pd.Index | list[str],
+    max_cardinality: int = 50,
 ) -> pd.DataFrame:
     """
-    One-hot encode categorical columns.
+    One-hot encode low-cardinality categorical columns.
+
+    Columns whose distinct-value count is at or below max_cardinality are
+    one-hot encoded; columns above it are identifier-like and dropped, keeping
+    the feature space bounded and stable for serving.
 
     Args:
         df: Input DataFrame (not modified in place).
-        categorical_cols: Columns to encode.
+        categorical_cols: Columns to consider for encoding.
+        max_cardinality: Maximum distinct values for a column to be one-hot
+            encoded; columns above this threshold are dropped.
 
     Returns:
-        New DataFrame with original categorical columns replaced by dummy variables.
+        New DataFrame with low-cardinality categoricals replaced by dummy
+        variables and high-cardinality categoricals dropped.
     """
     cols = [c for c in categorical_cols if c in df.columns]
     if not cols:
         return df
-    return pd.get_dummies(df, columns=cols, drop_first=False, dummy_na=False)
+    to_encode = [c for c in cols if df[c].nunique(dropna=True) <= max_cardinality]
+    to_drop = [c for c in cols if c not in to_encode]
+    result = df.drop(columns=to_drop) if to_drop else df
+    if not to_encode:
+        return result
+    return pd.get_dummies(result, columns=to_encode, drop_first=False, dummy_na=False)
+
+
+def align_to_encoded_columns(
+    df: pd.DataFrame,
+    expected_columns: pd.Index | list[str],
+) -> pd.DataFrame:
+    """
+    Align an encoded DataFrame to a fixed set of expected columns.
+
+    Missing columns are added and zero-filled, unexpected columns are dropped,
+    and column order follows expected_columns. This makes inference
+    deterministic when the categories present differ from training.
+
+    Args:
+        df: An already-encoded DataFrame (not modified in place).
+        expected_columns: The column set captured at fit time.
+
+    Returns:
+        New DataFrame with exactly expected_columns, in order.
+    """
+    return df.reindex(columns=list(expected_columns), fill_value=0)
 
 
 def run_preprocessing_pipeline(
     df: pd.DataFrame,
     outliers_strategy: OutlierStrategy = "clip",
     exclude_from_normalize: list[str] | None = None,
+    max_cardinality: int = 50,
 ) -> tuple[pd.DataFrame, dict[str, Any]]:
     """
     Run the full preprocessing pipeline.
@@ -229,6 +264,8 @@ def run_preprocessing_pipeline(
         outliers_strategy: Strategy for outlier treatment (default "clip").
         exclude_from_normalize: Columns to exclude from MinMax scaling.
             Defaults to ["last_updated_epoch", "latitude", "longitude"].
+        max_cardinality: Maximum distinct values for a categorical column to be
+            one-hot encoded; columns above this threshold are dropped.
 
     Returns:
         Tuple of (cleaned_df, artifacts_dict).
@@ -240,6 +277,7 @@ def run_preprocessing_pipeline(
             - exclude_from_normalize: Columns excluded from scaling.
             - minmax_scaler: Fitted MinMaxScaler instance (or None).
             - minmax_columns: List of columns that were scaled.
+            - max_cardinality: One-hot cardinality threshold applied.
             - output_columns: Final column names after encoding.
     """
     artifacts: dict[str, Any] = {}
@@ -269,7 +307,10 @@ def run_preprocessing_pipeline(
     artifacts["minmax_scaler"] = scaler
     artifacts["minmax_columns"] = scaled_cols
 
-    df_clean = encode_categorical_features(df_clean, categorical_cols)
+    artifacts["max_cardinality"] = max_cardinality
+    df_clean = encode_categorical_features(
+        df_clean, categorical_cols, max_cardinality=max_cardinality
+    )
     artifacts["output_columns"] = list(df_clean.columns)
 
     return df_clean, artifacts
