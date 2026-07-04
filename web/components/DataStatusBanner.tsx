@@ -29,7 +29,7 @@ export default function DataStatusBanner() {
 
   if (data.data_status === 'sample') {
     return (
-      <div className="data-status-banner" role="status" style={{ color: 'var(--color-warning)' }}>
+      <div className="data-status-banner" role="status" style={{ color: 'var(--color-warning-text)' }}>
         [ SAMPLE DATA ] layout preview · not model output
       </div>
     );

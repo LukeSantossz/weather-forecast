@@ -640,7 +640,7 @@ nav[aria-label='Tabs'] button {
   font-family: var(--font-mono);
   text-transform: uppercase;
   letter-spacing: 0.04em;
-  color: var(--color-danger);
+  color: var(--color-danger-text);
   margin-bottom: 8px;
 }
 
