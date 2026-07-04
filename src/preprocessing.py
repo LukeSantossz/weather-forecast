@@ -159,6 +159,41 @@ def normalize_numeric_features(
     return df, scaler, cols_to_scale
 
 
+def transform_numeric_features(
+    df: pd.DataFrame,
+    scaler: MinMaxScaler,
+    cols_to_scale: list[str],
+) -> pd.DataFrame:
+    """
+    Apply a previously fitted MinMaxScaler to numeric columns (transform only).
+
+    This is the transform-only counterpart to ``normalize_numeric_features``: it
+    never calls ``fit``, so a scaler fitted on the training split can be reused on
+    validation, test, or inference data without leaking their distributions. Values
+    outside the training range map outside [0, 1], as expected for an honest split.
+
+    Args:
+        df: Input DataFrame (not modified in place).
+        scaler: A MinMaxScaler already fitted on the training data.
+        cols_to_scale: Columns to scale, in the same order used at fit time
+            (the list returned by normalize_numeric_features).
+
+    Returns:
+        New DataFrame with cols_to_scale replaced by their scaled values.
+
+    Raises:
+        ValueError: If any column in cols_to_scale is absent from df.
+    """
+    missing = [c for c in cols_to_scale if c not in df.columns]
+    if missing:
+        raise ValueError(
+            f"Columns to scale are missing from the DataFrame: {missing}"
+        )
+    df = df.copy()
+    df[cols_to_scale] = scaler.transform(df[cols_to_scale])
+    return df
+
+
 def encode_categorical_features(
     df: pd.DataFrame,
     categorical_cols: pd.Index | list[str],
