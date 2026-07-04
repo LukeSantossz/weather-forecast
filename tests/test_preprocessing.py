@@ -15,6 +15,7 @@ from src.preprocessing import (
     normalize_numeric_features,
     transform_numeric_features,
     encode_categorical_features,
+    align_to_encoded_columns,
     run_preprocessing_pipeline,
 )
 
@@ -293,6 +294,54 @@ class TestEncodeCategoricalFeatures:
 
         assert result.shape == sample_df.shape
 
+    def test_encode_drops_columns_above_threshold(self) -> None:
+        df = pd.DataFrame({
+            "id": [f"v{i}" for i in range(60)],
+            "cat": ["A"] * 30 + ["B"] * 30,
+        })
+
+        result = encode_categorical_features(df, ["id", "cat"], max_cardinality=50)
+
+        # High-cardinality "id" (60 distinct) is dropped, not exploded.
+        assert "id" not in result.columns
+        assert not any(c.startswith("id_") for c in result.columns)
+        # Low-cardinality "cat" is one-hot encoded.
+        assert "cat_A" in result.columns
+        assert "cat_B" in result.columns
+
+    def test_encode_threshold_is_configurable(self) -> None:
+        df = pd.DataFrame({
+            "id": [f"v{i}" for i in range(60)],
+            "cat": ["A"] * 30 + ["B"] * 30,
+        })
+
+        result = encode_categorical_features(df, ["id", "cat"], max_cardinality=100)
+
+        # Raising the threshold above 60 lets "id" be one-hot encoded.
+        assert any(c.startswith("id_") for c in result.columns)
+
+
+class TestAlignToEncodedColumns:
+    """Tests for align_to_encoded_columns (deterministic inference, #9)."""
+
+    def test_align_to_encoded_columns_handles_unseen_categories(self) -> None:
+        train = pd.DataFrame({"city": ["A", "B"]})
+        encoded_train = encode_categorical_features(train, ["city"], max_cardinality=50)
+        expected_columns = list(encoded_train.columns)  # city_A, city_B
+
+        holdout = pd.DataFrame({"city": ["A", "C"]})  # "C" is unseen
+        encoded_holdout = encode_categorical_features(
+            holdout, ["city"], max_cardinality=50
+        )
+
+        aligned = align_to_encoded_columns(encoded_holdout, expected_columns)
+
+        # Exactly the training columns, in order; unseen "city_C" dropped.
+        assert list(aligned.columns) == expected_columns
+        # The missing "city_B" is zero-filled deterministically.
+        assert aligned["city_B"].sum() == 0
+        assert aligned.shape == (2, 2)
+
 
 class TestRunPreprocessingPipeline:
     """Tests for run_preprocessing_pipeline function."""
@@ -317,6 +366,17 @@ class TestRunPreprocessingPipeline:
         ]
         for key in expected_keys:
             assert key in artifacts
+
+    def test_pipeline_threads_and_records_threshold(
+        self, sample_df: pd.DataFrame
+    ) -> None:
+        result, artifacts = run_preprocessing_pipeline(sample_df, max_cardinality=1)
+
+        # Threshold is recorded and applied: city/country (3 distinct each) are
+        # dropped rather than one-hot encoded.
+        assert artifacts["max_cardinality"] == 1
+        assert not any(c.startswith("city_") for c in result.columns)
+        assert not any(c.startswith("country_") for c in result.columns)
 
     def test_no_missing_values_after(self, sample_df: pd.DataFrame) -> None:
         result, _ = run_preprocessing_pipeline(sample_df)
