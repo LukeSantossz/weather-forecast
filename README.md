@@ -72,7 +72,7 @@ The preprocessing utilities can export a cleaned, compressed Parquet, but that f
 | Column candidates pattern in data_loader | Hardcoded column names | Handles schema variation across Kaggle dataset versions gracefully |
 | PyArrow engine directly | pandas `to_parquet` wrapper | Avoids known Jupyter kernel crash with pandas PyArrow backend |
 | Lag + rolling features (1-21 days) | Raw values only | Captures autoregressive structure; under the leakage-free evaluation (#20) the ML models (RMSE 0.27-0.32) clearly beat the classical baselines (0.73-0.80) |
-| Inverse-RMSE weighted ensemble | Simple average / single best model | Risk diversification; weights reflect demonstrated model accuracy |
+| Inverse-RMSE weighted ensemble | Simple average / single best model | Risk diversification; weights are set from validation-set accuracy, not the test set |
 
 ## Results
 
@@ -82,13 +82,13 @@ The preprocessing utilities can export a cleaned, compressed Parquet, but that f
 |-------|-----------|----------|----------|
 | GradientBoosting | 0.27 | 0.22 | 0.96 |
 | LightGBM | 0.32 | 0.25 | 1.06 |
-| Ensemble (Weighted) | 0.36 | 0.29 | 1.26 |
+| Ensemble (Weighted) | 0.35 | 0.28 | 1.22 |
 | Ensemble (Simple Avg) | 0.47 | 0.38 | 1.61 |
 | ARIMA(5,1,0) | 0.73 | 0.57 | 2.43 |
 | Prophet (Baseline) | 0.77 | 0.69 | 3.95 |
 | SARIMA(1,1,1)(1,1,1,7) | 0.80 | 0.62 | 2.62 |
 
-All rows come from a single leakage-free evaluation on the current dataset (2024-05-16 to 2026-07-03): the final 30 days are held out as the test window and scored exactly once, and early stopping uses a validation slice carved from the training window (issue [#20](https://github.com/LukeSantossz/weather-forecast/issues/20)). GradientBoosting is the strongest single model at 0.27 °C RMSE, with LightGBM close behind at 0.32; both clearly beat the classical baselines (ARIMA 0.73, Prophet 0.77, SARIMA 0.80). The inverse-RMSE weighted ensemble (0.36) falls between the two groups: it underperforms its best member because ARIMA and SARIMA still carry about 28% of the weight and pull its predictions off. The earlier headline figure, produced under evaluation leakage, was withdrawn under #20; these numbers replace it.
+All rows come from a single leakage-free evaluation on the current dataset (2024-05-16 to 2026-07-03): the final 30 days are held out as the test window and scored exactly once. Both LightGBM's early stopping and the weighted ensemble's inverse-RMSE weights are fit on a validation slice carved from the training window, never on the test set (issue [#20](https://github.com/LukeSantossz/weather-forecast/issues/20)). GradientBoosting is the strongest single model at 0.27 °C RMSE, with LightGBM close behind at 0.32; both clearly beat the classical baselines (ARIMA 0.73, Prophet 0.77, SARIMA 0.80). The inverse-RMSE weighted ensemble (0.35) lands between them: it underperforms the best single model because ARIMA and SARIMA still carry about 24% of the weight and pull its predictions off. The earlier headline figure, produced under evaluation leakage, was withdrawn under #20; these numbers replace it.
 
 ### Anomaly Detection
 
