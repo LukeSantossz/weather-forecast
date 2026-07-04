@@ -154,6 +154,12 @@ html[data-theme='dark'] {
   --radius-container: 12px;
   --radius-page: 16px;
   --radius-full: 9999px;
+
+  /* --- Motion (DESIGN.md § Structural scales · Motion) — transcribed tokens.
+     "no bounce/elastic; honor prefers-reduced-motion; motion must be motivated." */
+  --motion-fast: 120ms;
+  --motion-base: 260ms;
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 /*
@@ -206,6 +212,25 @@ html[data-theme='dark'] {
 }
 
 /*
+ * Reduced motion for the interactive micro-interactions added in the polish
+ * pass (panel reveal, tab / legend hover lifts). Fully disables the animation
+ * and neutralizes the hover transforms so no movement remains.
+ */
+@media (prefers-reduced-motion: reduce) {
+  .console-panel:not([hidden]),
+  .forecast-legend-btn,
+  nav[aria-label='Tabs'] button {
+    animation: none !important;
+    transition: none !important;
+  }
+
+  .forecast-legend-btn:hover,
+  nav[aria-label='Tabs'] button:not([aria-current='page']):hover {
+    transform: none !important;
+  }
+}
+
+/*
  * Touch targets ≥ 44px (DESIGN.md § Accessibility guarantees). Astryx's own
  * interactive elements are sized off `--size-element-{sm,md,lg}` (28/32/36px
  * — see @astryxdesign/core's compiled tokens), all under 44px, so the tabs
@@ -216,6 +241,13 @@ html[data-theme='dark'] {
  */
 nav[aria-label='Tabs'] button {
   min-height: 44px;
+  transition: transform var(--motion-fast) var(--ease-out);
+}
+
+/* Subtle hover lift on non-active tabs (the active tab already reads as
+   selected). Transform only; reduced-motion zeroes it via the shell block. */
+nav[aria-label='Tabs'] button:not([aria-current='page']):hover {
+  transform: translateY(-1px);
 }
 
 .console-header-actions button {
@@ -338,6 +370,26 @@ nav[aria-label='Tabs'] button {
 
 .console-panel {
   padding-block: 32px;
+}
+
+/* Motivated tab-switch / page-load reveal: the newly-shown panel fades and
+   settles up a few px. Transform + opacity only (compositor-friendly, no
+   reflow). Re-runs each time a panel goes from hidden to shown, giving the one
+   orchestrated reveal per section DESIGN.md calls for. Disabled under
+   reduced-motion below. */
+.console-panel:not([hidden]) {
+  animation: panel-reveal var(--motion-base) var(--ease-out) both;
+}
+
+@keyframes panel-reveal {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .console-panel-placeholder {
@@ -640,6 +692,14 @@ nav[aria-label='Tabs'] button {
   border: 1px solid var(--color-border);
   border-radius: var(--radius-inner);
   cursor: pointer;
+  /* Smooth the toggle opacity change and a hover lift (transform/opacity only). */
+  transition:
+    transform var(--motion-fast) var(--ease-out),
+    opacity var(--motion-fast) var(--ease-out);
+}
+
+.forecast-legend-btn:hover {
+  transform: translateY(-1px);
 }
 
 .forecast-legend-btn[aria-pressed='false'] {
