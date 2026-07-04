@@ -265,10 +265,21 @@ nav[aria-label='Tabs'] button {
 
 .console-header-row {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   justify-content: space-between;
-  gap: 16px;
+  gap: 8px 16px;
   padding-block: 12px;
+}
+
+/* Brand column: the mark stacked over the one-line value statement. min-width:0
+   lets the column shrink (and the tagline wrap) inside the flex row rather than
+   forcing horizontal overflow on narrow viewports. */
+.console-header-brand {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
 }
 
 .console-mark {
@@ -277,6 +288,16 @@ nav[aria-label='Tabs'] button {
   font-weight: 600;
   letter-spacing: -0.02em;
   color: var(--color-text-primary);
+}
+
+/* The value statement: a plain, honest one-liner so the project reads in a few
+   seconds. Body font, muted tier (>=4.5:1), sits directly under the mark. */
+.console-tagline {
+  font-family: var(--font-body);
+  font-size: 14px;
+  line-height: 1.35;
+  color: var(--color-text-secondary);
+  max-width: 62ch;
 }
 
 .console-header-actions {
@@ -327,9 +348,26 @@ nav[aria-label='Tabs'] button {
 
 .section-header-row {
   display: flex;
+  flex-wrap: wrap;
   align-items: baseline;
   justify-content: space-between;
-  gap: 12px;
+  gap: 8px 12px;
+}
+
+/* One-line section descriptor under the ruled tick line: orients the section in
+   a sentence. Body font, muted; numeric tokens wear mono via .section-desc-num. */
+.section-desc {
+  margin-top: 12px;
+  font-family: var(--font-body);
+  font-size: 15px;
+  line-height: 1.45;
+  color: var(--color-text-secondary);
+  max-width: 70ch;
+}
+
+.section-desc-num {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
 }
 
 /*

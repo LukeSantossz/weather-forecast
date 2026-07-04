@@ -9,6 +9,19 @@ import DriversSection from '../components/drivers/DriversSection';
 
 type SectionId = 'forecast' | 'anomalies' | 'drivers';
 
+// One-line descriptors shown under each section header (drivers carries its own
+// PM2.5 framing chip instead). Numeric tokens wear mono, matching DESIGN.md's
+// "exact figures wear mono" voice.
+const SECTION_DESCRIPTIONS: Partial<Record<SectionId, React.ReactNode>> = {
+  forecast: (
+    <>
+      Daily-mean temperature across <span className="section-desc-num">211</span> countries, scored on a{' '}
+      <span className="section-desc-num">30-day</span> holdout.
+    </>
+  ),
+  anomalies: <>Temperature outliers flagged by z-score and Isolation Forest, mapped by location.</>,
+};
+
 const SECTIONS: ReadonlyArray<{ id: SectionId; label: string }> = [
   { id: 'forecast', label: 'Forecast' },
   { id: 'anomalies', label: 'Anomalies' },
@@ -75,7 +88,11 @@ export default function Page() {
           aria-labelledby={`heading-${section.id}`}
           hidden={active !== section.id}
         >
-          <SectionHeader title={section.label} headingId={`heading-${section.id}`} />
+          <SectionHeader
+            title={section.label}
+            headingId={`heading-${section.id}`}
+            description={SECTION_DESCRIPTIONS[section.id]}
+          />
           {section.id === 'forecast' && <ForecastSection />}
           {section.id === 'anomalies' && <AnomaliesSection />}
           {section.id === 'drivers' && <DriversSection />}

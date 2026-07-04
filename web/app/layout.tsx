@@ -67,7 +67,12 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <body>
         <header className="console-header">
           <div className="shell-container console-header-row">
-            <span className="console-mark">WEATHER · FORECAST CONSOLE</span>
+            <div className="console-header-brand">
+              <span className="console-mark">WEATHER · FORECAST CONSOLE</span>
+              <p className="console-tagline">
+                A global daily-mean temperature console. Every number shows its provenance.
+              </p>
+            </div>
             <div className="console-header-actions">
               <ThemeToggle />
               <Link href={REPO_URL} isExternalLink>
