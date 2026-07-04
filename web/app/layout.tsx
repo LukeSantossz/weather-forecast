@@ -7,6 +7,7 @@ import { Link } from '@astryxdesign/core/Link';
 import { archivo, hankenGrotesk, ibmPlexMono } from './fonts';
 import DataStatusBanner from '../components/DataStatusBanner';
 import ThemeToggle from '../components/ThemeToggle';
+import MethodologyNote from '../components/MethodologyNote';
 import meta from '../public/data/meta.json';
 
 const SITE_NAME = 'Weather · Forecast Console';
@@ -84,6 +85,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         </header>
         <DataStatusBanner />
         <main className="shell-container">{children}</main>
+        <MethodologyNote />
         <footer className="console-footer">
           <div className="tick-rule" aria-hidden="true" />
           <div className="shell-container console-footer-row">
