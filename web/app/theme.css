@@ -67,6 +67,36 @@ html[data-theme='dark'] {
   --color-warning-muted: light-dark(#b8902a33, #d8b23a3f);
   --color-on-warning: #1c2128;
 
+  /* --- Color: semantic success/danger/info (needed by ProvenanceChip) --- */
+  --color-success: light-dark(#1f8f5c, #3fae7a);
+  --color-success-muted: light-dark(#1f8f5c33, #3fae7a3f);
+  --color-danger: light-dark(#cc4a2e, #e0603f);
+  --color-danger-muted: light-dark(#cc4a2e33, #e0603f3f);
+  --color-info: light-dark(#2f88ab, #4aa6c9);
+  --color-info-muted: light-dark(#2f88ab33, #4aa6c93f);
+
+  /*
+   * Astryx's Badge component hardcodes literal colors for its semantic
+   * variants (success/warning/error/info — see
+   * @astryxdesign/theme-neutral/dist/theme.css `.astryx-badge.success` etc.),
+   * so those variants cannot be retheme'd via CSS variables. Its non-semantic
+   * "color" variants (green/yellow/red/cyan/gray), however, read
+   * `--color-background-<name>` / `--color-text-<name>`, which ARE variables.
+   * ProvenanceChip (components/ProvenanceChip.tsx) maps DESIGN.md's semantic
+   * tones onto those categorical variants instead, so this overrides just
+   * the vars each one reads.
+   */
+  --color-background-green: var(--color-success-muted);
+  --color-text-green: var(--color-success);
+  --color-background-yellow: var(--color-warning-muted);
+  --color-text-yellow: var(--color-warning);
+  --color-background-red: var(--color-danger-muted);
+  --color-text-red: var(--color-danger);
+  --color-background-cyan: var(--color-info-muted);
+  --color-text-cyan: var(--color-info);
+  --color-background-gray: var(--color-background-muted);
+  --color-text-gray: var(--color-text-secondary);
+
   /* --- Type: the three locked font roles (next/font vars from fonts.ts) --- */
   --font-family-heading: var(--font-display);
   --font-family-body: var(--font-body);
@@ -184,4 +214,69 @@ html[data-theme='dark'] {
   align-items: baseline;
   justify-content: space-between;
   gap: 12px;
+}
+
+/*
+ * ProvenanceChip (DESIGN.md § Signature): mono, uppercase, bordered wrapper
+ * around Astryx's Badge (components/ProvenanceChip.tsx). Badge's own base
+ * corner radius is `--radius-full` (a pill); DESIGN.md's Structural scales
+ * favor the small end for the "crisp, not pillowy" instrument read, so this
+ * overrides just the radius. Font-family/uppercase make the mono "honesty
+ * voice" explicit even where variant color alone wouldn't be enough (a11y:
+ * never color-only).
+ */
+.provenance-chip {
+  font-family: var(--font-mono);
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-inner);
+}
+
+/*
+ * StatBlock (components/StatBlock.tsx): the hero/stat-strip number treatment.
+ * Value is mono + tabular-nums (the "honesty voice" wears mono); label uses
+ * Astryx's own Text component (body font). `--stat-block-value-size` is
+ * DESIGN.md's Type modular scale top step (49px) — "numbers in the hero stat
+ * may go larger" than the rest of the scale.
+ */
+.stat-block {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.stat-block--emphasis {
+  border-left: 3px solid var(--color-accent);
+  padding-left: 16px;
+}
+
+.stat-block-value {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+}
+
+.stat-block-value-num {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  font-size: 49px;
+  line-height: 1.1;
+  color: var(--color-text-primary);
+}
+
+.stat-block-value-num--pending {
+  color: var(--color-text-secondary);
+}
+
+.stat-block-unit {
+  font-family: var(--font-mono);
+  font-size: 19px;
+  color: var(--color-text-secondary);
+}
+
+.stat-block-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
 }
