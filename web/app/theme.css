@@ -1,0 +1,701 @@
+/*
+ * theme.css — binds Astryx's CSS-variable tokens to the locked design
+ * language in `.ulpi/design/DESIGN.md`. Layered AFTER astryx.css and
+ * theme-neutral/theme.css (see import order in app/layout.tsx).
+ *
+ * These declarations are unlayered (plain author CSS), which always wins
+ * over Astryx's `@layer astryx-theme` rules regardless of import order
+ * (see the "Layer order" note in @astryxdesign/core/reset.css). They target
+ * `:root`, the same element that carries `data-astryx-theme="neutral"`.
+ *
+ * Hex values below are the ONLY off-token hex in this codebase — they are
+ * DESIGN.md's locked palette, transcribed verbatim.
+ */
+
+/*
+ * Force color-scheme from the `data-theme` attribute Theme.tsx/ThemeToggle
+ * set on <html>. Astryx's own theme-neutral/theme.css sets an unconditional
+ * `:root { color-scheme: light dark }` inside `@layer astryx-theme`, which
+ * outranks reset.css's `html[data-theme]` mapping (also layered, but in the
+ * lower-priority `reset` layer) regardless of specificity — CSS layers beat
+ * specificity. These two rules are unlayered (this file has no @layer), so
+ * they win over both and actually force the mode. Verified in-browser: the
+ * toggle silently no-op'd on background/surface colors without this.
+ */
+html[data-theme='light'] {
+  color-scheme: light;
+}
+
+html[data-theme='dark'] {
+  color-scheme: dark;
+}
+
+:root {
+  /* --- Color: background / surface / elevated (DESIGN.md § Color) --- */
+  --color-background-body: light-dark(#f6f8fa, #14171c);
+  --color-background-surface: light-dark(#ffffff, #1b1f26);
+  --color-background-card: light-dark(#ffffff, #1b1f26);
+  --color-background-muted: light-dark(#f6f8fa, #14171c);
+  --color-background-popover: light-dark(#fbfcfe, #242a33);
+
+  /* --- Color: text (primary / muted / subtle) --- */
+  --color-text-primary: light-dark(#1c2128, #eef1f5);
+  --color-icon-primary: light-dark(#1c2128, #eef1f5);
+  --color-text-secondary: light-dark(#5b6672, #a3adba);
+  --color-icon-secondary: light-dark(#5b6672, #a3adba);
+  /* "subtle": large/decorative only per DESIGN.md; essential small text uses
+     the "muted" tier above. Mapped onto Astryx's disabled tier, the closest
+     built-in de-emphasis role (assumption, cheap to revisit). */
+  --color-text-disabled: light-dark(#8592a0, #71808f);
+  --color-icon-disabled: light-dark(#8592a0, #71808f);
+
+  /* --- Color: border (hairlines, precision ticks) --- */
+  --color-border: light-dark(#dde2e9, #343c47);
+  --color-border-emphasized: light-dark(#dde2e9, #343c47);
+
+  /* --- Color: the single amber accent --- */
+  --color-accent: #e0942e;
+  --color-text-accent: #e0942e;
+  --color-icon-accent: #e0942e;
+  /* alpha tint of the same locked accent hex, following Astryx's own
+     `accent-muted` convention (hex + alpha suffix), not a new color. */
+  --color-accent-muted: light-dark(#e0942e33, #e0942e3f);
+  --color-on-accent: #1c2128;
+
+  /* --- Color: semantic warning/pending (needed by DataStatusBanner) --- */
+  --color-warning: light-dark(#b8902a, #d8b23a);
+  --color-warning-muted: light-dark(#b8902a33, #d8b23a3f);
+  --color-on-warning: #1c2128;
+
+  /* --- Color: semantic success/danger/info (needed by ProvenanceChip) --- */
+  --color-success: light-dark(#1f8f5c, #3fae7a);
+  --color-success-muted: light-dark(#1f8f5c33, #3fae7a3f);
+  --color-danger: light-dark(#cc4a2e, #e0603f);
+  --color-danger-muted: light-dark(#cc4a2e33, #e0603f3f);
+  --color-info: light-dark(#2f88ab, #4aa6c9);
+  --color-info-muted: light-dark(#2f88ab33, #4aa6c93f);
+
+  /*
+   * `-text` variants of the semantic tones for SMALL colored text sitting on
+   * the tinted `-muted` chip backgrounds (DESIGN.md § Color rule: bright tones
+   * for fills/borders/markers >=3:1; darker/brighter `-text` variants for small
+   * colored text >=4.5:1). The bright tones above are unchanged and still carry
+   * fills, borders and icons. These are the light-darkened / dark-brightened
+   * hue-preserving pairs that reach >=4.5:1 for 12px chip text in BOTH themes.
+   */
+  --color-warning-text: light-dark(#7e631d, #ddbc53);
+  --color-success-text: light-dark(#187148, #76c5a0);
+  --color-danger-text: light-dark(#a93d26, #eb9781);
+  --color-info-text: light-dark(#256b86, #7dbfd8);
+
+  /*
+   * --- Dataviz palette (charts only) — DESIGN.md § Dataviz palette ---
+   * The forecast series categorical scale, transcribed verbatim from
+   * DESIGN.md. Series that coincide with a semantic role reuse its
+   * theme-aware token (better light-mode contrast); violet and rose have no
+   * semantic role, so they carry DESIGN.md's single locked hex (the only
+   * off-token hex, same convention as the palette above). Never encode a
+   * series by hue alone — every line also carries a direct label + legend
+   * text + the a11y table (see components/forecast/ForecastChart.tsx).
+   */
+  --viz-actual: var(--color-text-primary); /* high-contrast neutral (thick) */
+  --viz-history: var(--color-text-secondary); /* thin muted context */
+  --viz-ensemble: var(--color-accent); /* amber — the hero series */
+  --viz-lightgbm: var(--color-info); /* info-cyan */
+  --viz-sarima: #8b7fd6; /* violet */
+  --viz-arima: var(--color-success); /* teal/green */
+  --viz-prophet: #d98aa8; /* rose */
+
+  /*
+   * `-text` variants for the SVG direct end-LABEL text, which is small colored
+   * text on the chart surface (DESIGN.md § Dataviz palette rule: bright `--viz-*`
+   * for lines/markers >=3:1; darker `-text` variants for small colored labels
+   * >=4.5:1). The bright lines above are unchanged. Light mode is darkened to
+   * reach >=4.5:1 on the chart background; dark-mode labels already pass, so the
+   * dark side keeps the bright series color.
+   */
+  --viz-ensemble-text: light-dark(#9e6820, #e0942e);
+  --viz-lightgbm-text: light-dark(#2b7c9c, #4aa6c9);
+  --viz-sarima-text: light-dark(#746ab3, #8b7fd6);
+  --viz-arima-text: light-dark(#1d8455, #3fae7a);
+  --viz-prophet-text: light-dark(#9b6378, #d98aa8);
+
+  /*
+   * Astryx's Badge component hardcodes literal colors for its semantic
+   * variants (success/warning/error/info — see
+   * @astryxdesign/theme-neutral/dist/theme.css `.astryx-badge.success` etc.),
+   * so those variants cannot be retheme'd via CSS variables. Its non-semantic
+   * "color" variants (green/yellow/red/cyan/gray), however, read
+   * `--color-background-<name>` / `--color-text-<name>`, which ARE variables.
+   * ProvenanceChip (components/ProvenanceChip.tsx) maps DESIGN.md's semantic
+   * tones onto those categorical variants instead, so this overrides just
+   * the vars each one reads.
+   */
+  --color-background-green: var(--color-success-muted);
+  --color-text-green: var(--color-success-text);
+  --color-background-yellow: var(--color-warning-muted);
+  --color-text-yellow: var(--color-warning-text);
+  --color-background-red: var(--color-danger-muted);
+  --color-text-red: var(--color-danger-text);
+  --color-background-cyan: var(--color-info-muted);
+  --color-text-cyan: var(--color-info-text);
+  --color-background-gray: var(--color-background-muted);
+  --color-text-gray: var(--color-text-secondary);
+
+  /* --- Type: the three locked font roles (next/font vars from fonts.ts) --- */
+  --font-family-heading: var(--font-display);
+  --font-family-body: var(--font-body);
+  --font-family-code: var(--font-mono);
+
+  /* --- Radius scale (DESIGN.md § Structural scales, favor the small end) --- */
+  --radius-none: 0px;
+  --radius-inner: 4px;
+  --radius-element: 8px;
+  --radius-container: 12px;
+  --radius-page: 16px;
+  --radius-full: 9999px;
+}
+
+/*
+ * ==========================================================================
+ * Shell-level accessibility (DESIGN.md § Accessibility guarantees).
+ * Per-section a11y (text/table equivalents, reduced-motion in charts/map,
+ * aria) is handled by each section's own component/CSS; the rules below
+ * cover the remaining shell-level items: a global focus ring, reduced
+ * motion for the shell/tab/toggle chrome, and touch targets.
+ * ==========================================================================
+ */
+
+/*
+ * Global visible focus ring: "visible focus ring (2px, accent, 2px offset)".
+ * Plain, unlayered author CSS — per the note at the top of this file, this
+ * wins over Astryx's own `@layer astryx-theme` focus-visible rules
+ * regardless of specificity, so every native interactive element (buttons,
+ * links, the Tab/ThemeToggle buttons, ListItem's invisible row button, and
+ * this file's own legend buttons) gets one consistent ring in both light
+ * and dark. Astryx's own focus-visible rules are not removed by this; this
+ * simply supersedes their outline color/offset (a layering override, not a
+ * destructive rewrite).
+ */
+:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+}
+
+/*
+ * Reduced motion — shell chrome only. The forecast chart's draw-in and the
+ * anomaly map's fly-to already self-handle `prefers-reduced-motion` (see
+ * ForecastChart.tsx / AnomalyMap.tsx and the `@media` block further down in
+ * this file); this covers what is left: the header/footer/banner chrome and
+ * the section Tabs (`nav[aria-label="Tabs"]`, the literal label TabList.tsx
+ * renders). Duration-only overrides: nothing here changes layout.
+ */
+@media (prefers-reduced-motion: reduce) {
+  .console-header,
+  .console-header *,
+  .console-footer,
+  .console-footer *,
+  .data-status-banner,
+  nav[aria-label='Tabs'],
+  nav[aria-label='Tabs'] * {
+    animation-duration: 0.01ms !important;
+    animation-delay: 0s !important;
+    transition-duration: 0.01ms !important;
+    transition-delay: 0s !important;
+  }
+}
+
+/*
+ * Touch targets ≥ 44px (DESIGN.md § Accessibility guarantees). Astryx's own
+ * interactive elements are sized off `--size-element-{sm,md,lg}` (28/32/36px
+ * — see @astryxdesign/core's compiled tokens), all under 44px, so the tabs
+ * and the theme toggle need an explicit floor here. `min-height` (not
+ * `height`) so it only raises the box when the native size is smaller,
+ * without fighting Astryx's own `height` declaration (a used-value floor,
+ * not a cascade override — both declarations coexist).
+ */
+nav[aria-label='Tabs'] button {
+  min-height: 44px;
+}
+
+.console-header-actions button {
+  min-height: 44px;
+}
+
+/* Records-list rows (Astryx ListItem renders its root as this `<li>`; see
+   components/anomalies/RecordsList.tsx) — the map's accessible equivalent. */
+.records-list-wrap li {
+  min-height: 44px;
+}
+
+/*
+ * Signature elements (DESIGN.md § Signature) and minimal shell layout.
+ * Custom, non-Astryx structural classes used by the app shell components.
+ */
+
+.shell-container {
+  max-width: 1200px;
+  margin-inline: auto;
+  padding-inline: 20px;
+}
+
+@media (min-width: 768px) {
+  .shell-container {
+    padding-inline: 32px;
+  }
+}
+
+/* Precision tick / graticule: a ruled line with short perpendicular ticks,
+   the console-bezel signature. Used under the header and every section
+   header instead of a plain rule. */
+.tick-rule {
+  height: 5px;
+  border-bottom: 1px solid var(--color-border);
+  background-image: linear-gradient(to right, var(--color-border) 1px, transparent 1px);
+  background-repeat: repeat-x;
+  background-position: bottom left;
+  background-size: 12px 5px;
+}
+
+.console-header {
+  /* Not sticky: only the honesty banner below pins to the top on scroll, so
+     the two bars never overlap at top:0 (they previously did). */
+  background: var(--color-background-surface);
+}
+
+.console-header-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding-block: 12px;
+}
+
+.console-mark {
+  font-family: var(--font-display);
+  font-size: 16px;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  color: var(--color-text-primary);
+}
+
+.console-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.data-status-banner {
+  position: sticky;
+  top: 0;
+  z-index: 30;
+  font-family: var(--font-mono);
+  font-size: 14px;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  text-align: center;
+  padding-block: 8px;
+  padding-inline: 16px;
+  border-bottom: 1px solid var(--color-border);
+  background: var(--color-background-surface);
+}
+
+.console-footer {
+  margin-top: 40px;
+}
+
+.console-footer-row {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 8px;
+  padding-block: 16px;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--color-text-secondary);
+}
+
+.console-panel {
+  padding-block: 32px;
+}
+
+.console-panel-placeholder {
+  font-family: var(--font-body);
+  color: var(--color-text-secondary);
+  margin-top: 8px;
+}
+
+.section-header-row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+/*
+ * ProvenanceChip (DESIGN.md § Signature): mono, uppercase, bordered wrapper
+ * around Astryx's Badge (components/ProvenanceChip.tsx). Badge's own base
+ * corner radius is `--radius-full` (a pill); DESIGN.md's Structural scales
+ * favor the small end for the "crisp, not pillowy" instrument read, so this
+ * overrides just the radius. Font-family/uppercase make the mono "honesty
+ * voice" explicit even where variant color alone wouldn't be enough (a11y:
+ * never color-only).
+ */
+.provenance-chip {
+  font-family: var(--font-mono);
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-inner);
+}
+
+/*
+ * StatBlock (components/StatBlock.tsx): the hero/stat-strip number treatment.
+ * Value is mono + tabular-nums (the "honesty voice" wears mono); label uses
+ * Astryx's own Text component (body font). `--stat-block-value-size` is
+ * DESIGN.md's Type modular scale top step (49px) — "numbers in the hero stat
+ * may go larger" than the rest of the scale.
+ */
+.stat-block {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.stat-block--emphasis {
+  border-left: 3px solid var(--color-accent);
+  padding-left: 16px;
+}
+
+.stat-block-value {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+}
+
+.stat-block-value-num {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  font-size: 49px;
+  line-height: 1.1;
+  color: var(--color-text-primary);
+}
+
+.stat-block-value-num--pending {
+  color: var(--color-text-secondary);
+}
+
+.stat-block-unit {
+  font-family: var(--font-mono);
+  font-size: 19px;
+  color: var(--color-text-secondary);
+}
+
+.stat-block-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+/*
+ * ==========================================================================
+ * Forecast section (components/forecast/*) — DESIGN.md § Section 1.
+ * Structure only; all color/type/spacing bind to the tokens above.
+ * ==========================================================================
+ */
+
+.forecast-section {
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+}
+
+/* Hero row: the StatBlock + the honesty note beside/under it. */
+.forecast-hero {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 16px 32px;
+}
+
+.forecast-hero-note {
+  font-family: var(--font-body);
+  font-size: 14px;
+  color: var(--color-text-secondary);
+  max-width: 42ch;
+}
+
+/* Chart lives in its own horizontal-scroll container so the page body never
+   scrolls sideways on narrow viewports (DESIGN.md § Section 1, mobile). */
+.forecast-chart-wrap {
+  overflow-x: auto;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-container);
+  background: var(--color-background-surface);
+  padding: 12px;
+}
+
+.forecast-chart-svg {
+  display: block;
+  width: 100%;
+  min-width: 640px;
+  height: auto;
+}
+
+/* Precision-tick axes + gridlines: fine 1px marks in the border color. */
+.forecast-axis-line {
+  stroke: var(--color-border);
+  stroke-width: 1;
+}
+
+.forecast-grid-line {
+  stroke: var(--color-border);
+  stroke-width: 1;
+  opacity: 0.5;
+}
+
+.forecast-tick-label {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  fill: var(--color-text-secondary);
+}
+
+.forecast-axis-title {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  fill: var(--color-text-secondary);
+}
+
+/* The train/holdout boundary marker at train_end. */
+.forecast-boundary-line {
+  stroke: var(--color-border);
+  stroke-width: 1;
+  stroke-dasharray: 3 3;
+}
+
+.forecast-boundary-label {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  fill: var(--color-text-disabled);
+}
+
+.forecast-series-line {
+  fill: none;
+  stroke-linejoin: round;
+  stroke-linecap: round;
+}
+
+/* First-view draw-in; only attached when motion is allowed (see the JS mount
+   guard) and additionally suppressed here for reduced-motion as a backstop. */
+.forecast-series-line--draw {
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
+  animation: forecast-draw 900ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes forecast-draw {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .forecast-series-line--draw {
+    animation: none;
+    stroke-dasharray: none;
+    stroke-dashoffset: 0;
+  }
+}
+
+.forecast-endlabel {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 500;
+}
+
+.forecast-crosshair {
+  stroke: var(--color-text-disabled);
+  stroke-width: 1;
+  stroke-dasharray: 2 2;
+}
+
+.forecast-hover-dot {
+  stroke: var(--color-background-surface);
+  stroke-width: 1.5;
+}
+
+/* Hover readout: an IBM Plex Mono console panel. */
+.forecast-readout {
+  position: absolute;
+  z-index: 20;
+  pointer-events: none;
+  min-width: 168px;
+  padding: 8px 10px;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  line-height: 1.5;
+  color: var(--color-text-primary);
+  background: var(--color-background-popover);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-element);
+  box-shadow: 0 4px 16px light-dark(#1c212814, #00000040);
+}
+
+.forecast-readout-date {
+  color: var(--color-text-secondary);
+  letter-spacing: 0.02em;
+  margin-bottom: 4px;
+}
+
+.forecast-readout-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  white-space: nowrap;
+}
+
+.forecast-readout-swatch {
+  flex: none;
+  width: 10px;
+  height: 3px;
+  border-radius: var(--radius-full);
+}
+
+.forecast-readout-label {
+  color: var(--color-text-secondary);
+}
+
+.forecast-readout-value {
+  margin-left: auto;
+  font-variant-numeric: tabular-nums;
+  color: var(--color-text-primary);
+}
+
+/* The chart container is the positioning context for the readout. */
+.forecast-chart {
+  position: relative;
+}
+
+/* Legend: keyboard-operable series toggles. */
+.forecast-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.forecast-legend-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 44px;
+  padding: 4px 10px;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  letter-spacing: 0.02em;
+  color: var(--color-text-primary);
+  background: var(--color-background-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-inner);
+  cursor: pointer;
+}
+
+.forecast-legend-btn[aria-pressed='false'] {
+  color: var(--color-text-disabled);
+  opacity: 0.6;
+}
+
+.forecast-legend-btn:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+}
+
+.forecast-legend-swatch {
+  flex: none;
+  width: 14px;
+  height: 3px;
+  border-radius: var(--radius-full);
+}
+
+.forecast-legend-btn[aria-pressed='false'] .forecast-legend-swatch {
+  opacity: 0.5;
+}
+
+/* Inline error panel — never a blank screen (DESIGN.md state table). */
+.forecast-error {
+  padding: 16px 20px;
+  font-family: var(--font-body);
+  color: var(--color-text-primary);
+  background: var(--color-danger-muted);
+  border: 1px solid var(--color-danger);
+  border-radius: var(--radius-container);
+}
+
+.forecast-error-title {
+  font-family: var(--font-mono);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--color-danger-text);
+  margin-bottom: 8px;
+}
+
+.forecast-error-detail {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  color: var(--color-text-secondary);
+  word-break: break-word;
+}
+
+.forecast-loading {
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+}
+
+/* Metrics table (Astryx Table, themed). Numbers are mono, tabular. */
+.metrics-table-wrap {
+  overflow-x: auto;
+}
+
+.metrics-num {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  color: var(--color-text-primary);
+}
+
+/* Pending / withdrawn value placeholder. Uses the "muted" (secondary) tier,
+   not "subtle" (disabled): DESIGN.md § Color says small essential text uses
+   muted, and this reaches >=4.5:1 in both themes (disabled did not). */
+.metrics-num--muted {
+  color: var(--color-text-secondary);
+}
+
+.metrics-model {
+  font-family: var(--font-body);
+  color: var(--color-text-primary);
+}
+
+/* Best final row: the accent left-border emphasis. Set on the row's first
+   cell via an inset box-shadow so it hugs the row's left edge regardless of
+   Astryx's cell padding. The row is marked with data-best-row by a Table
+   plugin (see components/forecast/MetricsTable.tsx). */
+.metrics-table-wrap tr[data-best-row] td:first-child {
+  box-shadow: inset 3px 0 0 0 var(--color-accent);
+}
+
+/* Screen-reader-only data table (the chart's text equivalent). */
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}

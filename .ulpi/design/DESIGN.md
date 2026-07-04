@@ -70,6 +70,14 @@ Distribution ~60-30-10: graphite surfaces (60) / mid neutrals + gridlines (30) /
 | danger / severe | #e0603f / #cc4a2e | severe anomaly, "both-method" overlap |
 | info / cool | #4aa6c9 / #2f88ab | the cool pole; z-score method |
 
+**Contrast rule for colored text (AA compliance):** bright tones above are for
+fills / lines / borders / markers (UI, ≥ 3:1); small COLORED text uses a darker
+(light) / brighter (dark) `-text` variant that reaches ≥ 4.5:1 on its actual
+background. Text `-text` variants (dark / light), for tone-tinted chip text:
+`success-text` #76c5a0 / #187148 · `warning-text` #ddbc53 / #7e631d ·
+`danger-text` #eb9781 / #a93d26 · `info-text` #7dbfd8 / #256b86. The bright tones
+are unchanged and keep the identity; only small colored text darkens/brightens.
+
 ## Dataviz palette (charts only — separate from the one UI accent)
 
 - **Temperature (diverging):** amber `#e0942e` (warm/high) ↔ neutral ↔ cool `#4aa6c9` (low). Encodes the
@@ -79,17 +87,26 @@ Distribution ~60-30-10: graphite surfaces (60) / mid neutrals + gridlines (30) /
   ARIMA = teal `#3fae7a`; Prophet = rose `#d98aa8`. Direct-label lines; no rainbow.
 - **Anomaly methods:** z-score = info-cyan; isolation-forest = violet; **both (overlap) = danger** (the
   strongest, agreed signal).
+- **Series end-label text** (small colored SVG text) uses a light-mode-darkened `-text` variant of each
+  series color so it reaches ≥ 4.5:1 on the chart surface; the LINES keep the bright series colors (UI,
+  ≥ 3:1). Label `-text` (light / dark = bright): ensemble #9e6820 / #e0942e · lightgbm #2b7c9c / #4aa6c9 ·
+  sarima #746ab3 / #8b7fd6 · arima #1d8455 / #3fae7a · prophet #9b6378 / #d98aa8. Dark labels already pass,
+  so the dark side keeps the bright series hex.
 - Rule: sequential/diverging for magnitude, categorical only for identity; never encode meaning by hue
-  alone (pair with shape/label). Validate contrast + colorblind safety at build (dataviz skill validator).
+  alone (pair with shape/label). Bright tones for fills/lines/markers ≥ 3:1; darker `-text` variants for
+  small colored text ≥ 4.5:1. Validate contrast + colorblind safety at build (dataviz skill validator).
 
 ## Type — paired on a contrast axis (none are the banned reflex defaults)
 
-- **Display** (section headers, the hero stat): **Cabinet Grotesk** — geometric-industrial, confident;
+- **Display** (section headers, the hero stat): **Archivo** — a technical grotesk with signage character;
   used with restraint, tight tracking (≈ −0.02em at large sizes), `text-wrap: balance`.
-- **Body / UI:** **General Sans** — humanist-geometric, quiet, readable (measure 65–75ch).
+- **Body / UI:** **Hanken Grotesk** — humanist-geometric, quiet, readable (measure 65–75ch).
 - **Data / mono:** **IBM Plex Mono** — ALL numbers, axis ticks, footnotes, and the provenance/status
   chips. The mono is the honesty voice: exact figures wear mono.
-- Self-hosted via `next/font` (no external CDN); metric-matched fallbacks to avoid layout shift.
+- Loaded via `next/font/google` (Archivo, Hanken Grotesk, IBM Plex Mono — self-hosted at build, no runtime
+  CDN, metric-matched fallbacks). Chosen over the Fontshare picks (Cabinet Grotesk / General Sans) so the
+  static build needs no committed font binaries, keeping the same industrial-grotesk + humanist + mono
+  contrast axis and still avoiding the banned reflex defaults.
 - We override Astryx's font tokens with these three roles.
 
 **Modular scale** (product-tight, 1.20): 12 · 14 · 16(base) · 19 · 23 · 28 · 34 · 41 · 49 px. Numbers in
