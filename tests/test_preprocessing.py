@@ -1,5 +1,6 @@
 """Unit tests for src/preprocessing.py."""
 
+import pickle
 import warnings
 
 import numpy as np
@@ -12,6 +13,7 @@ from src.preprocessing import (
     detect_outliers_iqr,
     treat_outliers_iqr,
     normalize_numeric_features,
+    transform_numeric_features,
     encode_categorical_features,
     run_preprocessing_pipeline,
 )
@@ -212,6 +214,69 @@ class TestNormalizeNumericFeatures:
         _ = normalize_numeric_features(numeric_df, ["value1"])
 
         assert numeric_df["value1"].max() == original_max
+
+
+class TestTransformNumericFeatures:
+    """Tests for transform_numeric_features function (fit/transform split, #8)."""
+
+    def test_transform_applies_fitted_scaler_without_refitting(self) -> None:
+        train = pd.DataFrame({"value1": [1.0, 2.0, 3.0, 4.0, 5.0]})
+        _, scaler, cols = normalize_numeric_features(train, ["value1"])
+
+        holdout = pd.DataFrame({"value1": [2.5, 4.5]})
+        data_min_before = scaler.data_min_.copy()
+        data_max_before = scaler.data_max_.copy()
+
+        result = transform_numeric_features(holdout, scaler, cols)
+
+        expected = scaler.transform(holdout[cols])
+        assert np.allclose(result[cols].to_numpy(), expected)
+        # The scaler was not refit on the holdout.
+        assert np.array_equal(scaler.data_min_, data_min_before)
+        assert np.array_equal(scaler.data_max_, data_max_before)
+
+    def test_transform_of_out_of_bounds_holdout_exceeds_unit_interval(self) -> None:
+        train = pd.DataFrame({"value1": [1.0, 2.0, 3.0, 4.0, 5.0]})
+        _, scaler, cols = normalize_numeric_features(train, ["value1"])
+
+        # Holdout values fall outside the training [1, 5] range.
+        holdout = pd.DataFrame({"value1": [-50.0, 200.0]})
+        result = transform_numeric_features(holdout, scaler, cols)
+
+        assert result["value1"].min() < 0.0
+        assert result["value1"].max() > 1.0
+
+    def test_fitted_scaler_is_serializable_and_reproduces_transform(self) -> None:
+        train = pd.DataFrame({"value1": [1.0, 2.0, 3.0, 4.0, 5.0]})
+        _, scaler, cols = normalize_numeric_features(train, ["value1"])
+
+        holdout = pd.DataFrame({"value1": [1.5, 3.5, 6.0]})
+        restored = pickle.loads(pickle.dumps(scaler))
+
+        original = transform_numeric_features(holdout, scaler, cols)
+        reloaded = transform_numeric_features(holdout, restored, cols)
+
+        assert np.allclose(original[cols].to_numpy(), reloaded[cols].to_numpy())
+
+    def test_transform_numeric_features_raises_when_column_missing(self) -> None:
+        train = pd.DataFrame({"value1": [1.0, 2.0, 3.0], "value2": [4.0, 5.0, 6.0]})
+        _, scaler, cols = normalize_numeric_features(train, ["value1", "value2"])
+
+        holdout_missing = pd.DataFrame({"value1": [1.5, 2.5]})
+
+        with pytest.raises(ValueError, match="value2"):
+            transform_numeric_features(holdout_missing, scaler, cols)
+
+    def test_transform_does_not_modify_original(self) -> None:
+        train = pd.DataFrame({"value1": [1.0, 2.0, 3.0, 4.0, 5.0]})
+        _, scaler, cols = normalize_numeric_features(train, ["value1"])
+
+        holdout = pd.DataFrame({"value1": [2.0, 4.0]})
+        original_values = holdout["value1"].copy()
+
+        _ = transform_numeric_features(holdout, scaler, cols)
+
+        assert holdout["value1"].equals(original_values)
 
 
 class TestEncodeCategoricalFeatures:
