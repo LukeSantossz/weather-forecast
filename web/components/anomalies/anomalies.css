@@ -109,7 +109,7 @@
   display: flex;
   align-items: center;
   gap: 8px;
-  min-height: 28px;
+  min-height: 44px;
   padding: 4px 6px;
   border: 0;
   border-radius: var(--radius-inner);
