@@ -2,6 +2,7 @@
 ![CI](https://github.com/LukeSantossz/weather-forecast/actions/workflows/ci.yml/badge.svg)
 ![Tests](https://img.shields.io/badge/tests-84%20passed-brightgreen)
 ![Status](https://img.shields.io/badge/status-complete-brightgreen)
+![License](https://img.shields.io/badge/license-MIT-blue)
 
 # Global Temperature Forecasting Pipeline
 
@@ -195,3 +196,11 @@ weather-forecast/
 - **Evaluation leakage (resolved, [#20](https://github.com/LukeSantossz/weather-forecast/issues/20))** — an earlier version passed the held-out test set to LightGBM as its early-stopping validation set and then scored it, deflating the reported RMSE. The fix carves the early-stopping validation slice from the training window and scores the test window exactly once; the results table now reflects the corrected, leakage-free metrics on the current dataset. The inflated headline figure it once produced is not reproduced anywhere.
 - **No serving layer** — the pipeline runs as notebooks; there is no API or scheduled-inference component yet.
 - **Test coverage is partial** — automated tests cover `data_loader`, `preprocessing`, `parquet_io`, `dashboard_export`, and `conformal`; forecasting and anomaly logic live in notebooks and are validated manually.
+
+## Contributing
+
+Contributions follow the development standards in the [`.standards`](.standards) submodule (spec at the Gate, test-first, Conventional Commits, R1/R2/R3 review). See [CONTRIBUTING.md](CONTRIBUTING.md) for the workflow and setup.
+
+## License
+
+Released under the [MIT License](LICENSE).
