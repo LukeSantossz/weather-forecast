@@ -3,20 +3,20 @@
 ![Tests](https://img.shields.io/badge/tests-37%20passed-brightgreen)
 ![Status](https://img.shields.io/badge/status-complete-brightgreen)
 
-# Global Temperature Forecasting Pipeline — daily temperature prediction across 211 countries
+# Global Temperature Forecasting Pipeline
 
-> Predicting daily temperatures across 211 countries with 0.19 °C RMSE using statistical and ML ensemble methods — built for agricultural planning, energy optimization, and climate alert systems.
+> Forecasting a global daily-mean temperature signal built from 211 countries' data, using statistical and machine-learning ensemble methods, for agricultural, energy, and public-safety planning.
 
 ---
 
 ## What It Does
 
-A complete data-science pipeline that forecasts daily temperatures and flags anomalous weather events from raw global weather data.
+A data-science pipeline that forecasts a global daily-mean temperature series and flags anomalous weather events from raw global weather data.
 
-- **Temperature forecasting** — daily prediction at 0.19 °C RMSE via a weighted ensemble of statistical and ML models
+- **Temperature forecasting** — a global daily-mean temperature series from a weighted ensemble of statistical and machine-learning models (built from 211 countries' data, not per-country forecasts)
 - **Anomaly detection** — flags extreme weather with Z-score and Isolation Forest, plus overlap analysis between methods
 - **Reproducible preprocessing** — cleans 133,000+ raw observations into type-safe, compressed Parquet
-- **Environmental analysis** — air-quality study and SHAP feature-importance attribution
+- **Environmental analysis** — an air-quality (PM2.5) study with SHAP feature-importance attribution, separate from the temperature forecaster
 
 ## What It Is
 
@@ -69,7 +69,7 @@ The data pipeline cleans raw CSV into compressed Parquet once; both the forecast
 | Parquet for processed data | CSV | Type safety, 3-5x compression, schema enforcement via PyArrow |
 | Column candidates pattern in data_loader | Hardcoded column names | Handles schema variation across Kaggle dataset versions gracefully |
 | PyArrow engine directly | pandas `to_parquet` wrapper | Avoids known Jupyter kernel crash with pandas PyArrow backend |
-| Lag + rolling features (1-21 days) | Raw values only | Captures autoregressive structure; drove 75% RMSE improvement for ML models |
+| Lag + rolling features (1-21 days) | Raw values only | Captures autoregressive structure for the ML models; the size of the gain is pending a leakage-free re-run (#20) |
 | Inverse-RMSE weighted ensemble | Simple average / single best model | Risk diversification; weights reflect demonstrated model accuracy |
 
 ## Results
@@ -81,12 +81,12 @@ The data pipeline cleans raw CSV into compressed Parquet once; both the forecast
 | Prophet (Baseline) | 0.77 | 0.69 | 3.95 |
 | ARIMA(5,1,0) | 1.71 | 1.45 | 10.63 |
 | SARIMA(1,1,1)(1,1,1,7) | 1.13 | 0.97 | 7.11 |
-| LightGBM | **0.19** | **0.16** | **1.25** |
-| GradientBoosting | 0.21 | 0.16 | 1.28 |
-| Ensemble (Simple Avg) | 0.72 | 0.61 | 4.49 |
-| Ensemble (Weighted) | 0.24 | 0.20 | 1.51 |
+| LightGBM | withdrawn | withdrawn | withdrawn |
+| GradientBoosting | withdrawn | withdrawn | withdrawn |
+| Ensemble (Simple Avg) | withdrawn | withdrawn | withdrawn |
+| Ensemble (Weighted) | withdrawn | withdrawn | withdrawn |
 
-LightGBM achieves the best individual performance — a 75% RMSE improvement over the Prophet baseline. The weighted ensemble (inverse-RMSE weights: LightGBM 0.455, GradientBoosting 0.415, SARIMA 0.078, ARIMA 0.051) trades a marginal accuracy cost for risk diversification.
+The LightGBM, GradientBoosting, and both ensemble rows are withdrawn: their previously reported scores were produced under evaluation leakage and are not trustworthy. A leakage-free re-run is tracked in issue [#20](https://github.com/LukeSantossz/weather-forecast/issues/20); see Known Issues below. Among the statistically validated models, Prophet is the strongest at 0.77 °C RMSE, ahead of SARIMA (1.13) and ARIMA (1.71).
 
 ### Anomaly Detection
 
@@ -171,9 +171,9 @@ weather-forecast/
 ### Done
 
 - [x] Preprocessing pipeline — IQR clipping, imputation, type-safe Parquet export
-- [x] Five forecasting approaches plus weighted ensemble (best: 0.19 °C RMSE)
+- [x] Five forecasting approaches plus weighted ensemble (gradient-boosted and ensemble scores withdrawn pending a leakage-free re-run, #20)
 - [x] Anomaly detection — Z-score and Isolation Forest with overlap analysis
-- [x] Environmental and SHAP feature-importance analysis
+- [x] Environmental analysis with SHAP feature-importance for a PM2.5 air-quality model
 - [x] 37 passing unit tests with GitHub Actions CI
 
 ### Pending
@@ -184,7 +184,7 @@ weather-forecast/
 ## Known Issues & Limitations
 
 - **Datasets are not bundled** — raw and processed data are gitignored; reproducing the results requires the source Kaggle CSV placed under `data/raw/`.
-- **Temporal and geographic scope** — models are fit on roughly 2 years across 211 countries; accuracy on longer horizons or unseen climate regimes is unverified.
-- **Ensemble trades accuracy for stability** — the inverse-RMSE ensemble (0.24 °C RMSE) is slightly less accurate than LightGBM alone (0.19 °C); the trade-off buys risk diversification across models.
+- **Temporal and geographic scope** — the model forecasts a global daily-mean series built from roughly 2 years of data across 211 countries; it is not a per-country forecast, and accuracy on longer horizons or unseen climate regimes is unverified.
+- **Evaluation leakage in the gradient-boosted and ensemble scores (retracted)** — the previously reported LightGBM, GradientBoosting, and ensemble metrics, including the headline figure once quoted in this README, were produced under evaluation leakage and have been withdrawn. Only the Prophet, ARIMA, and SARIMA rows remain in the results table. A leakage-free re-run is tracked in [#20](https://github.com/LukeSantossz/weather-forecast/issues/20).
 - **No serving layer** — the pipeline runs as notebooks; there is no API or scheduled-inference component yet.
 - **Test coverage is partial** — automated tests cover `data_loader` and `preprocessing`; forecasting and anomaly logic live in notebooks and are validated manually.
