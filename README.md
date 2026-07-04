@@ -36,14 +36,16 @@ Global Temperature Forecasting Pipeline is a **research codebase** — sequentia
 
 ```mermaid
 flowchart LR
-    subgraph Data Pipeline
-        A[Raw CSV\n133K rows x 41 cols] --> B[data_loader]
+    A[Raw CSV\n133K rows x 41 cols]
+
+    subgraph Preprocessing utilities
+        A --> B[data_loader]
         B --> C[preprocessing\nIQR clipping + imputation]
-        C --> D[Parquet\ntype-safe + compressed]
+        C -. optional export .-> D[Parquet\ntype-safe + compressed]
     end
 
     subgraph Forecasting Pipeline
-        D --> E[Daily aggregation]
+        A --> E[Daily-mean aggregation]
         E --> F[ARIMA]
         E --> G[SARIMA]
         E --> H[LightGBM]
@@ -53,13 +55,13 @@ flowchart LR
     end
 
     subgraph Anomaly Detection
-        D --> L[Z-score\nthreshold=3]
-        D --> M[Isolation Forest\ncontamination=2%]
+        A --> L[Z-score\nthreshold=3]
+        A --> M[Isolation Forest\ncontamination=2%]
         L & M --> N[Overlap analysis\n219 agreed anomalies]
     end
 ```
 
-The data pipeline cleans raw CSV into compressed Parquet once; both the forecasting and anomaly-detection pipelines read from that single shared artifact. Forecasting fans out into four models that feed an inverse-RMSE weighted ensemble, while anomaly detection runs two independent methods and reports their overlap rather than either result alone.
+The preprocessing utilities can export a cleaned, compressed Parquet, but that file is an optional export: the forecasting and anomaly-detection notebooks read the raw CSV directly (architecture decision EVO-1(b)). Forecasting fans out into four models that feed an inverse-RMSE weighted ensemble, while anomaly detection runs two independent methods and reports their overlap rather than either result alone.
 
 ## Engineering Decisions
 
