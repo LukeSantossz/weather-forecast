@@ -16,8 +16,8 @@ const SHAP_FILE = '/data/shap.json';
 type LoadState = { status: 'loading' } | { status: 'error'; error: Error } | { status: 'loaded'; data: Shap };
 
 export interface DriversSectionProps {
-  /** Id applied to the section heading; matches page.tsx's `heading-${id}`
-   * convention so this can slot into the existing `#drivers` panel. */
+  /** Id for this section's descriptive sub-heading. Distinct from the panel
+   * heading (`heading-drivers`) that page.tsx renders, to avoid a duplicate id. */
   headingId?: string;
 }
 
@@ -27,7 +27,7 @@ export interface DriversSectionProps {
  * states; never a blank screen. Honesty-forward: the title and chip make it
  * explicit this explains the PM2.5 model, not the temperature forecaster.
  */
-export default function DriversSection({ headingId = 'heading-drivers' }: DriversSectionProps) {
+export default function DriversSection({ headingId = 'drivers-subhead' }: DriversSectionProps) {
   const [state, setState] = useState<LoadState>({ status: 'loading' });
   const [attempt, setAttempt] = useState(0);
 

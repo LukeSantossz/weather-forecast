@@ -258,9 +258,8 @@ nav[aria-label='Tabs'] button {
 }
 
 .console-header {
-  position: sticky;
-  top: 0;
-  z-index: 30; /* DESIGN.md z-index scale: "sticky" */
+  /* Not sticky: only the honesty banner below pins to the top on scroll, so
+     the two bars never overlap at top:0 (they previously did). */
   background: var(--color-background-surface);
 }
 
