@@ -76,6 +76,19 @@ html[data-theme='dark'] {
   --color-info-muted: light-dark(#2f88ab33, #4aa6c93f);
 
   /*
+   * `-text` variants of the semantic tones for SMALL colored text sitting on
+   * the tinted `-muted` chip backgrounds (DESIGN.md § Color rule: bright tones
+   * for fills/borders/markers >=3:1; darker/brighter `-text` variants for small
+   * colored text >=4.5:1). The bright tones above are unchanged and still carry
+   * fills, borders and icons. These are the light-darkened / dark-brightened
+   * hue-preserving pairs that reach >=4.5:1 for 12px chip text in BOTH themes.
+   */
+  --color-warning-text: light-dark(#7e631d, #ddbc53);
+  --color-success-text: light-dark(#187148, #76c5a0);
+  --color-danger-text: light-dark(#a93d26, #eb9781);
+  --color-info-text: light-dark(#256b86, #7dbfd8);
+
+  /*
    * --- Dataviz palette (charts only) — DESIGN.md § Dataviz palette ---
    * The forecast series categorical scale, transcribed verbatim from
    * DESIGN.md. Series that coincide with a semantic role reuse its
@@ -94,6 +107,20 @@ html[data-theme='dark'] {
   --viz-prophet: #d98aa8; /* rose */
 
   /*
+   * `-text` variants for the SVG direct end-LABEL text, which is small colored
+   * text on the chart surface (DESIGN.md § Dataviz palette rule: bright `--viz-*`
+   * for lines/markers >=3:1; darker `-text` variants for small colored labels
+   * >=4.5:1). The bright lines above are unchanged. Light mode is darkened to
+   * reach >=4.5:1 on the chart background; dark-mode labels already pass, so the
+   * dark side keeps the bright series color.
+   */
+  --viz-ensemble-text: light-dark(#9e6820, #e0942e);
+  --viz-lightgbm-text: light-dark(#2b7c9c, #4aa6c9);
+  --viz-sarima-text: light-dark(#746ab3, #8b7fd6);
+  --viz-arima-text: light-dark(#1d8455, #3fae7a);
+  --viz-prophet-text: light-dark(#9b6378, #d98aa8);
+
+  /*
    * Astryx's Badge component hardcodes literal colors for its semantic
    * variants (success/warning/error/info — see
    * @astryxdesign/theme-neutral/dist/theme.css `.astryx-badge.success` etc.),
@@ -105,13 +132,13 @@ html[data-theme='dark'] {
    * the vars each one reads.
    */
   --color-background-green: var(--color-success-muted);
-  --color-text-green: var(--color-success);
+  --color-text-green: var(--color-success-text);
   --color-background-yellow: var(--color-warning-muted);
-  --color-text-yellow: var(--color-warning);
+  --color-text-yellow: var(--color-warning-text);
   --color-background-red: var(--color-danger-muted);
-  --color-text-red: var(--color-danger);
+  --color-text-red: var(--color-danger-text);
   --color-background-cyan: var(--color-info-muted);
-  --color-text-cyan: var(--color-info);
+  --color-text-cyan: var(--color-info-text);
   --color-background-gray: var(--color-background-muted);
   --color-text-gray: var(--color-text-secondary);
 
@@ -641,8 +668,11 @@ nav[aria-label='Tabs'] button {
   color: var(--color-text-primary);
 }
 
+/* Pending / withdrawn value placeholder. Uses the "muted" (secondary) tier,
+   not "subtle" (disabled): DESIGN.md § Color says small essential text uses
+   muted, and this reaches >=4.5:1 in both themes (disabled did not). */
 .metrics-num--muted {
-  color: var(--color-text-disabled);
+  color: var(--color-text-secondary);
 }
 
 .metrics-model {
