@@ -1,6 +1,6 @@
 ![Python](https://img.shields.io/badge/Python-3.10%2B-blue?logo=python&logoColor=white)
 ![CI](https://github.com/LukeSantossz/weather-forecast/actions/workflows/ci.yml/badge.svg)
-![Tests](https://img.shields.io/badge/tests-37%20passed-brightgreen)
+![Tests](https://img.shields.io/badge/tests-70%20passed-brightgreen)
 ![Status](https://img.shields.io/badge/status-complete-brightgreen)
 
 # Global Temperature Forecasting Pipeline
@@ -157,10 +157,13 @@ weather-forecast/
 │   ├── __init__.py           # Package exports
 │   ├── data_loader.py        # Data loading utilities
 │   ├── preprocessing.py      # Cleaning pipeline
-│   └── parquet_io.py         # Parquet I/O helper
+│   ├── parquet_io.py         # Parquet I/O helper
+│   └── dashboard_export.py   # Dashboard JSON data-contract export
 ├── tests/
-│   ├── test_data_loader.py   # 15 tests
-│   └── test_preprocessing.py # 22 tests
+│   ├── test_data_loader.py      # 20 tests
+│   ├── test_preprocessing.py    # 27 tests
+│   ├── test_parquet_io.py       # 5 tests
+│   └── test_dashboard_export.py # 18 tests
 ├── reports/                  # Exported charts (gitignored)
 ├── requirements.txt
 └── README.md
@@ -176,7 +179,7 @@ weather-forecast/
 - [x] Five forecasting approaches plus weighted ensemble (gradient-boosted and ensemble scores withdrawn pending a leakage-free re-run, #20)
 - [x] Anomaly detection — Z-score and Isolation Forest with overlap analysis
 - [x] Environmental analysis with SHAP feature-importance for a PM2.5 air-quality model
-- [x] 37 passing unit tests with GitHub Actions CI
+- [x] 70 passing unit tests with GitHub Actions CI
 
 ### Pending
 
