@@ -5,7 +5,7 @@ from pathlib import Path
 import pandas as pd
 import pytest
 
-from src.parquet_io import write_dataframe_parquet
+from weather_forecast.parquet_io import write_dataframe_parquet
 
 
 @pytest.fixture

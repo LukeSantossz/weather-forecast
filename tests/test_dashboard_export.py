@@ -5,7 +5,7 @@ from pathlib import Path
 
 import pytest
 
-from src.dashboard_export import (
+from weather_forecast.dashboard_export import (
     build_anomalies,
     build_anomalies_real,
     build_forecast,

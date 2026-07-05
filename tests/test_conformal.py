@@ -5,7 +5,7 @@ from __future__ import annotations
 import numpy as np
 import pytest
 
-from src.conformal import (
+from weather_forecast.conformal import (
     calibration_residuals,
     conformal_quantile,
     empirical_coverage,
