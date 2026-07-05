@@ -29,10 +29,10 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-pip-
 
-      - name: Install package (editable, with dev extras)
+      - name: Install package (editable, with dev and serving extras)
         run: |
           python -m pip install --upgrade pip
-          pip install -e .[dev]
+          pip install -e .[dev,serving]
 
       - name: Run tests
         run: pytest tests/ -v
@@ -56,10 +56,10 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-pip-
 
-      - name: Install package (editable, with dev extras)
+      - name: Install package (editable, with dev and serving extras)
         run: |
           python -m pip install --upgrade pip
-          pip install -e .[dev]
+          pip install -e .[dev,serving]
 
       - name: Run ruff check
         run: ruff check .
@@ -69,3 +69,12 @@ jobs:
 
       - name: Run mypy
         run: mypy src/
+
+  docker-build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build the serving image
+        run: docker build -t weather-forecast:ci .
