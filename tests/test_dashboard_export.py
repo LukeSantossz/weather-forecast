@@ -185,10 +185,22 @@ class TestRealBuilders:
 
     def test_build_metrics_real_marks_every_model_final(self) -> None:
         models = [
-            {"id": "gradientboosting", "name": "GradientBoosting", "rmse_c": 0.27,
-             "mae_c": 0.22, "mape_pct": 0.96, "ensemble_weight": 0.35},
-            {"id": "lightgbm", "name": "LightGBM", "rmse_c": 0.32, "mae_c": 0.25,
-             "mape_pct": 1.06, "ensemble_weight": 0.41},
+            {
+                "id": "gradientboosting",
+                "name": "GradientBoosting",
+                "rmse_c": 0.27,
+                "mae_c": 0.22,
+                "mape_pct": 0.96,
+                "ensemble_weight": 0.35,
+            },
+            {
+                "id": "lightgbm",
+                "name": "LightGBM",
+                "rmse_c": 0.32,
+                "mae_c": 0.25,
+                "mape_pct": 1.06,
+                "ensemble_weight": 0.41,
+            },
         ]
         metrics = build_metrics_real(models, generated_at=_GEN_AT)
 
@@ -204,8 +216,13 @@ class TestRealBuilders:
         forecast = build_forecast_real(
             history=[{"date": "2024-05-16", "value": 23.77}],
             actual=[{"date": "2026-06-04", "value": 20.0}],
-            models=[{"id": "lightgbm", "name": "LightGBM",
-                     "predictions": [{"date": "2026-06-04", "value": 20.1}]}],
+            models=[
+                {
+                    "id": "lightgbm",
+                    "name": "LightGBM",
+                    "predictions": [{"date": "2026-06-04", "value": 20.1}],
+                }
+            ],
             train_end="2026-06-03",
             generated_at=_GEN_AT,
         )
@@ -219,9 +236,18 @@ class TestRealBuilders:
             zscore={"threshold": 3.0, "count": 990, "share_pct": 0.66},
             isolation_forest={"contamination": 0.02, "count": 3021, "share_pct": 2.0},
             overlap_count=232,
-            records=[{"ts": "2026-01-01T00:00:00Z", "country": "Brazil", "lat": -15.8,
-                      "lon": -47.9, "temp_c": 41.0, "z": 3.5, "if_score": -0.6,
-                      "detected_by": "both"}],
+            records=[
+                {
+                    "ts": "2026-01-01T00:00:00Z",
+                    "country": "Brazil",
+                    "lat": -15.8,
+                    "lon": -47.9,
+                    "temp_c": 41.0,
+                    "z": 3.5,
+                    "if_score": -0.6,
+                    "detected_by": "both",
+                }
+            ],
             generated_at=_GEN_AT,
         )
 
@@ -252,23 +278,40 @@ class TestWriteRealContract:
             "forecast": build_forecast_real(
                 history=[{"date": "2024-05-16", "value": 23.77}],
                 actual=[{"date": "2026-06-04", "value": 20.0}],
-                models=[{"id": "lightgbm", "name": "LightGBM",
-                         "predictions": [{"date": "2026-06-04", "value": 20.1}]}],
-                train_end="2026-06-03", generated_at=_GEN_AT,
+                models=[
+                    {
+                        "id": "lightgbm",
+                        "name": "LightGBM",
+                        "predictions": [{"date": "2026-06-04", "value": 20.1}],
+                    }
+                ],
+                train_end="2026-06-03",
+                generated_at=_GEN_AT,
             ),
             "metrics": build_metrics_real(
-                [{"id": "lightgbm", "name": "LightGBM", "rmse_c": 0.32, "mae_c": 0.25,
-                  "mape_pct": 1.06, "ensemble_weight": 0.41}],
+                [
+                    {
+                        "id": "lightgbm",
+                        "name": "LightGBM",
+                        "rmse_c": 0.32,
+                        "mae_c": 0.25,
+                        "mape_pct": 1.06,
+                        "ensemble_weight": 0.41,
+                    }
+                ],
                 generated_at=_GEN_AT,
             ),
             "anomalies": build_anomalies_real(
                 zscore={"threshold": 3.0, "count": 990, "share_pct": 0.66},
                 isolation_forest={"contamination": 0.02, "count": 3021, "share_pct": 2.0},
-                overlap_count=232, records=[], generated_at=_GEN_AT,
+                overlap_count=232,
+                records=[],
+                generated_at=_GEN_AT,
             ),
             "shap": build_shap_real(
                 features=[{"name": "humidity", "mean_abs_shap": 4.8}],
-                beeswarm=[{"feature": "humidity", "points": []}], generated_at=_GEN_AT,
+                beeswarm=[{"feature": "humidity", "points": []}],
+                generated_at=_GEN_AT,
             ),
         }
 

@@ -493,8 +493,7 @@ def build_shap_real(
 ) -> dict:
     """Build the real ``shap.json`` section, capping beeswarm points to the schema max."""
     capped = [
-        {"feature": f["feature"], "points": f["points"][:_BEESWARM_MAX_POINTS]}
-        for f in beeswarm
+        {"feature": f["feature"], "points": f["points"][:_BEESWARM_MAX_POINTS]} for f in beeswarm
     ]
     return {
         "schema_version": _SCHEMA_VERSION,
@@ -554,9 +553,7 @@ def write_real_contract(
                 f"write_real_contract requires all five sections; '{name}' is missing."
             )
         if data.get("data_status") != "real":
-            raise ValueError(
-                f"write_real_contract section '{name}' must have data_status='real'."
-            )
+            raise ValueError(f"write_real_contract section '{name}' must have data_status='real'.")
 
     return [write_real_section(out_dir, name, data) for name, data in sections.items()]
 
