@@ -69,6 +69,10 @@ git_vendas.pdf
 # Model artifacts (persisted, versioned locally; not committed)
 models/
 
+# MLflow local tracking store (issue #17)
+mlruns/
+mlflow.db
+
 # Web app (phase-1 dashboard)
 web/node_modules/
 web/.next/

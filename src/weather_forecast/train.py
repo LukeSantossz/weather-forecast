@@ -128,6 +128,17 @@ def main(argv: list[str] | None = None) -> int:
         help="Persist the fitted ARIMA forecaster as a versioned artifact.",
     )
     parser.add_argument("--models-dir", type=Path, default=Path("models"))
+    parser.add_argument(
+        "--track",
+        action="store_true",
+        help="Log params, metrics, and the saved artifact to MLflow.",
+    )
+    parser.add_argument(
+        "--tracking-uri",
+        type=str,
+        default=None,
+        help="MLflow tracking URI (defaults to the ambient mlruns/ file store).",
+    )
     args = parser.parse_args(argv)
 
     overrides = {}
@@ -149,18 +160,34 @@ def main(argv: list[str] | None = None) -> int:
     for model_id, m in results.items():
         print(f"{model_id}: rmse={m['rmse_c']:.4f} mae={m['mae_c']:.4f} mape={m['mape_pct']:.4f}")
 
+    saved_dir: Path | None = None
     if args.save:
         # Fit the forecaster on the full series so it can predict beyond the
         # last observation, then persist it with the run metrics for lineage.
         series = daily.set_index("ds").sort_index()["y"]
         forecaster = fit_arima(series)
-        dest = save_artifact(
+        saved_dir = save_artifact(
             forecaster,
             {"metrics": results, "seed": config.seed, "test_window_days": config.test_window_days},
             models_dir=args.models_dir,
             name="forecaster",
         )
-        log.info("saved forecaster artifact to %s", dest)
+        log.info("saved forecaster artifact to %s", saved_dir)
+
+    if args.track:
+        from weather_forecast.tracking import log_training_run
+
+        run_id = log_training_run(
+            {
+                "seed": config.seed,
+                "test_window_days": config.test_window_days,
+                "val_size": config.val_size,
+            },
+            results,
+            tracking_uri=args.tracking_uri,
+            artifact_path=saved_dir,
+        )
+        log.info("logged MLflow run %s", run_id)
 
     return 0
 

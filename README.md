@@ -180,6 +180,29 @@ curl -X POST http://localhost:8000/anomaly \
   -d '{"observations": [{"temperature_celsius": 21.0, "humidity": 50, "wind_kph": 10, "pressure_mb": 1012, "precip_mm": 0}]}'
 ```
 
+### Experiment tracking and drift monitoring
+
+MLflow tracking and Evidently drift reporting live in the `mlops` extra ([#17](https://github.com/LukeSantossz/weather-forecast/issues/17)):
+
+```bash
+pip install -e ".[mlops]"
+```
+
+Log a training run's params, per-model metrics, and the saved artifact to a local MLflow file store (`mlruns/`):
+
+```bash
+python -m weather_forecast.train --save --track
+mlflow ui   # then open http://localhost:5000 (requires the full `mlflow` package)
+```
+
+Report data drift between an earlier reference window and the most recent window of the daily series, optionally writing an HTML report:
+
+```bash
+python -m weather_forecast.drift --window-days 30 --html reports/drift.html
+```
+
+The command prints a JSON summary (`dataset_drift`, `drifted_columns`, `share`, and per-column K-S p-values); a column is flagged when its p-value falls below 0.05, and the dataset is flagged when at least half of the checked columns drift.
+
 ## Project Structure
 
 ```text
