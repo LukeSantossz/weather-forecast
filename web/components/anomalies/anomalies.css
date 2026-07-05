@@ -118,6 +118,15 @@
   font: inherit;
   text-align: left;
   cursor: pointer;
+  /* Smooth the filter toggle (opacity) and a subtle hover lift. Transform /
+     opacity only; the tokens come from app/theme.css :root. */
+  transition:
+    transform var(--motion-fast) var(--ease-out),
+    opacity var(--motion-fast) var(--ease-out);
+}
+
+.anomaly-legend-btn:hover {
+  transform: translateY(-1px);
 }
 
 /* Off state is not colour-only: dimmed + struck through. */
@@ -251,6 +260,41 @@
 
 .records-method-dot--both {
   background: var(--color-danger);
+}
+
+/* Row hover affordance: an amber left-accent that slides in via transform
+   (scaleX from the left edge), signalling the row selects its map marker. No
+   layout shift; reduced-motion makes it appear instantly. */
+.records-list-wrap li {
+  position: relative;
+}
+
+.records-list-wrap li::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  background: var(--color-accent);
+  transform: scaleX(0);
+  transform-origin: left center;
+  transition: transform var(--motion-fast) var(--ease-out);
+}
+
+.records-list-wrap li:hover::before {
+  transform: scaleX(1);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .anomaly-legend-btn,
+  .records-list-wrap li::before {
+    transition: none !important;
+  }
+
+  .anomaly-legend-btn:hover {
+    transform: none !important;
+  }
 }
 
 /* --- Loading + error states ------------------------------------------- */

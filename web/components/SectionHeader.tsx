@@ -8,11 +8,14 @@ type SectionHeaderProps = {
   headingId?: string;
   /** Optional right-aligned chip (e.g. a provenance chip in later tasks). */
   chip?: ReactNode;
+  /** Optional one-line descriptor shown under the tick line (orients the
+   * section in a sentence). A node, so numeric tokens can wear mono. */
+  description?: ReactNode;
 };
 
 // DESIGN.md § Signature: "Section headers sit above a ruled tick line, not a
 // plain rule." Shared by every section (this task only renders placeholders).
-export default function SectionHeader({ title, headingId, chip }: SectionHeaderProps) {
+export default function SectionHeader({ title, headingId, chip, description }: SectionHeaderProps) {
   return (
     <div>
       <div className="section-header-row">
@@ -22,6 +25,7 @@ export default function SectionHeader({ title, headingId, chip }: SectionHeaderP
         {chip}
       </div>
       <div className="tick-rule" aria-hidden="true" />
+      {description && <p className="section-desc">{description}</p>}
     </div>
   );
 }

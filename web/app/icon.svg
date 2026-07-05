@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32" role="img" aria-label="Weather Forecast Console mark">
+  <rect width="32" height="32" rx="6" fill="#14171c" />
+  <rect x="0.5" y="0.5" width="31" height="31" rx="5.5" fill="none" stroke="#343c47" />
+  <!-- precision-tick baseline (the console-bezel signature) -->
+  <path d="M5 24 H27" stroke="#343c47" stroke-width="1.5" stroke-linecap="round" />
+  <path d="M9 24 v-2 M15 24 v-2 M21 24 v-2" stroke="#343c47" stroke-width="1.5" stroke-linecap="round" />
+  <!-- rising temperature forecast line, amber accent -->
+  <path d="M6 21 L12 15 L18 17 L26 7" fill="none" stroke="#e0942e" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" />
+  <circle cx="26" cy="7" r="2.5" fill="#e0942e" />
+</svg>

@@ -384,9 +384,14 @@ export default function ForecastChart({ series }: ForecastChartProps) {
         })}
       </div>
 
-      {/* Accessible text equivalent of the chart (visually hidden). */}
-      <table className="visually-hidden">
-        <caption>Daily global mean temperature by series, in degrees Celsius.</caption>
+      {/* Accessible text equivalent of the chart. The clip lives on a wrapper
+          div, not the table: a <table> ignores width:1px (its box sizes to its
+          content), so the sr-only class on the table itself left a ~700px box
+          that pushed the page wide on narrow viewports. The div clips it while
+          the table keeps its native table semantics for assistive tech. */}
+      <div className="visually-hidden">
+        <table>
+          <caption>Daily global mean temperature by series, in degrees Celsius.</caption>
         <thead>
           <tr>
             <th scope="col">Date</th>
@@ -407,8 +412,9 @@ export default function ForecastChart({ series }: ForecastChartProps) {
               })}
             </tr>
           ))}
-        </tbody>
-      </table>
+          </tbody>
+        </table>
+      </div>
     </div>
   );
 }

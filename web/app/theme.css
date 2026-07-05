@@ -154,6 +154,12 @@ html[data-theme='dark'] {
   --radius-container: 12px;
   --radius-page: 16px;
   --radius-full: 9999px;
+
+  /* --- Motion (DESIGN.md § Structural scales · Motion) — transcribed tokens.
+     "no bounce/elastic; honor prefers-reduced-motion; motion must be motivated." */
+  --motion-fast: 120ms;
+  --motion-base: 260ms;
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 /*
@@ -206,6 +212,25 @@ html[data-theme='dark'] {
 }
 
 /*
+ * Reduced motion for the interactive micro-interactions added in the polish
+ * pass (panel reveal, tab / legend hover lifts). Fully disables the animation
+ * and neutralizes the hover transforms so no movement remains.
+ */
+@media (prefers-reduced-motion: reduce) {
+  .console-panel:not([hidden]),
+  .forecast-legend-btn,
+  nav[aria-label='Tabs'] button {
+    animation: none !important;
+    transition: none !important;
+  }
+
+  .forecast-legend-btn:hover,
+  nav[aria-label='Tabs'] button:not([aria-current='page']):hover {
+    transform: none !important;
+  }
+}
+
+/*
  * Touch targets ≥ 44px (DESIGN.md § Accessibility guarantees). Astryx's own
  * interactive elements are sized off `--size-element-{sm,md,lg}` (28/32/36px
  * — see @astryxdesign/core's compiled tokens), all under 44px, so the tabs
@@ -216,6 +241,13 @@ html[data-theme='dark'] {
  */
 nav[aria-label='Tabs'] button {
   min-height: 44px;
+  transition: transform var(--motion-fast) var(--ease-out);
+}
+
+/* Subtle hover lift on non-active tabs (the active tab already reads as
+   selected). Transform only; reduced-motion zeroes it via the shell block. */
+nav[aria-label='Tabs'] button:not([aria-current='page']):hover {
+  transform: translateY(-1px);
 }
 
 .console-header-actions button {
@@ -265,10 +297,21 @@ nav[aria-label='Tabs'] button {
 
 .console-header-row {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   justify-content: space-between;
-  gap: 16px;
+  gap: 8px 16px;
   padding-block: 12px;
+}
+
+/* Brand column: the mark stacked over the one-line value statement. min-width:0
+   lets the column shrink (and the tagline wrap) inside the flex row rather than
+   forcing horizontal overflow on narrow viewports. */
+.console-header-brand {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
 }
 
 .console-mark {
@@ -277,6 +320,16 @@ nav[aria-label='Tabs'] button {
   font-weight: 600;
   letter-spacing: -0.02em;
   color: var(--color-text-primary);
+}
+
+/* The value statement: a plain, honest one-liner so the project reads in a few
+   seconds. Body font, muted tier (>=4.5:1), sits directly under the mark. */
+.console-tagline {
+  font-family: var(--font-body);
+  font-size: 14px;
+  line-height: 1.35;
+  color: var(--color-text-secondary);
+  max-width: 62ch;
 }
 
 .console-header-actions {
@@ -315,8 +368,146 @@ nav[aria-label='Tabs'] button {
   color: var(--color-text-secondary);
 }
 
+/*
+ * In-context methodology (components/MethodologyNote.tsx): a native <details>
+ * console panel that explains the honesty states in-product. Bordered surface,
+ * mono uppercase summary with a rotating amber chevron (transform only).
+ */
+.methodology {
+  margin-top: 40px;
+}
+
+.methodology-details {
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-container);
+  background: var(--color-background-surface);
+}
+
+.methodology-summary {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 44px;
+  padding: 10px 16px;
+  cursor: pointer;
+  font-family: var(--font-mono);
+  font-size: 13px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--color-text-primary);
+  list-style: none;
+}
+
+.methodology-summary::-webkit-details-marker {
+  display: none;
+}
+
+/* Disclosure chevron: points right when closed, rotates down when open. */
+.methodology-summary::before {
+  content: '';
+  flex: none;
+  width: 7px;
+  height: 7px;
+  border-right: 1.5px solid var(--color-accent);
+  border-bottom: 1.5px solid var(--color-accent);
+  transform: rotate(-45deg);
+  transition: transform var(--motion-fast) var(--ease-out);
+}
+
+.methodology-details[open] .methodology-summary::before {
+  transform: rotate(45deg);
+}
+
+.methodology-summary:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+}
+
+.methodology-body {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 16px;
+  border-top: 1px solid var(--color-border);
+}
+
+.methodology-intro {
+  margin: 0;
+  font-family: var(--font-body);
+  font-size: 15px;
+  line-height: 1.5;
+  color: var(--color-text-primary);
+  max-width: 72ch;
+}
+
+.methodology-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.methodology-item {
+  display: grid;
+  grid-template-columns: max-content 1fr;
+  align-items: start;
+  gap: 8px 16px;
+}
+
+.methodology-item p {
+  margin: 0;
+  font-family: var(--font-body);
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--color-text-secondary);
+  max-width: 72ch;
+}
+
+.methodology-more {
+  margin: 0;
+  font-family: var(--font-body);
+  font-size: 14px;
+  color: var(--color-text-secondary);
+}
+
+/* Narrow: chip stacks above its explanation. */
+@media (max-width: 560px) {
+  .methodology-item {
+    grid-template-columns: 1fr;
+    gap: 6px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .methodology-summary::before {
+    transition: none !important;
+  }
+}
+
 .console-panel {
   padding-block: 32px;
+}
+
+/* Motivated tab-switch / page-load reveal: the newly-shown panel fades and
+   settles up a few px. Transform + opacity only (compositor-friendly, no
+   reflow). Re-runs each time a panel goes from hidden to shown, giving the one
+   orchestrated reveal per section DESIGN.md calls for. Disabled under
+   reduced-motion below. */
+.console-panel:not([hidden]) {
+  animation: panel-reveal var(--motion-base) var(--ease-out) both;
+}
+
+@keyframes panel-reveal {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .console-panel-placeholder {
@@ -327,9 +518,36 @@ nav[aria-label='Tabs'] button {
 
 .section-header-row {
   display: flex;
+  flex-wrap: wrap;
   align-items: baseline;
   justify-content: space-between;
-  gap: 12px;
+  gap: 8px 12px;
+}
+
+/* One-line section descriptor under the ruled tick line: orients the section in
+   a sentence. Body font, muted; numeric tokens wear mono via .section-desc-num. */
+.section-desc {
+  margin-top: 12px;
+  font-family: var(--font-body);
+  font-size: 15px;
+  line-height: 1.45;
+  color: var(--color-text-secondary);
+  max-width: 70ch;
+}
+
+.section-desc-num {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+}
+
+/* Narrow: stack the title over its chip so a wide provenance chip (e.g. the
+   drivers "MODEL: PM2.5 · NOT TEMPERATURE" tag) drops to its own line and never
+   forces the page to scroll sideways. */
+@media (max-width: 560px) {
+  .section-header-row {
+    flex-direction: column;
+    align-items: flex-start;
+  }
 }
 
 /*
@@ -602,6 +820,14 @@ nav[aria-label='Tabs'] button {
   border: 1px solid var(--color-border);
   border-radius: var(--radius-inner);
   cursor: pointer;
+  /* Smooth the toggle opacity change and a hover lift (transform/opacity only). */
+  transition:
+    transform var(--motion-fast) var(--ease-out),
+    opacity var(--motion-fast) var(--ease-out);
+}
+
+.forecast-legend-btn:hover {
+  transform: translateY(-1px);
 }
 
 .forecast-legend-btn[aria-pressed='false'] {
