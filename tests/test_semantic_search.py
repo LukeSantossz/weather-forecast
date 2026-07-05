@@ -75,6 +75,15 @@ def test_build_payload_has_embeddings() -> None:
     assert len(payload["records"][0]["embedding"]) == 384
 
 
+def test_build_payload_includes_example_queries() -> None:
+    pytest.importorskip("sentence_transformers")
+    payload = build_embedding_payload(_FIXTURE)
+    assert len(payload["queries"]) > 0
+    query = payload["queries"][0]
+    assert "text" in query
+    assert len(query["embedding"]) == payload["dim"]
+
+
 def test_shipped_embeddings_validate_against_schema() -> None:
     data_dir = _REPO_ROOT / "web" / "public" / "data"
     payload = json.loads((data_dir / "anomaly_embeddings.json").read_text(encoding="utf-8"))

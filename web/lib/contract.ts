@@ -206,3 +206,39 @@ export const loadForecast = (): Promise<Forecast> => loadSection<Forecast>('fore
 export const loadMetrics = (): Promise<Metrics> => loadSection<Metrics>('metrics');
 export const loadAnomalies = (): Promise<Anomalies> => loadSection<Anomalies>('anomalies');
 export const loadShap = (): Promise<Shap> => loadSection<Shap>('shap');
+
+// --- anomaly_embeddings.json (issue #32) ---------------------------------
+// Precomputed sentence-transformer embeddings for the browser-side semantic
+// search demo. Not a core dashboard section, so it has its own loader.
+
+export interface EmbeddedAnomalyRecord extends AnomalyRecord {
+  embedding: number[];
+}
+
+export interface ExampleQuery {
+  text: string;
+  embedding: number[];
+}
+
+export interface AnomalyEmbeddings {
+  schema_version: SchemaVersion;
+  model: string;
+  dim: number;
+  records: EmbeddedAnomalyRecord[];
+  queries: ExampleQuery[];
+}
+
+/** Fetches the precomputed anomaly embeddings; throws on HTTP or parse error. */
+export async function loadAnomalyEmbeddings(): Promise<AnomalyEmbeddings> {
+  const response = await fetch('/data/anomaly_embeddings.json');
+  if (!response.ok) {
+    throw new Error(
+      `Failed to load anomaly embeddings: HTTP ${response.status} ${response.statusText}.`,
+    );
+  }
+  try {
+    return (await response.json()) as AnomalyEmbeddings;
+  } catch (cause) {
+    throw new Error('Failed to parse anomaly embeddings: response was not valid JSON.', { cause });
+  }
+}
