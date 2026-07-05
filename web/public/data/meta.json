@@ -1,10 +1,10 @@
 {
   "schema_version": "1.0",
-  "generated_at": "1970-01-01T00:00:00Z",
-  "data_status": "sample",
+  "generated_at": "2026-07-05T00:19:52Z",
+  "data_status": "real",
   "pipeline": {
     "source": "notebooks 04/06/07",
-    "repo_commit": null
+    "repo_commit": "24b712048b25352b200a00b634b17352ea1fdc3b"
   },
-  "disclaimer": "Sample snapshot for layout; not model output."
+  "disclaimer": "Real model output from the leakage-free pipeline (issue #20)."
 }

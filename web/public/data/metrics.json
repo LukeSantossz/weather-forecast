@@ -1,15 +1,60 @@
 {
   "schema_version": "1.0",
-  "generated_at": "1970-01-01T00:00:00Z",
-  "data_status": "sample",
+  "generated_at": "2026-07-05T00:19:52Z",
+  "data_status": "real",
   "evaluation": {
     "method": "holdout",
     "window_days": 30
   },
   "models": [
     {
+      "id": "gradientboosting",
+      "name": "GradientBoosting",
+      "rmse_c": 0.27,
+      "mae_c": 0.22,
+      "mape_pct": 0.96,
+      "ensemble_weight": 0.352,
+      "status": "final"
+    },
+    {
+      "id": "lightgbm",
+      "name": "LightGBM",
+      "rmse_c": 0.32,
+      "mae_c": 0.25,
+      "mape_pct": 1.06,
+      "ensemble_weight": 0.405,
+      "status": "final"
+    },
+    {
+      "id": "ensemble_weighted",
+      "name": "Ensemble (Weighted)",
+      "rmse_c": 0.35,
+      "mae_c": 0.28,
+      "mape_pct": 1.22,
+      "ensemble_weight": null,
+      "status": "final"
+    },
+    {
+      "id": "ensemble_simple",
+      "name": "Ensemble (Simple Avg)",
+      "rmse_c": 0.47,
+      "mae_c": 0.38,
+      "mape_pct": 1.61,
+      "ensemble_weight": null,
+      "status": "final"
+    },
+    {
+      "id": "arima",
+      "name": "ARIMA(5,1,0)",
+      "rmse_c": 0.73,
+      "mae_c": 0.57,
+      "mape_pct": 2.43,
+      "ensemble_weight": 0.124,
+      "status": "final"
+    },
+    {
       "id": "prophet",
-      "name": "Prophet",
+      "name": "Prophet (Baseline)",
       "rmse_c": 0.77,
       "mae_c": 0.69,
       "mape_pct": 3.95,
@@ -17,65 +62,14 @@
       "status": "final"
     },
     {
-      "id": "arima",
-      "name": "ARIMA",
-      "rmse_c": 1.71,
-      "mae_c": 1.45,
-      "mape_pct": 10.63,
-      "ensemble_weight": null,
-      "status": "final"
-    },
-    {
       "id": "sarima",
-      "name": "SARIMA",
-      "rmse_c": 1.13,
-      "mae_c": 0.97,
-      "mape_pct": 7.11,
-      "ensemble_weight": null,
+      "name": "SARIMA(1,1,1)(1,1,1,7)",
+      "rmse_c": 0.8,
+      "mae_c": 0.61,
+      "mape_pct": 2.62,
+      "ensemble_weight": 0.119,
       "status": "final"
-    },
-    {
-      "id": "lightgbm",
-      "name": "LightGBM",
-      "rmse_c": null,
-      "mae_c": null,
-      "mape_pct": null,
-      "ensemble_weight": null,
-      "status": "pending_rerun",
-      "note": "Withdrawn pending evaluation-leakage fix (#20)"
-    },
-    {
-      "id": "gradientboosting",
-      "name": "GradientBoosting",
-      "rmse_c": null,
-      "mae_c": null,
-      "mape_pct": null,
-      "ensemble_weight": null,
-      "status": "pending_rerun",
-      "note": "Withdrawn pending evaluation-leakage fix (#20)"
-    },
-    {
-      "id": "ensemble_simple",
-      "name": "Ensemble (simple average)",
-      "rmse_c": null,
-      "mae_c": null,
-      "mape_pct": null,
-      "ensemble_weight": null,
-      "status": "pending_rerun",
-      "note": "Withdrawn pending evaluation-leakage fix (#20)"
-    },
-    {
-      "id": "ensemble_weighted",
-      "name": "Ensemble (weighted)",
-      "rmse_c": null,
-      "mae_c": null,
-      "mape_pct": null,
-      "ensemble_weight": null,
-      "status": "pending_rerun",
-      "note": "Withdrawn pending evaluation-leakage fix (#20)"
     }
   ],
-  "caveats": [
-    "LightGBM, GradientBoosting, and both ensemble variants were retracted due to an evaluation-leakage bug (train/test overlap); see issue #20. Their metrics and ensemble weights are withheld (status: pending_rerun) until a leakage-free re-run is published."
-  ]
+  "caveats": []
 }
