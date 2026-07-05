@@ -1,0 +1,11 @@
+services:
+  api:
+    build: .
+    ports:
+      - "8000:8000"
+    environment:
+      MODELS_DIR: /app/models
+    # Mount a local artifact store so a `train --save` forecaster is served.
+    # If ./models is empty, /health still returns 200 and /forecast returns 503.
+    volumes:
+      - ./models:/app/models:ro

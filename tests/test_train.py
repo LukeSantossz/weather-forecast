@@ -4,6 +4,8 @@ import numpy as np
 import pandas as pd
 
 from weather_forecast.config import PipelineConfig
+from weather_forecast.models import forecast_steps
+from weather_forecast.persistence import load_artifact
 from weather_forecast.train import main, run_forecast
 
 _CFG = PipelineConfig.from_dict({"test_window_days": 8, "val_size": 8})
@@ -59,3 +61,35 @@ def test_cli_runs_end_to_end_and_reports_metrics(tmp_path, capsys) -> None:
     out = capsys.readouterr().out
     assert "lightgbm" in out
     assert "rmse" in out.lower()
+
+
+def test_cli_save_persists_forecaster(tmp_path) -> None:
+    data_dir = tmp_path / "data" / "raw"
+    data_dir.mkdir(parents=True)
+    n = 140
+    dates = pd.date_range("2024-01-01", periods=n, freq="D")
+    y = 20 + 5 * np.sin(2 * np.pi * np.arange(n) / 7) + np.arange(n) * 0.03
+    pd.DataFrame({"last_updated": dates, "temperature_celsius": y}).to_csv(
+        data_dir / "GlobalWeatherRepository.csv", index=False
+    )
+    models_dir = tmp_path / "models"
+
+    rc = main(
+        [
+            "--project-root",
+            str(tmp_path),
+            "--test-window-days",
+            "8",
+            "--val-size",
+            "8",
+            "--save",
+            "--models-dir",
+            str(models_dir),
+        ]
+    )
+    assert rc == 0
+
+    forecaster, meta = load_artifact(models_dir, "forecaster", version="latest")
+    assert "metrics" in meta
+    assert set(meta["metrics"]) >= {"arima", "ensemble_weighted"}
+    assert len(forecast_steps(forecaster, 3)) == 3

@@ -139,6 +139,47 @@ jupyter notebook notebooks/
 pytest tests/ -v
 ```
 
+### API
+
+A FastAPI service serves the trained pipeline over HTTP ([#16](https://github.com/LukeSantossz/weather-forecast/issues/16)). Install the serving extra and run it locally:
+
+```bash
+pip install -e ".[serving]"
+uvicorn weather_forecast.api.app:app --reload
+```
+
+Or with Docker:
+
+```bash
+docker compose up --build
+```
+
+The service loads a persisted forecaster from the directory named by `MODELS_DIR` (default `models/`). Create one with the training CLI:
+
+```bash
+python -m weather_forecast.train --save
+```
+
+| Method | Path | Purpose |
+|--------|------|---------|
+| GET | `/health` | Liveness probe; reports whether a forecaster is loaded |
+| POST | `/anomaly` | Score a batch of observations with the Z-score and Isolation Forest detectors |
+| POST | `/forecast` | Forecast N steps from the persisted forecaster (`503` if none is loaded) |
+
+Interactive OpenAPI docs are served at `/docs`. Example requests:
+
+```bash
+curl http://localhost:8000/health
+
+curl -X POST http://localhost:8000/forecast \
+  -H "Content-Type: application/json" \
+  -d '{"horizon": 7}'
+
+curl -X POST http://localhost:8000/anomaly \
+  -H "Content-Type: application/json" \
+  -d '{"observations": [{"temperature_celsius": 21.0, "humidity": 50, "wind_kph": 10, "pressure_mb": 1012, "precip_mm": 0}]}'
+```
+
 ## Project Structure
 
 ```text
@@ -182,11 +223,11 @@ weather-forecast/
 - [x] Five forecasting approaches plus weighted ensemble, all scored under a leakage-free evaluation (#20)
 - [x] Anomaly detection — Z-score and Isolation Forest with overlap analysis
 - [x] Environmental analysis with SHAP feature-importance for a PM2.5 air-quality model
-- [x] 84 passing unit tests with GitHub Actions CI
+- [x] FastAPI serving layer (`/health`, `/anomaly`, `/forecast`) with a Docker image (#16)
+- [x] Passing unit tests with GitHub Actions CI
 
 ### Pending
 
-- [ ] Serving layer for scheduled or on-demand inference
 - [ ] Validation on data beyond the current 2-year window
 
 ## Known Issues & Limitations

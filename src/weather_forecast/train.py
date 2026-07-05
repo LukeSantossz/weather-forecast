@@ -30,6 +30,7 @@ from weather_forecast.models import (
     train_lightgbm,
     weighted_ensemble,
 )
+from weather_forecast.persistence import save_artifact
 
 _DEFAULT_CONFIG = PipelineConfig()
 
@@ -121,6 +122,12 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--seed", type=int, default=None)
     parser.add_argument("--test-window-days", type=int, default=None)
     parser.add_argument("--val-size", type=int, default=None)
+    parser.add_argument(
+        "--save",
+        action="store_true",
+        help="Persist the fitted ARIMA forecaster as a versioned artifact.",
+    )
+    parser.add_argument("--models-dir", type=Path, default=Path("models"))
     args = parser.parse_args(argv)
 
     overrides = {}
@@ -141,6 +148,20 @@ def main(argv: list[str] | None = None) -> int:
     results = run_forecast(daily, config=config)
     for model_id, m in results.items():
         print(f"{model_id}: rmse={m['rmse_c']:.4f} mae={m['mae_c']:.4f} mape={m['mape_pct']:.4f}")
+
+    if args.save:
+        # Fit the forecaster on the full series so it can predict beyond the
+        # last observation, then persist it with the run metrics for lineage.
+        series = daily.set_index("ds").sort_index()["y"]
+        forecaster = fit_arima(series)
+        dest = save_artifact(
+            forecaster,
+            {"metrics": results, "seed": config.seed, "test_window_days": config.test_window_days},
+            models_dir=args.models_dir,
+            name="forecaster",
+        )
+        log.info("saved forecaster artifact to %s", dest)
+
     return 0
 
 
