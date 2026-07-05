@@ -26,26 +26,67 @@ import numpy as np
 
 DEFAULT_MODEL = "all-MiniLM-L6-v2"
 
+# Curated example queries whose embeddings are precomputed and shipped so the
+# static dashboard can offer a keyless search demo without an in-browser model.
+EXAMPLE_QUERIES = (
+    "extreme heat events",
+    "scorching desert temperatures",
+    "unusually cold weather",
+    "freezing winter conditions",
+    "the strongest temperature anomalies",
+    "unusual warmth in the Middle East",
+)
+
 _SCHEMA_VERSION = "1.0"
 _models: dict[str, Any] = {}
+
+
+def _temperature_phrase(temp: Any, z: Any) -> str:
+    """A qualitative phrase (magnitude + anomaly strength) for embedding signal.
+
+    Templated numeric text gives the model weak hot/cold signal, so we add
+    descriptive language keyed to the temperature magnitude and |z| so queries
+    like "record high temperatures" or "very cold" retrieve the right records.
+    """
+    if isinstance(temp, (int, float)):
+        if temp >= 38:
+            magnitude = "scorching, extreme heat"
+        elif temp >= 30:
+            magnitude = "very hot"
+        elif temp >= 22:
+            magnitude = "warm"
+        elif temp <= -12:
+            magnitude = "freezing, extreme cold"
+        elif temp <= 0:
+            magnitude = "very cold"
+        elif temp <= 10:
+            magnitude = "cold"
+        else:
+            magnitude = "mild"
+    else:
+        magnitude = "anomalous"
+
+    if isinstance(z, (int, float)) and abs(z) >= 3:
+        strength = "a severe"
+    elif isinstance(z, (int, float)) and abs(z) >= 2:
+        strength = "a notable"
+    else:
+        strength = "an"
+    return f"{strength} {magnitude} temperature anomaly"
 
 
 def render_record(record: dict) -> str:
     """Render an anomaly record to a searchable sentence.
 
-    Includes a qualitative "unusually warm/cold" descriptor (from the z-score
-    sign) so free-text queries about heat or cold have semantic signal beyond
-    the raw temperature number.
+    Includes a qualitative descriptor (heat/cold magnitude and anomaly strength)
+    so free-text queries about heat or cold have semantic signal beyond the raw
+    temperature number.
     """
     date = str(record.get("ts", ""))[:10]
-    z = record.get("z")
-    if isinstance(z, (int, float)):
-        direction = "unusually warm" if z >= 0 else "unusually cold"
-    else:
-        direction = "anomalous"
+    phrase = _temperature_phrase(record.get("temp_c"), record.get("z"))
     return (
-        f"On {date}, {record.get('country')} had {direction} weather: "
-        f"temperature {record.get('temp_c')}C, z-score {z}, "
+        f"On {date}, {record.get('country')} experienced {phrase}: "
+        f"temperature {record.get('temp_c')}C, z-score {record.get('z')}, "
         f"detected by {record.get('detected_by')}."
     )
 
@@ -100,17 +141,25 @@ class SemanticIndex:
         return [{**self.records[i], "score": round(score, 6)} for i, score in hits]
 
 
+def _round_vector(vector: Any) -> list[float]:
+    return [round(float(x), 6) for x in vector]
+
+
 def build_embedding_payload(records: list[dict], *, model_name: str = DEFAULT_MODEL) -> dict:
-    """Build a JSON-serializable payload of records with their embeddings."""
-    texts = [render_record(r) for r in records]
-    embeddings = embed_texts(texts, model_name=model_name)
+    """Build a JSON-serializable payload of records and example-query embeddings."""
+    embeddings = embed_texts([render_record(r) for r in records], model_name=model_name)
+    query_embeddings = embed_texts(list(EXAMPLE_QUERIES), model_name=model_name)
     return {
         "schema_version": _SCHEMA_VERSION,
         "model": model_name,
         "dim": int(embeddings.shape[1]),
         "records": [
-            {**record, "embedding": [round(float(x), 6) for x in embeddings[i]]}
+            {**record, "embedding": _round_vector(embeddings[i])}
             for i, record in enumerate(records)
+        ],
+        "queries": [
+            {"text": text, "embedding": _round_vector(query_embeddings[i])}
+            for i, text in enumerate(EXAMPLE_QUERIES)
         ],
     }
 

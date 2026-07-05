@@ -4,7 +4,7 @@
   "title": "Dashboard anomaly embeddings contract",
   "description": "Precomputed sentence-transformer embeddings of the anomaly records for semantic search (issue #32).",
   "type": "object",
-  "required": ["schema_version", "model", "dim", "records"],
+  "required": ["schema_version", "model", "dim", "records", "queries"],
   "additionalProperties": false,
   "properties": {
     "schema_version": {
@@ -58,6 +58,25 @@
           "detected_by": {
             "type": "string",
             "enum": ["zscore", "isolation_forest", "both"]
+          },
+          "embedding": {
+            "type": "array",
+            "items": {
+              "type": "number"
+            }
+          }
+        }
+      }
+    },
+    "queries": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["text", "embedding"],
+        "additionalProperties": false,
+        "properties": {
+          "text": {
+            "type": "string"
           },
           "embedding": {
             "type": "array",

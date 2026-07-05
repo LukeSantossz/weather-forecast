@@ -11,6 +11,7 @@ import { loadAnomalies, DataLoadError } from '../../lib/contract';
 import type { Anomalies } from '../../lib/contract';
 import MethodStrip from './MethodStrip';
 import RecordsList from './RecordsList';
+import SemanticSearch from './SemanticSearch';
 
 // The map chunk (and, from inside it, the maplibre-gl module + its CSS) loads
 // only when this component renders <AnomalyMap>, which is gated on visibility
@@ -141,6 +142,7 @@ export default function AnomaliesSection() {
               onSelect={setSelectedIndex}
             />
           </div>
+          <SemanticSearch />
         </>
       )}
     </div>

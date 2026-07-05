@@ -218,6 +218,8 @@ Precompute the embeddings shipped to the dashboard data contract (`web/public/da
 python -m weather_forecast.semantic_search --build-embeddings web/public/data/anomaly_embeddings.json
 ```
 
+The dashboard's Anomalies tab exposes this as a browser-side demo: selecting one of the precomputed example queries ranks the anomaly records by cosine similarity entirely in the browser, with no model and no network beyond the static JSON.
+
 ## Project Structure
 
 ```text
