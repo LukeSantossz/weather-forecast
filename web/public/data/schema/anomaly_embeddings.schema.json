@@ -1,0 +1,72 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://weather-forecast.local/schema/anomaly_embeddings.schema.json",
+  "title": "Dashboard anomaly embeddings contract",
+  "description": "Precomputed sentence-transformer embeddings of the anomaly records for semantic search (issue #32).",
+  "type": "object",
+  "required": ["schema_version", "model", "dim", "records"],
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": {
+      "type": "string",
+      "const": "1.0"
+    },
+    "model": {
+      "type": "string"
+    },
+    "dim": {
+      "type": "integer"
+    },
+    "records": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "ts",
+          "country",
+          "lat",
+          "lon",
+          "temp_c",
+          "z",
+          "if_score",
+          "detected_by",
+          "embedding"
+        ],
+        "additionalProperties": false,
+        "properties": {
+          "ts": {
+            "type": "string"
+          },
+          "country": {
+            "type": "string"
+          },
+          "lat": {
+            "type": "number"
+          },
+          "lon": {
+            "type": "number"
+          },
+          "temp_c": {
+            "type": "number"
+          },
+          "z": {
+            "type": "number"
+          },
+          "if_score": {
+            "type": "number"
+          },
+          "detected_by": {
+            "type": "string",
+            "enum": ["zscore", "isolation_forest", "both"]
+          },
+          "embedding": {
+            "type": "array",
+            "items": {
+              "type": "number"
+            }
+          }
+        }
+      }
+    }
+  }
+}

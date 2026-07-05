@@ -203,6 +203,21 @@ python -m weather_forecast.drift --window-days 30 --html reports/drift.html
 
 The command prints a JSON summary (`dataset_drift`, `drifted_columns`, `share`, and per-column K-S p-values); a column is flagged when its p-value falls below 0.05, and the dataset is flagged when at least half of the checked columns drift.
 
+### Semantic search
+
+Search the detected anomalies in natural language ([#32](https://github.com/LukeSantossz/weather-forecast/issues/32)). The core is keyless and offline: sentence-transformer embeddings (`all-MiniLM-L6-v2`) with an in-memory cosine search, no external service.
+
+```bash
+pip install -e ".[nlp]"
+python -m weather_forecast.semantic_search --query "extreme heat events" --top-k 5
+```
+
+Precompute the embeddings shipped to the dashboard data contract (`web/public/data/anomaly_embeddings.json`):
+
+```bash
+python -m weather_forecast.semantic_search --build-embeddings web/public/data/anomaly_embeddings.json
+```
+
 ## Project Structure
 
 ```text
