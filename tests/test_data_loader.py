@@ -1,39 +1,43 @@
 """Unit tests for src/data_loader.py."""
 
+from pathlib import Path
+
 import pandas as pd
 import pytest
-from pathlib import Path
-from unittest.mock import patch, MagicMock
 
 from src.data_loader import (
-    load_raw_weather,
     add_region_column,
     get_column_or_raise,
-    get_temperature_column,
     get_precipitation_column,
+    get_temperature_column,
+    load_raw_weather,
 )
 
 
 @pytest.fixture
 def sample_weather_df() -> pd.DataFrame:
     """Create a sample weather DataFrame for testing."""
-    return pd.DataFrame({
-        "last_updated": pd.to_datetime(["2024-01-01", "2024-01-02", "2024-01-03"]),
-        "temperature_celsius": [20.0, 22.0, 18.0],
-        "humidity": [60, 65, 70],
-        "timezone": ["America/New_York", "Europe/London", "Asia/Tokyo"],
-    })
+    return pd.DataFrame(
+        {
+            "last_updated": pd.to_datetime(["2024-01-01", "2024-01-02", "2024-01-03"]),
+            "temperature_celsius": [20.0, 22.0, 18.0],
+            "humidity": [60, 65, 70],
+            "timezone": ["America/New_York", "Europe/London", "Asia/Tokyo"],
+        }
+    )
 
 
 @pytest.fixture
 def sample_df_with_continent() -> pd.DataFrame:
     """Create a DataFrame with continent column."""
-    return pd.DataFrame({
-        "last_updated": pd.to_datetime(["2024-01-01", "2024-01-02"]),
-        "temperature_celsius": [20.0, 22.0],
-        "continent": ["North America", "Europe"],
-        "timezone": ["America/New_York", "Europe/London"],
-    })
+    return pd.DataFrame(
+        {
+            "last_updated": pd.to_datetime(["2024-01-01", "2024-01-02"]),
+            "temperature_celsius": [20.0, 22.0],
+            "continent": ["North America", "Europe"],
+            "timezone": ["America/New_York", "Europe/London"],
+        }
+    )
 
 
 class TestLoadRawWeather:
@@ -50,10 +54,12 @@ class TestLoadRawWeather:
         data_dir.mkdir(parents=True)
         csv_path = data_dir / "GlobalWeatherRepository.csv"
 
-        df = pd.DataFrame({
-            "last_updated": ["2024-01-01", "2024-01-02"],
-            "other_column": [1, 2],
-        })
+        df = pd.DataFrame(
+            {
+                "last_updated": ["2024-01-01", "2024-01-02"],
+                "other_column": [1, 2],
+            }
+        )
         df.to_csv(csv_path, index=False)
 
         with pytest.raises(ValueError, match="Missing required columns"):
@@ -66,10 +72,12 @@ class TestLoadRawWeather:
         data_dir.mkdir(parents=True)
         csv_path = data_dir / "GlobalWeatherRepository.csv"
 
-        df = pd.DataFrame({
-            "temperature_celsius": [20.0, 22.0],
-            "other_column": [1, 2],
-        })
+        df = pd.DataFrame(
+            {
+                "temperature_celsius": [20.0, 22.0],
+                "other_column": [1, 2],
+            }
+        )
         df.to_csv(csv_path, index=False)
 
         with pytest.raises(ValueError, match="Missing required columns"):
@@ -80,10 +88,12 @@ class TestLoadRawWeather:
         data_dir.mkdir(parents=True)
         csv_path = data_dir / "GlobalWeatherRepository.csv"
 
-        df = pd.DataFrame({
-            "last_updated": ["2024-01-03", "2024-01-01", "2024-01-02"],
-            "temperature_celsius": [18.0, 20.0, 22.0],
-        })
+        df = pd.DataFrame(
+            {
+                "last_updated": ["2024-01-03", "2024-01-01", "2024-01-02"],
+                "temperature_celsius": [18.0, 20.0, 22.0],
+            }
+        )
         df.to_csv(csv_path, index=False)
 
         result = load_raw_weather(tmp_path)
@@ -95,10 +105,12 @@ class TestLoadRawWeather:
         data_dir.mkdir(parents=True)
         csv_path = data_dir / "GlobalWeatherRepository.csv"
 
-        df = pd.DataFrame({
-            "last_updated": ["2024-01-01", None, "2024-01-02"],
-            "temperature_celsius": [20.0, 22.0, 18.0],
-        })
+        df = pd.DataFrame(
+            {
+                "last_updated": ["2024-01-01", None, "2024-01-02"],
+                "temperature_celsius": [20.0, 22.0, 18.0],
+            }
+        )
         df.to_csv(csv_path, index=False)
 
         result = load_raw_weather(tmp_path)
@@ -118,19 +130,19 @@ class TestAddRegionColumn:
         assert result.loc[1, "region"] == "Europe"
         assert result.loc[2, "region"] == "Asia"
 
-    def test_prefers_continent_over_timezone(
-        self, sample_df_with_continent: pd.DataFrame
-    ) -> None:
+    def test_prefers_continent_over_timezone(self, sample_df_with_continent: pd.DataFrame) -> None:
         result = add_region_column(sample_df_with_continent)
 
         assert result.loc[0, "region"] == "North America"
         assert result.loc[1, "region"] == "Europe"
 
     def test_partial_null_continent_falls_back_to_timezone_per_row(self) -> None:
-        df = pd.DataFrame({
-            "continent": ["North America", None, "Europe"],
-            "timezone": ["America/New_York", "Asia/Tokyo", "Europe/London"],
-        })
+        df = pd.DataFrame(
+            {
+                "continent": ["North America", None, "Europe"],
+                "timezone": ["America/New_York", "Asia/Tokyo", "Europe/London"],
+            }
+        )
         result = add_region_column(df)
 
         assert result.loc[0, "region"] == "North America"
@@ -138,10 +150,12 @@ class TestAddRegionColumn:
         assert result.loc[2, "region"] == "Europe"
 
     def test_null_timezone_value_falls_back_to_unknown(self) -> None:
-        df = pd.DataFrame({
-            "timezone": ["America/New_York", None],
-            "temperature_celsius": [20.0, 22.0],
-        })
+        df = pd.DataFrame(
+            {
+                "timezone": ["America/New_York", None],
+                "temperature_celsius": [20.0, 22.0],
+            }
+        )
         result = add_region_column(df)
 
         assert result.loc[0, "region"] == "America"

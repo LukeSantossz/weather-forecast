@@ -126,10 +126,7 @@ def build_forecast(
     Returns:
         A dict matching ``schema/forecast.schema.json``.
     """
-    history = [
-        {"date": _series_date(i), "value": _series_value(i)}
-        for i in range(_HISTORY_DAYS)
-    ]
+    history = [{"date": _series_date(i), "value": _series_value(i)} for i in range(_HISTORY_DAYS)]
     actual = [
         {"date": _series_date(_HISTORY_DAYS + i), "value": _series_value(_HISTORY_DAYS + i)}
         for i in range(_TEST_WINDOW_DAYS)
@@ -465,8 +462,7 @@ def _main() -> None:
         "--data-status",
         default="sample",
         choices=["sample"],
-        help="data_status recorded in each file (only 'sample' until the "
-        "real-data reader lands).",
+        help="data_status recorded in each file (only 'sample' until the real-data reader lands).",
     )
     parser.add_argument(
         "--generated-at",
@@ -475,9 +471,7 @@ def _main() -> None:
     )
     args = parser.parse_args()
 
-    written = write_contract(
-        args.out, data_status=args.data_status, generated_at=args.generated_at
-    )
+    written = write_contract(args.out, data_status=args.data_status, generated_at=args.generated_at)
     for path in written:
         print(f"wrote {path}")
 
