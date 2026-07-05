@@ -65,6 +65,9 @@ kaggle.json
 /tutor.md
 git_vendas.pdf
 
+# Model artifacts (persisted, versioned locally; not committed)
+models/
+
 # Web app (phase-1 dashboard)
 web/node_modules/
 web/.next/
