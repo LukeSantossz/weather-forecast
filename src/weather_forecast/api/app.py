@@ -77,7 +77,12 @@ def health() -> HealthResponse:
 
 @app.post("/anomaly", response_model=AnomalyResponse)
 def detect_anomaly(request: AnomalyRequest) -> AnomalyResponse:
-    """Score a batch with the stateless Z-score and Isolation Forest detectors."""
+    """Score a batch with the Z-score and Isolation Forest detectors.
+
+    Detection is batch-relative: the detectors fit on the submitted batch, so a
+    row is flagged relative to the others in the same request (not a persisted
+    reference distribution). Batches below ``MIN_ANOMALY_BATCH`` are rejected.
+    """
     frame = pd.DataFrame([obs.model_dump() for obs in request.observations])
     z_scores, z_flags = zscore_anomalies(frame["temperature_celsius"])
     if_flags, if_scores = isolation_forest_anomalies(frame[list(DEFAULT_IF_FEATURES)])

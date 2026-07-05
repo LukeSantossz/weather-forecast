@@ -38,6 +38,24 @@ def test_run_forecast_is_reproducible() -> None:
     assert a == b
 
 
+def test_run_forecast_seed_changes_results() -> None:
+    cfg1 = PipelineConfig.from_dict({"test_window_days": 8, "val_size": 8, "seed": 1})
+    cfg2 = PipelineConfig.from_dict({"test_window_days": 8, "val_size": 8, "seed": 2})
+    a = run_forecast(_daily(), config=cfg1)
+    b = run_forecast(_daily(), config=cfg2)
+    # The seed must actually reach the stochastic estimators.
+    assert (a["lightgbm"], a["gradientboosting"]) != (b["lightgbm"], b["gradientboosting"])
+
+
+def test_run_forecast_rejects_invalid_windows() -> None:
+    with pytest.raises(ValueError, match="val_size"):
+        run_forecast(_daily(), config=PipelineConfig.from_dict({"val_size": 0}))
+    with pytest.raises(ValueError, match="test_window_days|val_size|training"):
+        run_forecast(
+            _daily(60), config=PipelineConfig.from_dict({"test_window_days": 40, "val_size": 40})
+        )
+
+
 def test_cli_runs_end_to_end_and_reports_metrics(tmp_path, capsys) -> None:
     data_dir = tmp_path / "data" / "raw"
     data_dir.mkdir(parents=True)

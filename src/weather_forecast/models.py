@@ -52,7 +52,15 @@ def chronological_split(data: pd.DataFrame, cutoff: Any) -> tuple[Any, Any]:
 def carve_validation_tail(
     X_train: pd.DataFrame, y_train: pd.Series, val_size: int
 ) -> tuple[pd.DataFrame, pd.DataFrame, pd.Series, pd.Series]:
-    """Carve the last ``val_size`` rows as validation: (X_tr, X_val, y_tr, y_val)."""
+    """Carve the last ``val_size`` rows as validation: (X_tr, X_val, y_tr, y_val).
+
+    Raises:
+        ValueError: If ``val_size`` is not in ``1..len(X_train)-1`` (which would
+            otherwise leave an empty training or validation split).
+    """
+    n = len(X_train)
+    if not 1 <= val_size < n:
+        raise ValueError(f"val_size must be in 1..{n - 1}, got {val_size}")
     return (
         X_train.iloc[:-val_size],
         X_train.iloc[-val_size:],

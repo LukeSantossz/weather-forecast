@@ -94,3 +94,12 @@ def test_invalid_input_returns_422(monkeypatch, tmp_path) -> None:
     with TestClient(app) as client:
         resp = client.post("/forecast", json={"horizon": 0})
     assert resp.status_code == 422
+
+
+def test_anomaly_rejects_tiny_batch(monkeypatch, tmp_path) -> None:
+    monkeypatch.setenv("MODELS_DIR", str(tmp_path))
+    # A single observation cannot be scored against a reference distribution;
+    # the endpoint requires a minimum batch and rejects smaller ones.
+    with TestClient(app) as client:
+        resp = client.post("/anomaly", json={"observations": _batch(1)[:1]})
+    assert resp.status_code == 422
