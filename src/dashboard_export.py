@@ -373,6 +373,191 @@ def build_shap(
     }
 
 
+# --- real-data builders (issue #0015) ----------------------------------------
+# Unlike the sample builders above, these emit data_status="real" from values the
+# notebooks compute. They carry no _sample_only guard; write_real_contract refuses
+# any section not labeled "real".
+
+_REAL_DISCLAIMER = "Real model output from the leakage-free pipeline (issue #20)."
+_BEESWARM_MAX_POINTS = 200
+
+
+def build_meta_real(
+    *,
+    generated_at: str,
+    repo_commit: str | None,
+    source: str = "notebooks 04/06/07",
+) -> dict:
+    """Build the real ``meta.json`` section (``data_status="real"``)."""
+    return {
+        "schema_version": _SCHEMA_VERSION,
+        "generated_at": generated_at,
+        "data_status": "real",
+        "pipeline": {"source": source, "repo_commit": repo_commit},
+        "disclaimer": _REAL_DISCLAIMER,
+    }
+
+
+def build_metrics_real(
+    models: list[dict],
+    *,
+    generated_at: str,
+    method: str = "holdout",
+    window_days: int = 30,
+    caveats: list[str] | None = None,
+) -> dict:
+    """
+    Build the real ``metrics.json`` section from computed per-model metrics.
+
+    Every model is marked ``status="final"``; the leakage-free re-run (#20)
+    supersedes the retracted ``pending_rerun`` sample.
+    """
+    built = [
+        {
+            "id": m["id"],
+            "name": m["name"],
+            "rmse_c": m["rmse_c"],
+            "mae_c": m["mae_c"],
+            "mape_pct": m["mape_pct"],
+            "ensemble_weight": m.get("ensemble_weight"),
+            "status": "final",
+        }
+        for m in models
+    ]
+    return {
+        "schema_version": _SCHEMA_VERSION,
+        "generated_at": generated_at,
+        "data_status": "real",
+        "evaluation": {"method": method, "window_days": window_days},
+        "models": built,
+        "caveats": caveats or [],
+    }
+
+
+def build_forecast_real(
+    *,
+    history: list[dict],
+    actual: list[dict],
+    models: list[dict],
+    train_end: str,
+    generated_at: str,
+    test_window_days: int = 30,
+    unit: str = "celsius",
+) -> dict:
+    """Build the real ``forecast.json`` section from computed series and predictions."""
+    return {
+        "schema_version": _SCHEMA_VERSION,
+        "generated_at": generated_at,
+        "data_status": "real",
+        "series": {
+            "granularity": "daily_global_mean",
+            "unit": unit,
+            "train_end": train_end,
+            "test_window_days": test_window_days,
+            "history": history,
+            "actual": actual,
+            "models": models,
+        },
+    }
+
+
+def build_anomalies_real(
+    *,
+    zscore: dict,
+    isolation_forest: dict,
+    overlap_count: int,
+    records: list[dict],
+    generated_at: str,
+) -> dict:
+    """Build the real ``anomalies.json`` section from computed method summaries."""
+    return {
+        "schema_version": _SCHEMA_VERSION,
+        "generated_at": generated_at,
+        "data_status": "real",
+        "methods": {
+            "zscore": zscore,
+            "isolation_forest": isolation_forest,
+            "overlap_count": overlap_count,
+        },
+        "records": records,
+    }
+
+
+def build_shap_real(
+    *,
+    features: list[dict],
+    beeswarm: list[dict],
+    generated_at: str,
+    model: str = "lightgbm",
+    sample_n: int = 1000,
+) -> dict:
+    """Build the real ``shap.json`` section, capping beeswarm points to the schema max."""
+    capped = [
+        {"feature": f["feature"], "points": f["points"][:_BEESWARM_MAX_POINTS]} for f in beeswarm
+    ]
+    return {
+        "schema_version": _SCHEMA_VERSION,
+        "generated_at": generated_at,
+        "data_status": "real",
+        "model": model,
+        "target": "pm2_5",
+        "sample_n": sample_n,
+        "features": features,
+        "beeswarm": capped,
+    }
+
+
+def write_real_section(out_dir: Path, section: str, data: dict) -> Path:
+    """Validate and write one real section to ``out_dir/<section>.json``.
+
+    Raises:
+        ValueError: If ``data`` is not labeled ``data_status="real"``.
+        jsonschema.ValidationError: If ``data`` fails the section schema.
+    """
+    if data.get("data_status") != "real":
+        raise ValueError(f"Section '{section}' must have data_status='real'.")
+    validate(section, data)
+    out_dir = Path(out_dir)
+    out_dir.mkdir(parents=True, exist_ok=True)
+    out_path = out_dir / f"{section}.json"
+    out_path.write_text(json.dumps(data, indent=2) + "\n")
+    return out_path
+
+
+def write_real_contract(
+    out_dir: Path,
+    *,
+    meta: dict,
+    forecast: dict,
+    metrics: dict,
+    anomalies: dict,
+    shap: dict,
+) -> list[Path]:
+    """
+    Validate and write all five real dashboard sections (``data_status="real"``).
+
+    Raises:
+        ValueError: If any section is missing or is not labeled ``data_status="real"``.
+        jsonschema.ValidationError: If any section fails its schema.
+    """
+    sections = {
+        "meta": meta,
+        "forecast": forecast,
+        "metrics": metrics,
+        "anomalies": anomalies,
+        "shap": shap,
+    }
+    for name, data in sections.items():
+        if data is None:
+            raise ValueError(
+                f"write_real_contract requires all five sections; '{name}' is missing."
+            )
+        if data.get("data_status") != "real":
+            raise ValueError(f"write_real_contract section '{name}' must have data_status='real'.")
+
+    return [write_real_section(out_dir, name, data) for name, data in sections.items()]
+
+
 _SECTION_BUILDERS = {
     "meta": build_meta,
     "forecast": build_forecast,
