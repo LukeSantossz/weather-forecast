@@ -7,12 +7,18 @@ import pytest
 
 from src.dashboard_export import (
     build_anomalies,
+    build_anomalies_real,
     build_forecast,
+    build_forecast_real,
     build_meta,
+    build_meta_real,
     build_metrics,
+    build_metrics_real,
     build_shap,
+    build_shap_real,
     validate,
     write_contract,
+    write_real_contract,
 )
 
 _SECTIONS = ("meta", "forecast", "metrics", "anomalies", "shap")
@@ -164,6 +170,125 @@ class TestHonestyAcrossContract:
                 build(data_status="real")
 
 
+_GEN_AT = "2026-07-05T00:00:00Z"
+
+
+class TestRealBuilders:
+    """Tests for the real-data builders (#0015)."""
+
+    def test_build_meta_real_is_real_and_schema_valid(self) -> None:
+        meta = build_meta_real(generated_at=_GEN_AT, repo_commit="abc1234")
+
+        assert meta["data_status"] == "real"
+        assert meta["pipeline"]["repo_commit"] == "abc1234"
+        validate("meta", meta)
+
+    def test_build_metrics_real_marks_every_model_final(self) -> None:
+        models = [
+            {"id": "gradientboosting", "name": "GradientBoosting", "rmse_c": 0.27,
+             "mae_c": 0.22, "mape_pct": 0.96, "ensemble_weight": 0.35},
+            {"id": "lightgbm", "name": "LightGBM", "rmse_c": 0.32, "mae_c": 0.25,
+             "mape_pct": 1.06, "ensemble_weight": 0.41},
+        ]
+        metrics = build_metrics_real(models, generated_at=_GEN_AT)
+
+        assert metrics["data_status"] == "real"
+        assert all(m["status"] == "final" for m in metrics["models"])
+        assert not any(m["status"] == "pending_rerun" for m in metrics["models"])
+        assert "pending_rerun" not in json.dumps(metrics)
+        by_id = {m["id"]: m for m in metrics["models"]}
+        assert by_id["gradientboosting"]["rmse_c"] == 0.27
+        validate("metrics", metrics)
+
+    def test_build_forecast_real_is_schema_valid(self) -> None:
+        forecast = build_forecast_real(
+            history=[{"date": "2024-05-16", "value": 23.77}],
+            actual=[{"date": "2026-06-04", "value": 20.0}],
+            models=[{"id": "lightgbm", "name": "LightGBM",
+                     "predictions": [{"date": "2026-06-04", "value": 20.1}]}],
+            train_end="2026-06-03",
+            generated_at=_GEN_AT,
+        )
+
+        assert forecast["data_status"] == "real"
+        assert forecast["series"]["granularity"] == "daily_global_mean"
+        validate("forecast", forecast)
+
+    def test_build_anomalies_real_is_schema_valid(self) -> None:
+        anomalies = build_anomalies_real(
+            zscore={"threshold": 3.0, "count": 990, "share_pct": 0.66},
+            isolation_forest={"contamination": 0.02, "count": 3021, "share_pct": 2.0},
+            overlap_count=232,
+            records=[{"ts": "2026-01-01T00:00:00Z", "country": "Brazil", "lat": -15.8,
+                      "lon": -47.9, "temp_c": 41.0, "z": 3.5, "if_score": -0.6,
+                      "detected_by": "both"}],
+            generated_at=_GEN_AT,
+        )
+
+        assert anomalies["data_status"] == "real"
+        assert anomalies["methods"]["isolation_forest"]["count"] == 3021
+        validate("anomalies", anomalies)
+
+    def test_build_shap_real_caps_points_and_is_schema_valid(self) -> None:
+        points = [{"shap": 0.01 * i, "feature_value_norm": 0.001 * i} for i in range(300)]
+        shap = build_shap_real(
+            features=[{"name": "humidity", "mean_abs_shap": 4.8}],
+            beeswarm=[{"feature": "humidity", "points": points}],
+            generated_at=_GEN_AT,
+        )
+
+        assert shap["data_status"] == "real"
+        assert shap["target"] == "pm2_5"
+        assert all(len(f["points"]) <= 200 for f in shap["beeswarm"])
+        validate("shap", shap)
+
+
+class TestWriteRealContract:
+    """Tests for write_real_contract (#0015)."""
+
+    def _built(self):
+        return {
+            "meta": build_meta_real(generated_at=_GEN_AT, repo_commit="abc1234"),
+            "forecast": build_forecast_real(
+                history=[{"date": "2024-05-16", "value": 23.77}],
+                actual=[{"date": "2026-06-04", "value": 20.0}],
+                models=[{"id": "lightgbm", "name": "LightGBM",
+                         "predictions": [{"date": "2026-06-04", "value": 20.1}]}],
+                train_end="2026-06-03", generated_at=_GEN_AT,
+            ),
+            "metrics": build_metrics_real(
+                [{"id": "lightgbm", "name": "LightGBM", "rmse_c": 0.32, "mae_c": 0.25,
+                  "mape_pct": 1.06, "ensemble_weight": 0.41}],
+                generated_at=_GEN_AT,
+            ),
+            "anomalies": build_anomalies_real(
+                zscore={"threshold": 3.0, "count": 990, "share_pct": 0.66},
+                isolation_forest={"contamination": 0.02, "count": 3021, "share_pct": 2.0},
+                overlap_count=232, records=[], generated_at=_GEN_AT,
+            ),
+            "shap": build_shap_real(
+                features=[{"name": "humidity", "mean_abs_shap": 4.8}],
+                beeswarm=[{"feature": "humidity", "points": []}], generated_at=_GEN_AT,
+            ),
+        }
+
+    def test_write_real_contract_emits_five_real_files(self, tmp_path: Path) -> None:
+        written = write_real_contract(tmp_path, **self._built())
+
+        names = {p.name for p in written}
+        assert names == {f"{section}.json" for section in _SECTIONS}
+        for path in written:
+            data = json.loads(path.read_text())
+            assert data["data_status"] == "real"
+            validate(path.stem, data)
+
+    def test_write_real_contract_refuses_non_real_section(self, tmp_path: Path) -> None:
+        sections = self._built()
+        sections["metrics"] = build_metrics()  # a sample section
+        with pytest.raises(ValueError, match="real"):
+            write_real_contract(tmp_path, **sections)
+
+
 class TestWriteContract:
     """Tests for write_contract."""
 
@@ -186,12 +311,17 @@ class TestWriteContract:
         assert not list(tmp_path.glob("*.json"))
 
 
-class TestCommittedSample:
-    """The committed web/public/data/*.json sample must match its schema."""
+class TestCommittedContract:
+    """The committed web/public/data/*.json is the real, schema-valid contract (#0015)."""
 
-    def test_committed_sample_matches_schema(self) -> None:
+    def test_committed_contract_is_real_and_schema_valid(self) -> None:
         for section in _SECTIONS:
             path = _DATA_DIR / f"{section}.json"
             data = json.loads(path.read_text())
-            assert data["data_status"] == "sample"
+            assert data["data_status"] == "real"
             validate(section, data)
+
+    def test_committed_metrics_has_no_pending_rerun(self) -> None:
+        data = json.loads((_DATA_DIR / "metrics.json").read_text())
+        assert all(m["status"] == "final" for m in data["models"])
+        assert "pending_rerun" not in json.dumps(data)
