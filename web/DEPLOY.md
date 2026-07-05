@@ -5,18 +5,14 @@ This app is a static, client-only dashboard: `next.config.mjs` sets `output: 'ex
 image optimization endpoint — `images.unoptimized: true` is already set for this reason).
 Vercel can serve that output directly.
 
-## Gating note — do not go live before issue #19 merges
+## Status — clear to deploy
 
-**Do not make the deployed URL public until [issue #19](https://github.com/LukeSantossz/weather-forecast/issues/19)
-(README retraction of the leakage-inflated metrics and architecture diagram) merges.**
-
-The dashboard already renders the honest state (the Forecast hero shows the best `final`
-statistical model with a `[ LEAKAGE FIX PENDING · #20 ]` chip, per `dashboard-phase1.md`), but
-the README currently still advertises the retracted "0.19 °C RMSE" headline and the incorrect
-Parquet-based architecture. Publishing the dashboard while the README still makes those claims
-would put a correct, honest site next to a contradicting README on the same repo. Deploy the
-project (or leave it building on preview URLs) but keep the production domain unassigned/private
-until #19 merges.
+The earlier gate (do not go live until the README retracted the leakage-inflated headline,
+issues [#19](https://github.com/LukeSantossz/weather-forecast/issues/19) /
+[#20](https://github.com/LukeSantossz/weather-forecast/issues/20)) has been lifted: both merged,
+and the README and the dashboard now show the same corrected, leakage-free metrics. There is no
+outstanding consistency gate; the site can be made public. Regenerate `web/public/data/*.json`
+from the current commit before publishing so the provenance banner shows the right date and SHA.
 
 ## Vercel project setup
 
