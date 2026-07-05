@@ -12,11 +12,12 @@ from __future__ import annotations
 
 import math
 from collections.abc import Sequence
+from typing import TypeAlias
 
 import numpy as np
 
-ArrayLike = np.ndarray | Sequence[float]
-PointLike = float | np.ndarray | Sequence[float]
+ArrayLike: TypeAlias = np.ndarray | Sequence[float]
+PointLike: TypeAlias = float | np.ndarray | Sequence[float]
 
 
 def calibration_residuals(y_true: ArrayLike, y_pred: ArrayLike) -> np.ndarray:
