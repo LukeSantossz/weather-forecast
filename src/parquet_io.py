@@ -1,4 +1,8 @@
-"""Parquet I/O helpers that avoid pandas' PyArrowImpl (duplicate extension registration in Jupyter)."""
+"""Parquet I/O helpers that avoid pandas' PyArrowImpl.
+
+PyArrowImpl triggers duplicate extension registration in Jupyter; these helpers
+sidestep it.
+"""
 
 from __future__ import annotations
 

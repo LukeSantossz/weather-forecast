@@ -11,12 +11,13 @@ into a notebook or the dashboard is an explicit follow-up, not included here.
 from __future__ import annotations
 
 import math
-from typing import Sequence, Union
+from collections.abc import Sequence
+from typing import TypeAlias
 
 import numpy as np
 
-ArrayLike = Union[np.ndarray, Sequence[float]]
-PointLike = Union[float, np.ndarray, Sequence[float]]
+ArrayLike: TypeAlias = np.ndarray | Sequence[float]
+PointLike: TypeAlias = float | np.ndarray | Sequence[float]
 
 
 def calibration_residuals(y_true: ArrayLike, y_pred: ArrayLike) -> np.ndarray:
@@ -100,9 +101,7 @@ def prediction_interval(
     return lower, upper
 
 
-def empirical_coverage(
-    y_true: ArrayLike, lower: PointLike, upper: PointLike
-) -> float:
+def empirical_coverage(y_true: ArrayLike, lower: PointLike, upper: PointLike) -> float:
     """
     Compute the empirical coverage of prediction intervals.
 

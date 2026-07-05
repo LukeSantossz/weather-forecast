@@ -1,14 +1,16 @@
 """
 Cleaning and preprocessing utilities for the weather dataset.
 
-Pipeline: impute missing values → IQR bounds + clip → MinMax scale numerics → one-hot encode categoricals.
+Pipeline: impute missing values → IQR bounds + clip → MinMax scale numerics →
+one-hot encode categoricals.
 """
 
 from __future__ import annotations
+
 from typing import Any, Literal
+
 import pandas as pd
 from sklearn.preprocessing import MinMaxScaler
-
 
 OutlierStrategy = Literal["clip"]
 
@@ -147,9 +149,7 @@ def normalize_numeric_features(
         Returns (df, None, []) if no columns were scaled.
     """
     exclude_cols = exclude_cols or []
-    cols_to_scale = [
-        c for c in numerical_cols if c in df.columns and c not in exclude_cols
-    ]
+    cols_to_scale = [c for c in numerical_cols if c in df.columns and c not in exclude_cols]
     if not cols_to_scale:
         return df, None, []
 
@@ -186,9 +186,7 @@ def transform_numeric_features(
     """
     missing = [c for c in cols_to_scale if c not in df.columns]
     if missing:
-        raise ValueError(
-            f"Columns to scale are missing from the DataFrame: {missing}"
-        )
+        raise ValueError(f"Columns to scale are missing from the DataFrame: {missing}")
     df = df.copy()
     df[cols_to_scale] = scaler.transform(df[cols_to_scale])
     return df

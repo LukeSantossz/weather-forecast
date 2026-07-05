@@ -8,36 +8,40 @@ import pandas as pd
 import pytest
 
 from src.preprocessing import (
-    split_feature_types,
-    impute_missing_values,
-    detect_outliers_iqr,
-    treat_outliers_iqr,
-    normalize_numeric_features,
-    transform_numeric_features,
-    encode_categorical_features,
     align_to_encoded_columns,
+    detect_outliers_iqr,
+    encode_categorical_features,
+    impute_missing_values,
+    normalize_numeric_features,
     run_preprocessing_pipeline,
+    split_feature_types,
+    transform_numeric_features,
+    treat_outliers_iqr,
 )
 
 
 @pytest.fixture
 def sample_df() -> pd.DataFrame:
     """Create a sample DataFrame for testing."""
-    return pd.DataFrame({
-        "temperature": [20.0, 25.0, np.nan, 30.0, 100.0],
-        "humidity": [50, 60, 70, np.nan, 80],
-        "city": ["A", "B", np.nan, "A", "C"],
-        "country": ["X", "X", "Y", "Y", "Z"],
-    })
+    return pd.DataFrame(
+        {
+            "temperature": [20.0, 25.0, np.nan, 30.0, 100.0],
+            "humidity": [50, 60, 70, np.nan, 80],
+            "city": ["A", "B", np.nan, "A", "C"],
+            "country": ["X", "X", "Y", "Y", "Z"],
+        }
+    )
 
 
 @pytest.fixture
 def numeric_df() -> pd.DataFrame:
     """Create a numeric-only DataFrame for testing."""
-    return pd.DataFrame({
-        "value1": [1.0, 2.0, 3.0, 4.0, 100.0],
-        "value2": [10.0, 20.0, 30.0, 40.0, 50.0],
-    })
+    return pd.DataFrame(
+        {
+            "value1": [1.0, 2.0, 3.0, 4.0, 100.0],
+            "value2": [10.0, 20.0, 30.0, 40.0, 50.0],
+        }
+    )
 
 
 class TestSplitFeatureTypes:
@@ -85,9 +89,7 @@ class TestImputeMissingValues:
     """Tests for impute_missing_values function."""
 
     def test_imputes_numeric_with_median(self, sample_df: pd.DataFrame) -> None:
-        result = impute_missing_values(
-            sample_df, ["temperature", "humidity"], []
-        )
+        result = impute_missing_values(sample_df, ["temperature", "humidity"], [])
 
         assert result["temperature"].isna().sum() == 0
         assert result["humidity"].isna().sum() == 0
@@ -105,9 +107,7 @@ class TestImputeMissingValues:
         assert sample_df["temperature"].isna().sum() == original_nulls
 
     def test_handles_missing_columns(self, sample_df: pd.DataFrame) -> None:
-        result = impute_missing_values(
-            sample_df, ["nonexistent"], ["also_nonexistent"]
-        )
+        result = impute_missing_values(sample_df, ["nonexistent"], ["also_nonexistent"])
 
         assert result.shape == sample_df.shape
 
@@ -136,18 +136,22 @@ class TestDetectOutliersIqr:
         assert bounds_wide["value1"][1] > bounds_default["value1"][1]
 
     def test_detect_outliers_iqr_omits_zero_width_columns(self) -> None:
-        df = pd.DataFrame({
-            "zero_inflated": [0, 0, 0, 0, 0, 0, 0, 0, 0, 5.0, 10.0],
-        })
+        df = pd.DataFrame(
+            {
+                "zero_inflated": [0, 0, 0, 0, 0, 0, 0, 0, 0, 5.0, 10.0],
+            }
+        )
 
         bounds = detect_outliers_iqr(df, ["zero_inflated"])
 
         assert "zero_inflated" not in bounds
 
     def test_zero_inflated_column_survives_outlier_treatment(self) -> None:
-        df = pd.DataFrame({
-            "zero_inflated": [0, 0, 0, 0, 0, 0, 0, 0, 0, 5.0, 10.0],
-        })
+        df = pd.DataFrame(
+            {
+                "zero_inflated": [0, 0, 0, 0, 0, 0, 0, 0, 0, 5.0, 10.0],
+            }
+        )
 
         bounds = detect_outliers_iqr(df, ["zero_inflated"])
         result = treat_outliers_iqr(df, bounds)
@@ -187,9 +191,7 @@ class TestNormalizeNumericFeatures:
     """Tests for normalize_numeric_features function."""
 
     def test_scales_to_0_1(self, numeric_df: pd.DataFrame) -> None:
-        result, scaler, cols = normalize_numeric_features(
-            numeric_df, ["value1", "value2"]
-        )
+        result, scaler, cols = normalize_numeric_features(numeric_df, ["value1", "value2"])
 
         assert result["value1"].min() >= 0.0
         assert result["value1"].max() <= 1.0
@@ -295,10 +297,12 @@ class TestEncodeCategoricalFeatures:
         assert result.shape == sample_df.shape
 
     def test_encode_drops_columns_above_threshold(self) -> None:
-        df = pd.DataFrame({
-            "id": [f"v{i}" for i in range(60)],
-            "cat": ["A"] * 30 + ["B"] * 30,
-        })
+        df = pd.DataFrame(
+            {
+                "id": [f"v{i}" for i in range(60)],
+                "cat": ["A"] * 30 + ["B"] * 30,
+            }
+        )
 
         result = encode_categorical_features(df, ["id", "cat"], max_cardinality=50)
 
@@ -310,10 +314,12 @@ class TestEncodeCategoricalFeatures:
         assert "cat_B" in result.columns
 
     def test_encode_threshold_is_configurable(self) -> None:
-        df = pd.DataFrame({
-            "id": [f"v{i}" for i in range(60)],
-            "cat": ["A"] * 30 + ["B"] * 30,
-        })
+        df = pd.DataFrame(
+            {
+                "id": [f"v{i}" for i in range(60)],
+                "cat": ["A"] * 30 + ["B"] * 30,
+            }
+        )
 
         result = encode_categorical_features(df, ["id", "cat"], max_cardinality=100)
 
@@ -330,9 +336,7 @@ class TestAlignToEncodedColumns:
         expected_columns = list(encoded_train.columns)  # city_A, city_B
 
         holdout = pd.DataFrame({"city": ["A", "C"]})  # "C" is unseen
-        encoded_holdout = encode_categorical_features(
-            holdout, ["city"], max_cardinality=50
-        )
+        encoded_holdout = encode_categorical_features(holdout, ["city"], max_cardinality=50)
 
         aligned = align_to_encoded_columns(encoded_holdout, expected_columns)
 
@@ -367,9 +371,7 @@ class TestRunPreprocessingPipeline:
         for key in expected_keys:
             assert key in artifacts
 
-    def test_pipeline_threads_and_records_threshold(
-        self, sample_df: pd.DataFrame
-    ) -> None:
+    def test_pipeline_threads_and_records_threshold(self, sample_df: pd.DataFrame) -> None:
         result, artifacts = run_preprocessing_pipeline(sample_df, max_cardinality=1)
 
         # Threshold is recorded and applied: city/country (3 distinct each) are

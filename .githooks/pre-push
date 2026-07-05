@@ -1,14 +1,28 @@
 #!/bin/sh
-# Pre-push R2 gate: advisory cross-provider review by Codex CLI.
-# See .standards/docs/standards/codex_review.md.
+# Pre-push gate: lint + tests (blocking), then the advisory Codex R2 review.
+# See docs/specs/0017-dev-tooling.md and .standards/docs/standards/codex_review.md.
 #
 # Enable locally (one-time, not committed):
-#   git config core.hooksPath .githooks
+#   git config core.hooksPath .githooks    (or: sh scripts/enable-hooks.sh)
 #
-# The review is advisory by default and does not block the push. Bypass with
-# SKIP_CODEX_REVIEW=1 git push, or make it blocking with CODEX_REVIEW_BLOCKING=1.
+# lint + tests block the push on failure; the Codex R2 review is advisory.
+# Bypass everything with: git push --no-verify.
 
 set -e
 
 repo_root="$(git rev-parse --show-toplevel)"
+
+if command -v ruff >/dev/null 2>&1; then
+    echo "pre-push: ruff check ."
+    ruff check .
+    echo "pre-push: ruff format --check ."
+    ruff format --check .
+else
+    echo "pre-push: ruff not found; skipping lint (pip install -r requirements-dev.txt)."
+fi
+
+echo "pre-push: pytest -q"
+python -m pytest -q
+
+echo "pre-push: lint + tests passed; running advisory R2 review..."
 exec "$repo_root/scripts/codex-review.sh"
