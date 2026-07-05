@@ -12,7 +12,7 @@ import pytest
 
 pytest.importorskip("evidently")
 
-from weather_forecast.drift import data_drift_report, main  # noqa: E402
+from weather_forecast.drift import _summarize, data_drift_report, main  # noqa: E402
 
 
 def _frames(shift: float) -> tuple[pd.DataFrame, pd.DataFrame]:
@@ -62,3 +62,23 @@ def test_drift_cli_reports_summary(tmp_path, capsys) -> None:
     assert rc == 0
     summary = json.loads(capsys.readouterr().out)
     assert summary["dataset_drift"] is True
+
+
+def test_summarize_raises_when_drift_count_absent() -> None:
+    # If Evidently's internal metric tags change, fail loudly rather than
+    # silently returning a zeroed (misleading) drift verdict.
+    with pytest.raises(ValueError):
+        _summarize([{"config": {"type": "evidently:metric_v2:SomethingElse"}, "value": 1.0}])
+
+
+def test_drift_cli_errors_on_insufficient_history(tmp_path) -> None:
+    data_dir = tmp_path / "data" / "raw"
+    data_dir.mkdir(parents=True)
+    n = 30  # fewer than 2 * window_days
+    dates = pd.date_range("2024-01-01", periods=n, freq="D")
+    pd.DataFrame({"last_updated": dates, "temperature_celsius": np.full(n, 20.0)}).to_csv(
+        data_dir / "GlobalWeatherRepository.csv", index=False
+    )
+
+    with pytest.raises(SystemExit):
+        main(["--project-root", str(tmp_path), "--window-days", "30"])

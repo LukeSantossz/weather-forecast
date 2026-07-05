@@ -20,7 +20,9 @@ from typing import Any
 
 import pandas as pd
 
-# Stable Evidently metric type tags (matched instead of display names).
+# Evidently metric type tags (matched instead of display names). These are
+# internal to Evidently and may change across versions; _summarize fails loudly
+# if the expected drift-count metric is absent rather than reporting a zero.
 _DRIFTED_COUNT_TYPE = "evidently:metric_v2:DriftedColumnsCount"
 _VALUE_DRIFT_TYPE = "evidently:metric_v2:ValueDrift"
 # A dataset is flagged as drifted when at least this share of columns drift
@@ -49,7 +51,7 @@ def data_drift_report(
     from evidently import DataDefinition, Dataset, Report
     from evidently.presets import DataDriftPreset
 
-    cols = list(numerical_columns) if numerical_columns else list(reference.columns)
+    cols = list(numerical_columns) if numerical_columns is not None else list(reference.columns)
     data_definition = DataDefinition(numerical_columns=cols)
     ref_ds = Dataset.from_pandas(reference, data_definition=data_definition)
     cur_ds = Dataset.from_pandas(current, data_definition=data_definition)
@@ -63,8 +65,8 @@ def data_drift_report(
 
 
 def _summarize(metrics: list[dict[str, Any]]) -> dict[str, Any]:
-    drifted_columns = 0
-    share = 0.0
+    drifted_columns: int | None = None
+    share: float | None = None
     columns: dict[str, dict[str, Any]] = {}
     for metric in metrics:
         config = metric.get("config", {})
@@ -82,6 +84,14 @@ def _summarize(metrics: list[dict[str, Any]]) -> dict[str, Any]:
                 "p_value": p_value,
                 "drifted": p_value < threshold,
             }
+    # These type tags are Evidently-internal and may change across versions; if
+    # the drift-count metric is missing, fail loudly rather than silently
+    # reporting a zeroed (misleading) verdict.
+    if drifted_columns is None or share is None:
+        raise ValueError(
+            "Evidently drift report did not contain a DriftedColumnsCount metric; "
+            "the report structure may have changed for this Evidently version."
+        )
     return {
         "dataset_drift": share >= _DRIFT_SHARE_THRESHOLD,
         "drifted_columns": drifted_columns,
@@ -119,6 +129,8 @@ def main(argv: list[str] | None = None) -> int:
 
     daily = _daily_from_raw(args.project_root)
     w = args.window_days
+    if len(daily) < 2 * w:
+        parser.error(f"Not enough data for two {w}-day windows: only {len(daily)} rows available.")
     reference = daily.iloc[-2 * w : -w][["y"]].reset_index(drop=True)
     current = daily.iloc[-w:][["y"]].reset_index(drop=True)
 
