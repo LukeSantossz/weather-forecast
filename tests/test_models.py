@@ -2,6 +2,7 @@
 
 import numpy as np
 import pandas as pd
+import pytest
 
 from weather_forecast.models import (
     carve_validation_tail,
@@ -83,3 +84,11 @@ class TestTrainers:
     def test_fit_sarima_forecasts(self) -> None:
         fit = fit_sarima(_series(50))
         assert len(forecast_steps(fit, 5)) == 5
+
+
+def test_carve_validation_tail_guards_val_size() -> None:
+    X, y = _xy(30)
+    with pytest.raises(ValueError):
+        carve_validation_tail(X, y, 0)
+    with pytest.raises(ValueError):
+        carve_validation_tail(X, y, 30)

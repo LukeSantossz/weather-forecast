@@ -53,6 +53,12 @@ def run_forecast(
     vs = config.val_size
 
     series = daily.set_index("ds").sort_index()["y"]
+    if tw <= 0 or vs <= 0:
+        raise ValueError(f"test_window_days and val_size must be positive; got {tw} and {vs}")
+    if tw + vs >= len(series):
+        raise ValueError(
+            f"test_window_days + val_size ({tw} + {vs}) must be < series length ({len(series)})"
+        )
     series_train = series.iloc[:-tw]
 
     feats = create_features(daily).dropna()
@@ -64,9 +70,9 @@ def run_forecast(
 
     X_tr, X_val, y_tr, y_val = carve_validation_tail(X_train, y_train, vs)
 
-    lgb_model = train_lightgbm(X_tr, y_tr, X_val, y_val)
+    lgb_model = train_lightgbm(X_tr, y_tr, X_val, y_val, params={"seed": config.seed})
     lgb_pred = lgb_model.predict(X_test, num_iteration=lgb_model.best_iteration)
-    gb_model = train_gradient_boosting(X_train, y_train)
+    gb_model = train_gradient_boosting(X_train, y_train, params={"random_state": config.seed})
     gb_pred = gb_model.predict(X_test)
 
     arima_pred = forecast_steps(fit_arima(series_train), tw)
@@ -84,7 +90,9 @@ def run_forecast(
     # Weighted ensemble: weights from an out-of-sample validation holdout so the
     # test window is never used to choose them (leakage-free, issue #20).
     lgb_val_pred = lgb_model.predict(X_val, num_iteration=lgb_model.best_iteration)
-    gb_val_pred = train_gradient_boosting(X_tr, y_tr).predict(X_val)
+    gb_val_pred = train_gradient_boosting(X_tr, y_tr, params={"random_state": config.seed}).predict(
+        X_val
+    )
     series_fit_val = series_train.iloc[:-vs]
     arima_val_pred = forecast_steps(fit_arima(series_fit_val), vs)
     sarima_val_pred = forecast_steps(fit_sarima(series_fit_val), vs)

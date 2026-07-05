@@ -9,6 +9,12 @@ from __future__ import annotations
 
 from pydantic import BaseModel, Field
 
+# The detectors score each request batch relative to itself (a population
+# Z-score and an Isolation Forest fit on the batch), so a batch that is too
+# small yields a degenerate verdict (a lone row always has z=0). Require a
+# minimum batch so callers cannot get a meaningless result.
+MIN_ANOMALY_BATCH = 10
+
 
 class AnomalyObservation(BaseModel):
     """A single weather observation scored by both detectors."""
@@ -21,9 +27,13 @@ class AnomalyObservation(BaseModel):
 
 
 class AnomalyRequest(BaseModel):
-    """A batch of observations to run through the stateless detectors."""
+    """A batch of observations scored relative to itself by the detectors.
 
-    observations: list[AnomalyObservation] = Field(..., min_length=1)
+    Requires at least ``MIN_ANOMALY_BATCH`` observations; smaller batches yield
+    a degenerate verdict and are rejected with HTTP 422.
+    """
+
+    observations: list[AnomalyObservation] = Field(..., min_length=MIN_ANOMALY_BATCH)
 
 
 class AnomalyResult(BaseModel):
