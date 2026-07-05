@@ -21,7 +21,7 @@ from pathlib import Path
 
 from jsonschema import validate as _jsonschema_validate
 
-SCHEMA_DIR = Path(__file__).resolve().parent.parent / "web" / "public" / "data" / "schema"
+SCHEMA_DIR = Path(__file__).resolve().parent.parent.parent / "web" / "public" / "data" / "schema"
 
 _SCHEMA_VERSION = "1.0"
 

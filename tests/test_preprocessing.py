@@ -7,7 +7,7 @@ import numpy as np
 import pandas as pd
 import pytest
 
-from src.preprocessing import (
+from weather_forecast.preprocessing import (
     align_to_encoded_columns,
     detect_outliers_iqr,
     encode_categorical_features,

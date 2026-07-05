@@ -5,7 +5,7 @@ from pathlib import Path
 import pandas as pd
 import pytest
 
-from src.data_loader import (
+from weather_forecast.data_loader import (
     add_region_column,
     get_column_or_raise,
     get_precipitation_column,
