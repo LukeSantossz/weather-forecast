@@ -29,10 +29,10 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-pip-
 
-      - name: Install package (editable, with dev and serving extras)
+      - name: Install package (editable, with dev, serving, and mlops extras)
         run: |
           python -m pip install --upgrade pip
-          pip install -e .[dev,serving]
+          pip install -e .[dev,serving,mlops]
 
       - name: Run tests
         run: pytest tests/ -v
