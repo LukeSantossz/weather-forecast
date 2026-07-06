@@ -73,7 +73,7 @@ html[data-theme='dark'] {
   --color-danger: light-dark(#cc4a2e, #e0603f);
   --color-danger-muted: light-dark(#cc4a2e29, #e0603f33);
   --color-info: light-dark(#0e86aa, #3fa9c7);
-  --color-info-muted: light-dark(#2e8aa829, #3fa9c733);
+  --color-info-muted: light-dark(#0e86aa29, #3fa9c733);
 
   /*
    * `-text` variants of the semantic tones for SMALL colored text sitting on
