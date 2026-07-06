@@ -156,7 +156,7 @@ export default function ShapBeeswarm({ features, beeswarm }: ShapBeeswarmProps) 
             <span
               className={styles.beeswarmLegendSwatch}
               style={{
-                backgroundColor: 'color-mix(in oklch, var(--color-accent) 85%, var(--color-info) 15%)',
+                backgroundColor: 'color-mix(in srgb, var(--color-accent) 85%, var(--color-info) 15%)',
               }}
               aria-hidden="true"
             />
