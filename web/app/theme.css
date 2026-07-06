@@ -165,6 +165,39 @@ html[data-theme='dark'] {
      shell). Not a DESIGN.md-locked token; exists so `.data-status-banner`'s
      sticky offset below can't drift out of sync with `header.bar`'s height. */
   --bar-height: 58px;
+
+  /* Budget for `.data-status-banner`'s tallest realistic state: two wrapped
+     lines of its mono text. The banner has no `white-space: nowrap`, so its
+     longest line (the "real" status, e.g. "[ REAL ] generated 2026-07-05 ·
+     commit 24b7120") wraps to 2 lines at narrow viewports (from 320px, where
+     the ~47-character string no longer fits the ~288px content box at the
+     banner's 14px monospace metrics). Two lines at the inherited 1.5
+     line-height (reset.css) is 2 * 14px * 1.5 = 42px of text, plus the
+     banner's own 8px+8px `padding-block` and 1px `border-bottom` = 59px;
+     rounded up to 64px as a small margin against cross-browser font-metric
+     rounding. Used below by the deep-link `scroll-padding-top`. */
+  --banner-height: 64px;
+}
+
+/*
+ * Deep-link scroll offset (Task 3 review fix): `header.bar` and
+ * `.data-status-banner` are both `position: sticky` at the top of the
+ * viewport (see their rules further down), stacked to a combined height of
+ * `--bar-height` + `--banner-height`. Native anchor scrolling (`/#forecast`,
+ * `/#anomalies`, `/#drivers` - the single-scroll shell's `<section id="...">`
+ * targets in `app/page.tsx`) otherwise aligns the target's top edge to
+ * viewport y=0, so that sticky pair would cover the target's `SectionHeader`.
+ * `scroll-padding-top` on the scrolling box (html) reserves that space for
+ * both fragment navigation and `scrollIntoView`, without affecting ordinary
+ * wheel/scrollbar scrolling. One rule for every current and future anchor
+ * target, instead of `scroll-margin-top` duplicated per section. The 16px
+ * addition is breathing room so the heading doesn't sit flush under the
+ * banner; `--banner-height` already budgets for the tallest (two-line, 320px)
+ * banner state, so this single constant offset is sufficient at every
+ * viewport width, not just the narrowest.
+ */
+html {
+  scroll-padding-top: calc(var(--bar-height) + var(--banner-height) + 16px);
 }
 
 /*
