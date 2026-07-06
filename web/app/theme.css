@@ -1,5 +1,5 @@
 /*
- * theme.css — binds Astryx's CSS-variable tokens to the locked design
+ * theme.css - binds Astryx's CSS-variable tokens to the locked design
  * language in `.ulpi/design/DESIGN.md`. Layered AFTER astryx.css and
  * theme-neutral/theme.css (see import order in app/layout.tsx).
  *
@@ -8,7 +8,7 @@
  * (see the "Layer order" note in @astryxdesign/core/reset.css). They target
  * `:root`, the same element that carries `data-astryx-theme="neutral"`.
  *
- * Hex values below are the ONLY off-token hex in this codebase — they are
+ * Hex values below are the ONLY off-token hex in this codebase - they are
  * DESIGN.md's locked palette, transcribed verbatim.
  */
 
@@ -17,7 +17,7 @@
  * set on <html>. Astryx's own theme-neutral/theme.css sets an unconditional
  * `:root { color-scheme: light dark }` inside `@layer astryx-theme`, which
  * outranks reset.css's `html[data-theme]` mapping (also layered, but in the
- * lower-priority `reset` layer) regardless of specificity — CSS layers beat
+ * lower-priority `reset` layer) regardless of specificity - CSS layers beat
  * specificity. These two rules are unlayered (this file has no @layer), so
  * they win over both and actually force the mode. Verified in-browser: the
  * toggle silently no-op'd on background/surface colors without this.
@@ -89,13 +89,13 @@ html[data-theme='dark'] {
   --color-info-text: light-dark(#1f6f8a, #7ec9dd);
 
   /*
-   * --- Dataviz palette (charts only) — DESIGN.md § Dataviz palette ---
+   * --- Dataviz palette (charts only) - DESIGN.md § Dataviz palette ---
    * The forecast series categorical scale, transcribed verbatim from
    * DESIGN.md. Series that coincide with a semantic role reuse its
    * theme-aware token (better light-mode contrast); violet and rose have no
    * semantic role, so they carry DESIGN.md's single locked hex (the only
    * off-token hex, same convention as the palette above). Never encode a
-   * series by hue alone — every line also carries a direct label + legend
+   * series by hue alone - every line also carries a direct label + legend
    * text + the a11y table (see components/forecast/ForecastChart.tsx).
    */
   --viz-actual: var(--color-text-primary); /* high-contrast neutral (thick) */
@@ -122,7 +122,7 @@ html[data-theme='dark'] {
 
   /*
    * Astryx's Badge component hardcodes literal colors for its semantic
-   * variants (success/warning/error/info — see
+   * variants (success/warning/error/info - see
    * @astryxdesign/theme-neutral/dist/theme.css `.astryx-badge.success` etc.),
    * so those variants cannot be retheme'd via CSS variables. Its non-semantic
    * "color" variants (green/yellow/red/cyan/gray), however, read
@@ -155,7 +155,7 @@ html[data-theme='dark'] {
   --radius-page: 16px;
   --radius-full: 9999px;
 
-  /* --- Motion (DESIGN.md § Structural scales · Motion) — transcribed tokens.
+  /* --- Motion (DESIGN.md § Structural scales · Motion) - transcribed tokens.
      "no bounce/elastic; honor prefers-reduced-motion; motion must be motivated." */
   --motion-fast: 120ms;
   --motion-base: 260ms;
@@ -248,7 +248,7 @@ body {
 
 /*
  * Global visible focus ring: "visible focus ring (2px, accent, 2px offset)".
- * Plain, unlayered author CSS — per the note at the top of this file, this
+ * Plain, unlayered author CSS - per the note at the top of this file, this
  * wins over Astryx's own `@layer astryx-theme` focus-visible rules
  * regardless of specificity, so every native interactive element (buttons,
  * links, the Tab/ThemeToggle buttons, ListItem's invisible row button, and
@@ -263,7 +263,7 @@ body {
 }
 
 /*
- * Reduced motion — shell chrome only. The forecast chart's draw-in and the
+ * Reduced motion - shell chrome only. The forecast chart's draw-in and the
  * anomaly map's fly-to already self-handle `prefers-reduced-motion` (see
  * ForecastChart.tsx / AnomalyMap.tsx and the `@media` block further down in
  * this file); this covers what is left: the sticky header/footer/banner
@@ -312,7 +312,7 @@ body {
  */
 
 /* Records-list rows (Astryx ListItem renders its root as this `<li>`; see
-   components/anomalies/RecordsList.tsx) — the map's accessible equivalent. */
+   components/anomalies/RecordsList.tsx) - the map's accessible equivalent. */
 .records-list-wrap li {
   min-height: 44px;
 }
@@ -346,7 +346,7 @@ body {
 
 /*
  * header.bar: the slim sticky bar (ported from the "Observatory" design
- * preview template's `<header class="bar">` — docs/design/
+ * preview template's `<header class="bar">` - docs/design/
  * observatory-preview-template.html). Sticky at DESIGN.md's "fixed" z-index
  * tier (40); `.data-status-banner` below stays at the "sticky" tier (30) and
  * is pushed down by `--bar-height` so the two never overlap on scroll (only
@@ -398,7 +398,7 @@ header.bar {
 }
 
 /* Touch target floor for the bar's interactive elements (the ThemeToggle
-   button) — see the "Touch targets ≥ 44px" note further up this file. */
+   button) - see the "Touch targets ≥ 44px" note further up this file. */
 .bar-right button {
   min-height: 44px;
 }
@@ -939,7 +939,7 @@ section.act {
  * StatBlock (components/StatBlock.tsx): the hero/stat-strip number treatment.
  * Value is mono + tabular-nums (the "honesty voice" wears mono); label uses
  * Astryx's own Text component (body font). `--stat-block-value-size` is
- * DESIGN.md's Type modular scale top step (49px) — "numbers in the hero stat
+ * DESIGN.md's Type modular scale top step (49px) - "numbers in the hero stat
  * may go larger" than the rest of the scale.
  */
 .stat-block {
@@ -985,7 +985,7 @@ section.act {
 
 /*
  * ==========================================================================
- * Forecast section (components/forecast/*) — DESIGN.md § Section 1.
+ * Forecast section (components/forecast/*) - DESIGN.md § Section 1.
  * Structure only; all color/type/spacing bind to the tokens above.
  * ==========================================================================
  */
@@ -1217,7 +1217,7 @@ section.act {
   opacity: 0.5;
 }
 
-/* Inline error panel — never a blank screen (DESIGN.md state table). */
+/* Inline error panel - never a blank screen (DESIGN.md state table). */
 .forecast-error {
   padding: 16px 20px;
   font-family: var(--font-body);

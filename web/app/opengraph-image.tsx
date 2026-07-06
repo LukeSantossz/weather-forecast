@@ -1,7 +1,7 @@
 import { ImageResponse } from 'next/og';
 
 // Self-contained social-share card (Open Graph + Twitter). Generated as a
-// static PNG at build time by next/og — no runtime service, no external asset
+// static PNG at build time by next/og - no runtime service, no external asset
 // host. Colors are DESIGN.md's locked amber-on-graphite instrument palette,
 // transcribed verbatim (the same values app/theme.css binds to Astryx tokens).
 // Emit as a static file at build time (required under next.config `output: export`).
@@ -32,7 +32,7 @@ export default function OpengraphImage() {
           padding: '72px 80px',
         }}
       >
-        {/* Provenance chip — the honesty signature */}
+        {/* Provenance chip - the honesty signature */}
         <div style={{ display: 'flex' }}>
           <div
             style={{

@@ -9,7 +9,7 @@ import ProvenanceChip from '../ProvenanceChip';
 
 // Astryx `Table` requires the row type to carry an index signature
 // (`T extends Record<string, unknown>`). MetricsModel is the real shape; the
-// intersection just satisfies that constraint. The cast is type-only — the
+// intersection just satisfies that constraint. The cast is type-only - the
 // rendered objects are the untouched contract rows.
 type MetricsRow = MetricsModel & Record<string, unknown>;
 
