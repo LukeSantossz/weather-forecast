@@ -115,7 +115,7 @@ export default function Hero() {
 
   const heroStats: Array<{ value: string; suffix: string; label: string }> = [
     {
-      value: bestModel ? bestModel.rmse_c.toFixed(2) : '—',
+      value: bestModel ? bestModel.rmse_c.toFixed(2) : '-',
       suffix: '°C RMSE',
       label: bestModel ? `Best model · ${bestModel.name.split(' ')[0]}` : 'Best model',
     },
