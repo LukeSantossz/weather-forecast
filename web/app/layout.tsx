@@ -3,11 +3,9 @@ import '@astryxdesign/core/reset.css';
 import '@astryxdesign/core/astryx.css';
 import '@astryxdesign/theme-neutral/theme.css';
 import './theme.css';
-import { Link } from '@astryxdesign/core/Link';
 import { display, hankenGrotesk, ibmPlexMono } from './fonts';
 import DataStatusBanner from '../components/DataStatusBanner';
 import ThemeToggle from '../components/ThemeToggle';
-import MethodologyNote from '../components/MethodologyNote';
 import meta from '../public/data/meta.json';
 
 const SITE_NAME = 'Weather · Forecast Console';
@@ -45,7 +43,18 @@ export const metadata: Metadata = {
   },
 };
 
-const REPO_URL = 'https://github.com/LukeSantossz/weather-forecast#readme';
+// Minimal commit line for the footer (the full colophon lives in
+// components/CloseSection.tsx). Mirrors the shortSha/shortDate helpers in
+// components/DataStatusBanner.tsx - same defensive handling, kept local since
+// this is the only other place the repo commit / generation date are shown.
+function shortCommit(sha: string | null | undefined): string {
+  return sha ? sha.slice(0, 7) : 'unknown';
+}
+
+function shortDate(iso: string): string {
+  const parsed = new Date(iso);
+  return Number.isNaN(parsed.getTime()) ? iso : parsed.toISOString().slice(0, 10);
+}
 
 // Runs before hydration (plain <script>, not next/script) so the light/dark
 // mode is correct on first paint with no flash. Reads localStorage, falls
@@ -66,33 +75,30 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <script dangerouslySetInnerHTML={{ __html: THEME_INIT_SCRIPT }} />
       </head>
       <body>
-        <header className="console-header">
-          <div className="shell-container console-header-row">
-            <div className="console-header-brand">
-              <span className="console-mark">WEATHER · FORECAST CONSOLE</span>
-              <p className="console-tagline">
-                A global daily-mean temperature console. Every number shows its provenance.
-              </p>
-            </div>
-            <div className="console-header-actions">
+        {/* The slim sticky bar (single-scroll shell, Task 3): wordmark + ember
+            status dot on the left, the "Live model output" chip and the theme
+            toggle on the right. Ported from the Observatory design preview
+            template's `<header class="bar">`. */}
+        <header className="bar">
+          <div className="shell-container bar-in">
+            <span className="wordmark">
+              <span className="dot" aria-hidden="true" />
+              WEATHER · FORECAST OBSERVATORY
+            </span>
+            <div className="bar-right">
+              <span className="chip">
+                <span className="live" aria-hidden="true" />
+                Live model output
+              </span>
               <ThemeToggle />
-              <Link href={REPO_URL} isExternalLink>
-                Methodology
-              </Link>
             </div>
           </div>
-          <div className="tick-rule" aria-hidden="true" />
         </header>
         <DataStatusBanner />
         <main className="shell-container">{children}</main>
-        <MethodologyNote />
-        <footer className="console-footer">
-          <div className="tick-rule" aria-hidden="true" />
-          <div className="shell-container console-footer-row">
-            <span>
-              {meta.pipeline.source} · schema v{meta.schema_version} · generated {meta.generated_at}
-            </span>
-            <span>Global daily-mean model built from 211 countries&apos; data.</span>
+        <footer className="site-footer">
+          <div className="shell-container site-footer-line">
+            commit {shortCommit(meta.pipeline.repo_commit)} · generated {shortDate(meta.generated_at)}
           </div>
         </footer>
       </body>
