@@ -1459,3 +1459,112 @@ section.act {
     font-size: 34px;
   }
 }
+
+/*
+ * ==========================================================================
+ * Close act (components/CloseSection.tsx) - the reproducibility close.
+ * Class names ported from the Observatory preview template's `.close` /
+ * `.repro` / `.colophon` + its section-scoped footer (docs/design/
+ * observatory-preview-template.html). `.close` carries no border-bottom
+ * (unlike `.act`, further up this file): it is the last section on the page,
+ * nothing needs to divide it from what follows, and its own footer already
+ * carries a border-top.
+ * ==========================================================================
+ */
+
+.close {
+  padding-block: 92px 40px;
+}
+
+.repro {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 40px;
+  margin-top: 36px;
+}
+
+.repro h3 {
+  margin: 0 0 10px;
+  font-family: var(--font-family-heading);
+  font-size: 21px;
+}
+
+.repro p {
+  margin: 0;
+  font-family: var(--font-body);
+  font-size: 15.5px;
+  color: var(--color-text-secondary);
+}
+
+.colophon {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1px;
+  margin-top: 28px;
+  background: var(--color-border);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-container);
+  overflow: hidden;
+}
+
+.colophon > div {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 16px 18px;
+  background: var(--color-background-surface);
+}
+
+.colophon dt {
+  margin: 0;
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--color-text-secondary);
+}
+
+.colophon dd {
+  margin: 0;
+  font-family: var(--font-mono);
+  font-size: 13px;
+  color: var(--color-text-primary);
+}
+
+/* Scoped to `.close` (a descendant selector, not a bare `footer` element
+   selector) so this never leaks onto the unrelated site-wide
+   `<footer className="site-footer">` in app/layout.tsx, which sits outside
+   `.close` entirely. */
+.close footer {
+  margin-top: 8px;
+  padding-block: 26px 60px;
+  border-top: 1px solid var(--color-border);
+}
+
+.close .foot {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 16px;
+  font-family: var(--font-mono);
+  font-size: 11.5px;
+  letter-spacing: 0.04em;
+  color: var(--color-text-secondary);
+}
+
+@media (max-width: 768px) {
+  .repro {
+    grid-template-columns: 1fr;
+    gap: 28px;
+  }
+}
+
+@media (max-width: 640px) {
+  .close {
+    padding-block: 64px 32px;
+  }
+
+  .colophon {
+    grid-template-columns: 1fr;
+  }
+}
