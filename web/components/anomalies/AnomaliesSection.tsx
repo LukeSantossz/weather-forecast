@@ -8,14 +8,25 @@ import { Skeleton } from '@astryxdesign/core/Skeleton';
 import { Text } from '@astryxdesign/core/Text';
 import { Button } from '@astryxdesign/core/Button';
 import { loadAnomalies, DataLoadError } from '../../lib/contract';
-import type { Anomalies } from '../../lib/contract';
+import type { Anomalies, AnomalyDetectedBy } from '../../lib/contract';
 import MethodStrip from './MethodStrip';
 import RecordsList from './RecordsList';
 import SemanticSearch from './SemanticSearch';
+import MethodologyNote from '../MethodologyNote';
+// Type-only: erased at compile time, so casting/typing the dynamic import
+// below never pulls the real AnomalyMap module (and its maplibre-gl.css/
+// maplibre-gl deps) into this file's own bundle -- only `dynamic()`'s lazy
+// `import()` call does that, at runtime, once <AnomalyMap> actually renders.
+import type AnomalyMapComponent from './AnomalyMap';
+import type { AnomalyMapHandle } from './AnomalyMap';
 
 // The map chunk (and, from inside it, the maplibre-gl module + its CSS) loads
 // only when this component renders <AnomalyMap>, which is gated on visibility
-// below. ssr:false keeps it out of the static-export prerender entirely.
+// below. ssr:false keeps it out of the static-export prerender entirely. Cast
+// to the real forwardRef component type so `ref` type-checks below -- purely
+// a compile-time assertion; next/dynamic's own `ComponentType<P>` return type
+// has no ref-forwarding annotation, but the lazy-loaded component underneath
+// is (and always was) exactly `AnomalyMapComponent`.
 const AnomalyMap = dynamic(() => import('./AnomalyMap'), {
   ssr: false,
   loading: () => (
@@ -23,7 +34,7 @@ const AnomalyMap = dynamic(() => import('./AnomalyMap'), {
       <Skeleton width="100%" height="100%" radius={0} />
     </div>
   ),
-});
+}) as unknown as typeof AnomalyMapComponent;
 
 type LoadStatus = 'loading' | 'error' | 'ready';
 
@@ -35,10 +46,31 @@ function MapSkeleton() {
   );
 }
 
-// DESIGN.md § Anomaly explorer: a method stat-strip, then the map (dominant)
-// with the records list beside it on wide screens / below on mobile. Loads the
-// anomalies contract on mount; renders skeleton / inline error / content per
-// the state table in dashboard-phase1.md.
+// The ticker's row count (docs/design/observatory-preview-template.html's
+// `.ticker`, "Most extreme flagged readings"). Not a contract field: derived
+// client-side from the same `records` array RecordsList already sorts by |z|.
+const TICKER_SIZE = 8;
+
+const TICKER_METHOD_LABEL: Record<AnomalyDetectedBy, string> = {
+  zscore: 'Z-score',
+  isolation_forest: 'Isolation Forest',
+  both: 'Both methods',
+};
+
+/** Ticker figure tone: hot readings read danger, cold read the cool/info-text
+ * tone, everything else stays the primary ink (ported thresholds from the
+ * template's ticker: >=25 warm-critical, <=0 cold). */
+function tickerTone(temp_c: number): string {
+  if (temp_c >= 25) return 'var(--color-danger)';
+  if (temp_c <= 0) return 'var(--color-info-text)';
+  return 'var(--color-text-primary)';
+}
+
+// DESIGN.md § Anomaly explorer: the metric trio, then the map + "most extreme"
+// ticker, then the full records list (the map's keyboard-accessible
+// equivalent), then semantic search, then the "how to read this" aside. Loads
+// the anomalies contract on mount; renders skeleton / inline error / content
+// per the state table in dashboard-phase1.md.
 export default function AnomaliesSection() {
   const [status, setStatus] = useState<LoadStatus>('loading');
   const [data, setData] = useState<Anomalies | null>(null);
@@ -50,6 +82,9 @@ export default function AnomaliesSection() {
   // `hidden` rather than unmounted.
   const [hasBeenVisible, setHasBeenVisible] = useState(false);
   const rootRef = useRef<HTMLDivElement | null>(null);
+  // Shared with SemanticSearch: selecting a query rings its top matches on
+  // the real map via AnomalyMap's imperative `highlightRecords`.
+  const mapRef = useRef<AnomalyMapHandle>(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -90,6 +125,10 @@ export default function AnomaliesSection() {
   const failingFile =
     error instanceof DataLoadError ? `/data/${error.section}.json` : '/data/anomalies.json';
 
+  const ticker = data
+    ? [...data.records].sort((a, b) => Math.abs(b.z) - Math.abs(a.z)).slice(0, TICKER_SIZE)
+    : [];
+
   return (
     <div ref={rootRef} className="anomalies-section">
       {status === 'loading' && (
@@ -99,11 +138,14 @@ export default function AnomaliesSection() {
             <Skeleton height={92} index={1} />
             <Skeleton height={92} index={2} />
           </div>
-          <div className="anomalies-explorer">
+          <div className="mapwrap">
             <MapSkeleton />
-            <div className="records-list-wrap">
-              <Skeleton width="100%" height={320} radius={0} />
+            <div className="ticker" aria-hidden="true">
+              <Skeleton width="100%" height="100%" radius={0} />
             </div>
+          </div>
+          <div className="records-list-wrap">
+            <Skeleton width="100%" height={320} radius={0} />
           </div>
         </>
       )}
@@ -126,9 +168,11 @@ export default function AnomaliesSection() {
       {status === 'ready' && data && (
         <>
           <MethodStrip methods={data.methods} />
-          <div className="anomalies-explorer">
+
+          <div className="mapwrap">
             {hasBeenVisible ? (
               <AnomalyMap
+                ref={mapRef}
                 records={data.records}
                 selectedIndex={selectedIndex}
                 onSelect={setSelectedIndex}
@@ -136,15 +180,37 @@ export default function AnomaliesSection() {
             ) : (
               <MapSkeleton />
             )}
-            <RecordsList
-              records={data.records}
-              selectedIndex={selectedIndex}
-              onSelect={setSelectedIndex}
-            />
+            <div className="ticker" aria-label="Most extreme flagged readings">
+              {ticker.map((r) => (
+                <div className="tkrow" key={`${r.ts}-${r.country}`}>
+                  <div>
+                    <div className="cc">{r.country}</div>
+                    <div className="cm">
+                      {r.ts.slice(0, 10)} · {TICKER_METHOD_LABEL[r.detected_by]}
+                    </div>
+                  </div>
+                  <div>
+                    <div className="tt" style={{ color: tickerTone(r.temp_c) }}>
+                      {r.temp_c.toFixed(1)}&deg;
+                    </div>
+                    <div className="tz">z {r.z.toFixed(2)}</div>
+                  </div>
+                </div>
+              ))}
+            </div>
           </div>
-          <SemanticSearch />
+
+          <RecordsList
+            records={data.records}
+            selectedIndex={selectedIndex}
+            onSelect={setSelectedIndex}
+          />
+
+          <SemanticSearch mapRef={mapRef} />
         </>
       )}
+
+      <MethodologyNote />
     </div>
   );
 }

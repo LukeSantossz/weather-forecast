@@ -1286,3 +1286,176 @@ section.act {
   white-space: nowrap;
   border: 0;
 }
+
+/*
+ * ==========================================================================
+ * Anomalies act - shared "act-level" cards (components/anomalies/
+ * MethodStrip.tsx + AnomaliesSection.tsx). Ported verbatim (class names) from
+ * the Observatory preview template's `.metricstrip`/`.mcard` and
+ * `.ticker`/`.tkrow` (docs/design/observatory-preview-template.html). The rest
+ * of the Anomalies act's styling (map, records list, semantic search) stays
+ * component-local in components/anomalies/anomalies.css, per that file's own
+ * header comment; these two groups are shared/reusable enough to live here
+ * alongside the other act-scaffold classes above.
+ * ==========================================================================
+ */
+
+.metricstrip {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+  margin-top: 36px;
+}
+
+.mcard {
+  background: var(--color-background-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-container);
+  padding: 20px;
+}
+
+/* Big stat figure: the "hero stat" serif treatment already established for
+   .hstat .v (Hero.tsx) - DESIGN.md's modular scale lets hero-adjacent numbers
+   go larger than the 12-49px scale. `font-variant-numeric` folds in what the
+   template's separate `.mono` utility class contributed on top of `.mv`. */
+.mcard .mv {
+  font-family: var(--font-family-heading);
+  font-variant-numeric: tabular-nums;
+  font-size: 40px;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  line-height: 1;
+  color: var(--color-text-primary);
+}
+
+.mcard .mk {
+  font-family: var(--font-mono);
+  font-size: 11.5px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--color-text-secondary);
+  margin-top: 12px;
+}
+
+/* Essential small text (not decorative), so this uses the "muted" tier
+   (--color-text-secondary) rather than the template's `--subtle` - the same
+   contrast rule already applied to `.hstat .k` above. */
+.mcard .ms {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-top: 8px;
+  font-family: var(--font-body);
+  font-size: 14px;
+  color: var(--color-text-secondary);
+  line-height: 1.45;
+}
+
+.mcard.hero-card {
+  border-color: color-mix(in srgb, var(--color-accent) 42%, var(--color-border));
+}
+
+.mcard.hero-card .mv {
+  color: var(--color-text-accent);
+}
+
+/* Map + "most extreme" ticker row (components/anomalies/AnomaliesSection.tsx
+   `.mapwrap`; the map itself is `.anomaly-map-wrap`, anomalies.css). Unlike
+   the template (one shared `.panel` with an internal `.ticker` divider), this
+   codebase gives each side its own bordered box - the same independent-panel
+   convention already used for the map + records list pairing. */
+.mapwrap {
+  display: grid;
+  grid-template-columns: 1fr 300px;
+  gap: 16px;
+  align-items: start;
+  margin-top: 36px;
+}
+
+.ticker {
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-container);
+  background: var(--color-background-surface);
+  padding: 14px 4px;
+  max-height: 380px;
+  overflow-y: auto;
+}
+
+.tkrow {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 8px;
+  padding: 9px 16px;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.tkrow:last-child {
+  border-bottom: none;
+}
+
+.tkrow .cc {
+  font-family: var(--font-body);
+  font-size: 13.5px;
+  color: var(--color-text-primary);
+}
+
+.tkrow .cm {
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  color: var(--color-text-secondary);
+  margin-top: 2px;
+  letter-spacing: 0.03em;
+}
+
+.tkrow .tt {
+  font-family: var(--font-mono);
+  font-size: 15px;
+  font-weight: 600;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+.tkrow .tz {
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  text-align: right;
+  color: var(--color-text-secondary);
+  margin-top: 2px;
+}
+
+@media (max-width: 1024px) {
+  .mapwrap {
+    grid-template-columns: 1fr 260px;
+  }
+}
+
+@media (max-width: 860px) {
+  .mapwrap {
+    grid-template-columns: 1fr;
+  }
+
+  .ticker {
+    max-height: none;
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 8px;
+  }
+}
+
+@media (max-width: 768px) {
+  .metricstrip {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 640px) {
+  .ticker {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 560px) {
+  .mcard .mv {
+    font-size: 34px;
+  }
+}
