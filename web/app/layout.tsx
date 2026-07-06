@@ -8,6 +8,7 @@ import DataStatusBanner from '../components/DataStatusBanner';
 import Hero from '../components/Hero';
 import ThemeToggle from '../components/ThemeToggle';
 import meta from '../public/data/meta.json';
+import { shortDate, shortSha } from '../lib/format';
 
 const SITE_NAME = 'Weather · Forecast Console';
 const SITE_DESCRIPTION =
@@ -43,19 +44,6 @@ export const metadata: Metadata = {
     description: SITE_DESCRIPTION,
   },
 };
-
-// Minimal commit line for the footer (the full colophon lives in
-// components/CloseSection.tsx). Mirrors the shortSha/shortDate helpers in
-// components/DataStatusBanner.tsx - same defensive handling, kept local since
-// this is the only other place the repo commit / generation date are shown.
-function shortCommit(sha: string | null | undefined): string {
-  return sha ? sha.slice(0, 7) : 'unknown';
-}
-
-function shortDate(iso: string): string {
-  const parsed = new Date(iso);
-  return Number.isNaN(parsed.getTime()) ? iso : parsed.toISOString().slice(0, 10);
-}
 
 // Runs before hydration (plain <script>, not next/script) so the light/dark
 // mode is correct on first paint with no flash. Reads localStorage, falls
@@ -112,7 +100,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <main className="shell-container">{children}</main>
         <footer className="site-footer">
           <div className="shell-container site-footer-line">
-            commit {shortCommit(meta.pipeline.repo_commit)} · generated {shortDate(meta.generated_at)}
+            commit {shortSha(meta.pipeline.repo_commit)} · generated {shortDate(meta.generated_at)}
           </div>
         </footer>
       </body>

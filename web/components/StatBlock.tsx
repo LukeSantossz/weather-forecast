@@ -17,7 +17,7 @@ export interface StatBlockProps {
 const PENDING_VALUE = '-';
 
 // Mono tabular hero/stat-strip number (components/StatBlock.tsx). Value is
-// custom (mono, tabular-nums, sized per DESIGN.md's modular-scale top step —
+// custom (mono, tabular-nums, sized per DESIGN.md's modular-scale top step -
 // see .stat-block-value-num in app/theme.css); label reuses Astryx's own
 // Text component (body font) rather than reimplementing it.
 export default function StatBlock({ value, unit, label, chips, emphasis }: StatBlockProps) {

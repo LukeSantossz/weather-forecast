@@ -1,41 +1,15 @@
-import meta from '../public/data/meta.json';
 import SectionHeader from './SectionHeader';
-
-// Mirrors the enum in web/public/data/schema/meta.schema.json (data_status).
-// Kept local (not a shared contract module) - same convention as
-// components/DataStatusBanner.tsx and the shortCommit/shortDate helpers in
-// app/layout.tsx.
-type Meta = {
-  generated_at: string;
-  data_status: 'sample' | 'real';
-  pipeline: {
-    source: string;
-    repo_commit?: string | null;
-  };
-};
-
-function shortDate(iso: string): string {
-  const parsed = new Date(iso);
-  return Number.isNaN(parsed.getTime()) ? iso : parsed.toISOString().slice(0, 10);
-}
-
-function shortSha(sha: string | null | undefined): string {
-  return sha ? sha.slice(0, 7) : 'unknown';
-}
 
 // The closing act (ported from docs/design/observatory-preview-template.html's
 // `.close` / `.repro` / `.colophon` + its section-scoped footer). Reproducibility
 // is framed as the argument's conclusion, not a hedge (DESIGN.md § Voice:
 // "reproducibility is the closing argument, not a hedge"): two cards state what
 // "every figure regenerates from the contract" and "commit-stamped and honest"
-// actually mean, a role-grouped colophon credits the real stack, and a
-// commit-stamped line closes the page. Reads the same committed meta.json
-// contract as DataStatusBanner.
+// actually mean, and a role-grouped colophon credits the real stack. The commit
+// + generation date live once at the page bottom, in the page-level
+// `<footer className="site-footer">` in app/layout.tsx (the contentinfo
+// landmark), so this closing footer carries only the wordmark signature.
 export default function CloseSection() {
-  const data = meta as Meta;
-  const commit = shortSha(data.pipeline.repo_commit);
-  const date = shortDate(data.generated_at);
-
   return (
     <section className="close" aria-labelledby="heading-close">
       <div className="reveal">
@@ -97,9 +71,6 @@ export default function CloseSection() {
       <footer>
         <div className="foot">
           <span>WEATHER · FORECAST OBSERVATORY</span>
-          <span>
-            SOURCE COMMIT {commit} · GENERATED {date}
-          </span>
         </div>
       </footer>
     </section>
