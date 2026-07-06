@@ -84,7 +84,7 @@ darken/brighten pattern). Exact ratios are verified in code per the Accessibilit
 ## Dataviz palette (charts only, separate from the one UI accent)
 
 - **Temperature (diverging, the one scale every chart and map reuses):** cool #2e8aa8 (light) / #3fa9c7
-  (dark) &rarr; neutral #c9c3b6 &rarr; warm #d8511c (light) / #f2612c (dark). Encodes the real physical
+  (dark) → neutral #c9c3b6 → warm #d8511c (light) / #f2612c (dark). Encodes the real physical
   axis; used for the anomaly-map markers and the hero warming-stripes.
 - **Forecast lines:** observed = the primary text color (achromatic, thick, direct-labeled "Observed");
   ensemble forecast = the ember accent (direct-labeled "Forecast"). The model leaderboard ranks every

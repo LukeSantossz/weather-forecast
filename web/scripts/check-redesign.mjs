@@ -36,9 +36,10 @@ if (page.includes('TabList')) fail('app/page.tsx still imports/uses TabList');
 // Uses the local `main` branch as the base ref, not `origin/main` (this checkout may have
 // no `origin` remote, or `main` may not be fetched under that name). The diff is run with
 // cwd at the repo root so the `web/public/data` pathspec resolves correctly regardless of
-// where this script itself lives; if the base ref cannot be resolved (or the diff
-// otherwise cannot be computed), the assertion is skipped with a clear message instead of
-// crashing the whole check.
+// where this script itself lives. This assertion must actually run: if the base ref cannot
+// be resolved (or the diff otherwise cannot be computed), that is a hard failure, not a
+// skip - a silent skip would let the check report overall success without ever having
+// verified the data contract.
 const REPO_ROOT = fileURLToPath(new URL('../../', import.meta.url));
 const BASE_REF = 'main';
 try {
@@ -47,7 +48,7 @@ try {
     .toString().trim();
   if (changed) fail(`data contract changed:\n${changed}`);
 } catch (err) {
-  console.error(`SKIP: could not diff against base ref "${BASE_REF}" (${err.message.split('\n')[0]}). Data-contract check not run.`);
+  fail(`cannot resolve base ref '${BASE_REF}' to verify the data contract (${err.message.split('\n')[0]})`);
 }
 
 if (failed) { console.error('\nredesign check FAILED'); process.exit(1); }
