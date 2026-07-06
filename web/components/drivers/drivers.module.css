@@ -1,10 +1,10 @@
 /*
- * drivers.module.css — scoped styles for the Environmental drivers (SHAP)
+ * drivers.module.css - scoped styles for the Environmental drivers (SHAP)
  * section (.ulpi/design/dashboard-phase1.md § Section 3). Every value below
  * is either a structural constant already established elsewhere (spacing,
  * radius) or a reference to a DESIGN.md token exposed as a CSS var in
- * app/theme.css. No new hex literals are introduced here: the amber/cyan
- * ramps are built from `--color-accent` / `--color-info` via `color-mix()`
+ * app/theme.css. No new hex literals are introduced here: the cool -> warm
+ * ramps are built from `--color-info` / `--color-accent` via `color-mix()`
  * at render time in ShapBar.tsx / ShapBeeswarm.tsx.
  */
 
@@ -78,6 +78,11 @@
   display: block;
   height: 100%;
   border-radius: var(--radius-inner);
+  /* First-view grow-in (ported from the template's `.sbar` transition,
+     `0.9s` with a per-row stagger set inline via `transitionDelay` in
+     ShapBar.tsx). Width only - never the color, so the cool -> warm hue
+     itself doesn't visibly sweep during the grow-in. */
+  transition: width 0.9s var(--ease-out);
 }
 
 .barValue {
@@ -248,5 +253,15 @@
 
   .beeswarmRowSummary {
     display: none;
+  }
+}
+
+/* Static when reduced (ShapBar.tsx's mount effect already skips the
+   IntersectionObserver and shows real widths immediately under reduced
+   motion; this is the CSS-level backstop so the width change can never be
+   animated even if that JS gate were somehow bypassed). */
+@media (prefers-reduced-motion: reduce) {
+  .barFill {
+    transition: none;
   }
 }
