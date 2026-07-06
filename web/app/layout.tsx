@@ -4,7 +4,7 @@ import '@astryxdesign/core/astryx.css';
 import '@astryxdesign/theme-neutral/theme.css';
 import './theme.css';
 import { Link } from '@astryxdesign/core/Link';
-import { archivo, hankenGrotesk, ibmPlexMono } from './fonts';
+import { display, hankenGrotesk, ibmPlexMono } from './fonts';
 import DataStatusBanner from '../components/DataStatusBanner';
 import ThemeToggle from '../components/ThemeToggle';
 import MethodologyNote from '../components/MethodologyNote';
@@ -59,7 +59,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       lang="en"
       data-astryx-theme="neutral"
       suppressHydrationWarning
-      className={`${archivo.variable} ${hankenGrotesk.variable} ${ibmPlexMono.variable}`}
+      className={`${display.variable} ${hankenGrotesk.variable} ${ibmPlexMono.variable}`}
     >
       <head>
         {/* eslint-disable-next-line @next/next/no-sync-scripts */}

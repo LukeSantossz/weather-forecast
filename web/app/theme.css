@@ -32,48 +32,48 @@ html[data-theme='dark'] {
 
 :root {
   /* --- Color: background / surface / elevated (DESIGN.md § Color) --- */
-  --color-background-body: light-dark(#f6f8fa, #14171c);
-  --color-background-surface: light-dark(#ffffff, #1b1f26);
-  --color-background-card: light-dark(#ffffff, #1b1f26);
-  --color-background-muted: light-dark(#f6f8fa, #14171c);
-  --color-background-popover: light-dark(#fbfcfe, #242a33);
+  --color-background-body: light-dark(#f7f6f3, #141210);
+  --color-background-surface: light-dark(#ffffff, #1b1815);
+  --color-background-card: light-dark(#ffffff, #1b1815);
+  --color-background-muted: light-dark(#f7f6f3, #141210);
+  --color-background-popover: light-dark(#ffffff, #24201b);
 
   /* --- Color: text (primary / muted / subtle) --- */
-  --color-text-primary: light-dark(#1c2128, #eef1f5);
-  --color-icon-primary: light-dark(#1c2128, #eef1f5);
-  --color-text-secondary: light-dark(#5b6672, #a3adba);
-  --color-icon-secondary: light-dark(#5b6672, #a3adba);
+  --color-text-primary: light-dark(#201c18, #f3ece2);
+  --color-icon-primary: light-dark(#201c18, #f3ece2);
+  --color-text-secondary: light-dark(#5e574e, #a79e92);
+  --color-icon-secondary: light-dark(#5e574e, #a79e92);
   /* "subtle": large/decorative only per DESIGN.md; essential small text uses
      the "muted" tier above. Mapped onto Astryx's disabled tier, the closest
      built-in de-emphasis role (assumption, cheap to revisit). */
-  --color-text-disabled: light-dark(#8592a0, #71808f);
-  --color-icon-disabled: light-dark(#8592a0, #71808f);
+  --color-text-disabled: light-dark(#8b8377, #6f6659);
+  --color-icon-disabled: light-dark(#8b8377, #6f6659);
 
   /* --- Color: border (hairlines, precision ticks) --- */
-  --color-border: light-dark(#dde2e9, #343c47);
-  --color-border-emphasized: light-dark(#dde2e9, #343c47);
+  --color-border: light-dark(#e5e0d8, #37312b);
+  --color-border-emphasized: light-dark(#d8d1c6, #453e36);
 
-  /* --- Color: the single amber accent --- */
-  --color-accent: #e0942e;
-  --color-text-accent: #e0942e;
-  --color-icon-accent: #e0942e;
+  /* --- Color: the single ember accent --- */
+  --color-accent: light-dark(#d8511c, #f2612c);
+  --color-text-accent: light-dark(#b8410f, #f7855a);
+  --color-icon-accent: light-dark(#d8511c, #f2612c);
   /* alpha tint of the same locked accent hex, following Astryx's own
      `accent-muted` convention (hex + alpha suffix), not a new color. */
-  --color-accent-muted: light-dark(#e0942e33, #e0942e3f);
-  --color-on-accent: #1c2128;
+  --color-accent-muted: light-dark(#d8511c1f, #f2612c33);
+  --color-on-accent: light-dark(#ffffff, #1b1712);
 
   /* --- Color: semantic warning/pending (needed by DataStatusBanner) --- */
-  --color-warning: light-dark(#b8902a, #d8b23a);
-  --color-warning-muted: light-dark(#b8902a33, #d8b23a3f);
-  --color-on-warning: #1c2128;
+  --color-warning: light-dark(#b8902a, #e0b341);
+  --color-warning-muted: light-dark(#b8902a29, #e0b34133);
+  --color-on-warning: #1b1712;
 
   /* --- Color: semantic success/danger/info (needed by ProvenanceChip) --- */
-  --color-success: light-dark(#1f8f5c, #3fae7a);
-  --color-success-muted: light-dark(#1f8f5c33, #3fae7a3f);
+  --color-success: light-dark(#1f8f5c, #46b482);
+  --color-success-muted: light-dark(#1f8f5c29, #46b48233);
   --color-danger: light-dark(#cc4a2e, #e0603f);
-  --color-danger-muted: light-dark(#cc4a2e33, #e0603f3f);
-  --color-info: light-dark(#2f88ab, #4aa6c9);
-  --color-info-muted: light-dark(#2f88ab33, #4aa6c93f);
+  --color-danger-muted: light-dark(#cc4a2e29, #e0603f33);
+  --color-info: light-dark(#0e86aa, #3fa9c7);
+  --color-info-muted: light-dark(#2e8aa829, #3fa9c733);
 
   /*
    * `-text` variants of the semantic tones for SMALL colored text sitting on
@@ -83,10 +83,10 @@ html[data-theme='dark'] {
    * fills, borders and icons. These are the light-darkened / dark-brightened
    * hue-preserving pairs that reach >=4.5:1 for 12px chip text in BOTH themes.
    */
-  --color-warning-text: light-dark(#7e631d, #ddbc53);
-  --color-success-text: light-dark(#187148, #76c5a0);
-  --color-danger-text: light-dark(#a93d26, #eb9781);
-  --color-info-text: light-dark(#256b86, #7dbfd8);
+  --color-warning-text: light-dark(#7e631d, #e6c463);
+  --color-success-text: light-dark(#187148, #79c9a4);
+  --color-danger-text: light-dark(#a93d26, #ef9a80);
+  --color-info-text: light-dark(#1f6f8a, #7ec9dd);
 
   /*
    * --- Dataviz palette (charts only) — DESIGN.md § Dataviz palette ---
@@ -100,7 +100,7 @@ html[data-theme='dark'] {
    */
   --viz-actual: var(--color-text-primary); /* high-contrast neutral (thick) */
   --viz-history: var(--color-text-secondary); /* thin muted context */
-  --viz-ensemble: var(--color-accent); /* amber — the hero series */
+  --viz-ensemble: var(--color-accent); /* ember, the hero series */
   --viz-lightgbm: var(--color-info); /* info-cyan */
   --viz-sarima: #8b7fd6; /* violet */
   --viz-arima: var(--color-success); /* teal/green */
