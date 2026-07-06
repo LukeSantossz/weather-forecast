@@ -5,6 +5,7 @@ import '@astryxdesign/theme-neutral/theme.css';
 import './theme.css';
 import { display, hankenGrotesk, ibmPlexMono } from './fonts';
 import DataStatusBanner from '../components/DataStatusBanner';
+import Hero from '../components/Hero';
 import ThemeToggle from '../components/ThemeToggle';
 import meta from '../public/data/meta.json';
 
@@ -95,6 +96,19 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           </div>
         </header>
         <DataStatusBanner />
+        {/* Direct child of <body>, not <main class="shell-container"> (Task 4
+            review fix): the warming-stripes signature (`.hero`, position:
+            relative/overflow:hidden) must reach the viewport edge, and the
+            shell's max-width:1200px + padding-inline column would otherwise
+            cap the stripes to the padded content column instead of true
+            full-bleed. `<body>` carries no margin/padding (Astryx's reset.css
+            zeroes body margin; nothing in this codebase adds body padding),
+            so Hero here spans the full document width with no 100vw
+            break-out and no `overflow-x` hack. `.hero-in` (app/theme.css)
+            now carries its own max-width:1200px + padding-inline to keep the
+            headline/stats aligned with the acts inside `.shell-container`
+            below. */}
+        <Hero />
         <main className="shell-container">{children}</main>
         <footer className="site-footer">
           <div className="shell-container site-footer-line">

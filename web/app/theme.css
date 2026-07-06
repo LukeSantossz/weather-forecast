@@ -441,13 +441,15 @@ header.bar {
 /*
  * Hero (components/Hero.tsx) - the warming-stripes signature (DESIGN.md §
  * Signature), ported from the Observatory preview template's `.hero*` rules
- * (docs/design/observatory-preview-template.html). Renders inside
- * `<main class="shell-container">` (see app/layout.tsx), so unlike the
- * template's unconstrained full-bleed mockup, `.hero` fills the shell's
- * already-padded content column rather than the full viewport; this keeps it
- * consistent with every other section on the page and carries no risk of the
- * horizontal-scroll regression a manual full-bleed break-out could introduce.
- * `--ease-out` is this project's port of the template's `--ease` token.
+ * (docs/design/observatory-preview-template.html). Renders as a direct child
+ * of <body>, before `<main class="shell-container">` (see app/layout.tsx;
+ * Task 4 review fix), so `.hero` is full-bleed to the true document/viewport
+ * edge, matching the template's unconstrained mockup - no `100vw` break-out
+ * and no `overflow-x` hack, just its natural block width against an
+ * unpadded, unmargined <body>. `.hero-in` below carries its own max-width +
+ * padding-inline so the headline/stats column still lines up with
+ * `.shell-container`'s column used by every act. `--ease-out` is this
+ * project's port of the template's `--ease` token.
  */
 .hero {
   position: relative;
@@ -479,9 +481,25 @@ header.bar {
   );
 }
 
+/* max-width + padding-inline mirror .shell-container exactly (same 1200px /
+   20px / 32px-at-768px values) so the hero's own content column lines up
+   with every act below, now that `.hero` itself is no longer nested inside
+   `.shell-container` (Task 4 review fix). `padding-block`/`padding-inline`
+   (not the `padding` shorthand) so the max-width:640px override further
+   down can vary only the vertical rhythm without re-zeroing this
+   horizontal inset. */
 .hero-in {
   position: relative;
-  padding: 104px 0 76px;
+  max-width: 1200px;
+  margin-inline: auto;
+  padding-block: 104px 76px;
+  padding-inline: 20px;
+}
+
+@media (min-width: 768px) {
+  .hero-in {
+    padding-inline: 32px;
+  }
 }
 
 .eyebrow {
@@ -601,7 +619,7 @@ h1.title em {
    block, hero-specific rules only). */
 @media (max-width: 640px) {
   .hero-in {
-    padding: 76px 0 56px;
+    padding-block: 76px 56px;
   }
 
   .herostats {

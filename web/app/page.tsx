@@ -1,7 +1,6 @@
 'use client';
 
 import { useEffect } from 'react';
-import Hero from '../components/Hero';
 import SectionHeader from '../components/SectionHeader';
 import ForecastSection from '../components/forecast/ForecastSection';
 import AnomaliesSection from '../components/anomalies/AnomaliesSection';
@@ -29,10 +28,13 @@ const SECTIONS: ReadonlyArray<{ id: SectionId; label: string }> = [
   { id: 'drivers', label: 'Drivers' },
 ];
 
-// Single-scroll narrative (Task 3): Hero, then every section rendered at
-// once in order, then CloseSection - no tabs, no hash-router state. Deep
-// links (e.g. `/#anomalies`) resolve natively because the ids live on the
-// <section> elements themselves.
+// Single-scroll narrative (Task 3): every section rendered at once in order,
+// then CloseSection - no tabs, no hash-router state. Deep links (e.g.
+// `/#anomalies`) resolve natively because the ids live on the <section>
+// elements themselves. Hero renders just above this fragment as a sibling in
+// app/layout.tsx, not here (Task 4 review fix: it needs to be a direct
+// child of <body> for the warming-stripes signature to reach full viewport
+// width, outside this component's own <main class="shell-container">).
 export default function Page() {
   // Drives the shared .reveal -> .reveal.in entrance for every act (ported
   // from the template's REVEALS IIFE). Under prefers-reduced-motion, `.in` is
@@ -64,7 +66,6 @@ export default function Page() {
 
   return (
     <>
-      <Hero />
       {SECTIONS.map((section) => (
         <section key={section.id} id={section.id} className="act reveal" aria-labelledby={`heading-${section.id}`}>
           <SectionHeader

@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import forecastData from '../public/data/forecast.json';
 import metricsData from '../public/data/metrics.json';
-import type { Forecast, Metrics } from '../lib/contract';
+import type { Forecast, Metrics, MetricsModel } from '../lib/contract';
 
 // Direct JSON import (same pattern as components/DataStatusBanner.tsx), not
 // lib/contract.ts's fetch-based loadForecast/loadMetrics: the hero is the
@@ -97,18 +97,27 @@ export default function Hero() {
   // Hero stats: best `final` model by minimum rmse_c, 211 countries (a
   // template literal, not a contract field), the holdout window, and the
   // model count - all from forecast.json / metrics.json, no invented fields.
-  // Every model in the committed metrics.json is status "final", so this
-  // reduce (ported directly from the template's HERO STATS IIFE) always has
-  // a row to pick from.
-  const bestModel = metrics.models
-    .filter((m) => m.status === 'final' && m.rmse_c !== null)
-    .reduce((a, b) => ((a.rmse_c as number) <= (b.rmse_c as number) ? a : b));
+  // Every model in the committed metrics.json is status "final", so
+  // `finalModels` always has a row to pick from in practice - but
+  // `MetricsStatus` allows every model to be `pending_rerun`, and the hero
+  // has no error boundary above it (it's the first thing painted), so this
+  // guards the empty case the same way ForecastSection.tsx:67-71 does
+  // (finals.length ? finals.reduce(...) : null) rather than letting an
+  // unguarded `.reduce()` throw `TypeError: Reduce of empty array`. The
+  // filter's type predicate narrows `rmse_c` to `number` for real, so the
+  // `as number` casts below are gone.
+  const finalModels = metrics.models.filter(
+    (m): m is MetricsModel & { rmse_c: number } => m.status === 'final' && m.rmse_c !== null,
+  );
+  const bestModel = finalModels.length
+    ? finalModels.reduce((a, b) => (a.rmse_c <= b.rmse_c ? a : b))
+    : null;
 
   const heroStats: Array<{ value: string; suffix: string; label: string }> = [
     {
-      value: (bestModel.rmse_c as number).toFixed(2),
+      value: bestModel ? bestModel.rmse_c.toFixed(2) : '—',
       suffix: '°C RMSE',
-      label: `Best model · ${bestModel.name.split(' ')[0]}`,
+      label: bestModel ? `Best model · ${bestModel.name.split(' ')[0]}` : 'Best model',
     },
     { value: '211', suffix: '', label: 'Countries scored' },
     { value: String(forecast.series.test_window_days), suffix: 'days', label: 'Untouched holdout' },
