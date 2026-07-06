@@ -66,12 +66,13 @@ export default function Page() {
 
   return (
     <>
-      {SECTIONS.map((section) => (
+      {SECTIONS.map((section, index) => (
         <section key={section.id} id={section.id} className="act reveal" aria-labelledby={`heading-${section.id}`}>
           <SectionHeader
             title={section.label}
             headingId={`heading-${section.id}`}
             description={SECTION_DESCRIPTIONS[section.id]}
+            actNumber={String(index + 1).padStart(2, '0')}
           />
           {section.id === 'forecast' && <ForecastSection />}
           {section.id === 'anomalies' && <AnomaliesSection />}

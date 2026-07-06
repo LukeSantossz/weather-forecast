@@ -313,18 +313,6 @@ nav[aria-label='Tabs'] button:not([aria-current='page']):hover {
   }
 }
 
-/* Precision tick / graticule: a ruled line with short perpendicular ticks,
-   the console-bezel signature. Used under the header and every section
-   header instead of a plain rule. */
-.tick-rule {
-  height: 5px;
-  border-bottom: 1px solid var(--color-border);
-  background-image: linear-gradient(to right, var(--color-border) 1px, transparent 1px);
-  background-repeat: repeat-x;
-  background-position: bottom left;
-  background-size: 12px 5px;
-}
-
 /*
  * header.bar: the slim sticky bar (ported from the "Observatory" design
  * preview template's `<header class="bar">` — docs/design/
@@ -643,11 +631,14 @@ h1.title em {
 }
 
 /*
- * .act / .acthead / .actnum: the per-act scaffold for the single-scroll
- * narrative (ported from the template's `section.act` / `.acthead` /
- * `.actnum`). `.acthead`/`.actnum` are scaffolding for a later task's
- * numbered act headers; `app/page.tsx` renders the existing `SectionHeader`
- * for now (Tasks 5-7 own each act's internals).
+ * .act / .acthead / .actnum / .actt / .actlede: the per-act scaffold for the
+ * single-scroll narrative (ported from the template's `section.act` /
+ * `.acthead` / `.actnum` / `h2.actt` / `.actlede`). `SectionHeader.tsx` renders
+ * `.acthead` (act number + serif title) and `.actlede` (the one-line lede);
+ * `app/page.tsx` threads the "01"/"02"/"03" act number per section by order
+ * (Task 5). `.section-header-row` (further down this file) nests inside
+ * `.acthead` so a section's optional chip (DriversSection's PM2.5 tag) still
+ * has somewhere to sit without widening the act number/title baseline row.
  */
 section.act {
   padding-block: 92px;
@@ -668,6 +659,37 @@ section.act {
   letter-spacing: 0.2em;
   text-transform: uppercase;
   color: var(--color-text-accent);
+}
+
+/* Serif act title (ported from the template's `h2.actt`; font-family/weight
+   already come from Astryx's `.astryx-heading.level-2` rule reading
+   `--font-family-heading`). */
+.actt {
+  font-size: clamp(27px, 4vw, 40px);
+  letter-spacing: -0.02em;
+}
+
+/* One-line act lede under the act header (ported from the template's
+   `.actlede`); numeric tokens inside wear mono via `.section-desc-num`
+   (defined further down this file, alongside `.section-header-row`). */
+.actlede {
+  margin-top: 14px;
+  font-family: var(--font-body);
+  font-size: 18px;
+  color: var(--color-text-secondary);
+  max-width: 62ch;
+}
+
+/* Narrow-viewport act header spacing (ported from the template's
+   max-width:640px block, act-header rules only). */
+@media (max-width: 640px) {
+  .acthead {
+    gap: 12px;
+  }
+
+  .actlede {
+    font-size: 16.5px;
+  }
 }
 
 /*
@@ -846,23 +868,18 @@ section.act {
   margin-top: 8px;
 }
 
+/* Nests inside `.acthead` (a flex row: act number + this row), so this needs
+   its own flex-grow to actually claim the remaining width - otherwise it
+   would hug its content and `justify-content: space-between` below would
+   have no extra space to distribute between the title and an optional chip. */
 .section-header-row {
   display: flex;
+  flex: 1 1 auto;
+  min-width: 0;
   flex-wrap: wrap;
   align-items: baseline;
   justify-content: space-between;
   gap: 8px 12px;
-}
-
-/* One-line section descriptor under the ruled tick line: orients the section in
-   a sentence. Body font, muted; numeric tokens wear mono via .section-desc-num. */
-.section-desc {
-  margin-top: 12px;
-  font-family: var(--font-body);
-  font-size: 15px;
-  line-height: 1.45;
-  color: var(--color-text-secondary);
-  max-width: 70ch;
 }
 
 .section-desc-num {
@@ -958,19 +975,14 @@ section.act {
   gap: 32px;
 }
 
-/* Hero row: the StatBlock + the honesty note beside/under it. */
+/* Hero row: the StatBlock (the honesty note that used to sit beside it -
+   "withheld pending a leakage-free re-run" - is gone; every metric shown here
+   is final, so the hero no longer hedges). */
 .forecast-hero {
   display: flex;
   flex-wrap: wrap;
   align-items: flex-end;
   gap: 16px 32px;
-}
-
-.forecast-hero-note {
-  font-family: var(--font-body);
-  font-size: 14px;
-  color: var(--color-text-secondary);
-  max-width: 42ch;
 }
 
 /* Chart lives in its own horizontal-scroll container so the page body never
@@ -983,10 +995,13 @@ section.act {
   padding: 12px;
 }
 
+/* No min-width: the SVG's viewBox is recomputed to the container's real
+   measured width (ForecastChart.tsx's ResizeObserver `draw`/reflow effect),
+   so it reflows to any container width instead of forcing this wrapper's
+   overflow-x:auto to kick in on narrow viewports. */
 .forecast-chart-svg {
   display: block;
   width: 100%;
-  min-width: 640px;
   height: auto;
 }
 
@@ -1233,6 +1248,22 @@ section.act {
 .metrics-model {
   font-family: var(--font-body);
   color: var(--color-text-primary);
+}
+
+/* Leaderboard RMSE bar (ported from the template's `.bartrack`/`.bar`):
+   decorative reinforcement of the numeric RMSE cell, scaled to the weakest
+   `final` baseline. See MetricsTable.tsx's `barCell`. */
+.metrics-bartrack {
+  width: 100%;
+  height: 10px;
+  border-radius: var(--radius-inner);
+  background: var(--color-background-muted);
+}
+
+.metrics-bar {
+  height: 100%;
+  border-radius: var(--radius-inner);
+  background: var(--color-accent);
 }
 
 /* Best final row: the accent left-border emphasis. Set on the row's first
