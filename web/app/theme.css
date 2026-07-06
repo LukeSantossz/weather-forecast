@@ -201,6 +201,42 @@ html {
 }
 
 /*
+ * scroll-padding-top responsiveness (Task 9a). `--banner-height` above budgets
+ * for the banner's tallest state: its ~47-char uppercase-mono status line
+ * ("Live model output · commit 1234567 · 2026-07-05") wraps to two lines only
+ * at narrow viewports, where its content box can't fit that string on one line.
+ * From 640px up the banner is always a single line, so the two-line budget
+ * over-reserves ~22px at the top of every deep-linked section. Re-budget the
+ * banner to its one-line height here (padding-block 16 + border 1 + one ~21px
+ * line ≈ 38px, rounded up to 42px for cross-browser font-metric slack); the
+ * `scroll-padding-top` calc above re-resolves from the variable automatically.
+ * Below 640px the base two-line budget still holds. Verified a `/#anomalies`
+ * deep link lands the SectionHeader clear of the sticky header+banner at both
+ * 320px (two-line budget) and 1280px (one-line budget).
+ */
+@media (min-width: 640px) {
+  :root {
+    --banner-height: 42px;
+  }
+}
+
+/*
+ * Horizontal-overflow guard (Task 9a): no body horizontal scroll at any width
+ * from 320 to 1536. Wide content already scrolls inside its own `overflow-x: auto`
+ * container (`.forecast-chart-wrap`, `.metrics-table-wrap`), wide rows wrap
+ * (`.section-header-row`, `.forecast-legend`, `.close .foot`), and the mobile
+ * breakpoints further down collapse every multi-column grid to one column, so
+ * this is a defensive backstop rather than the primary mechanism. `clip` (not
+ * `hidden`): `hidden` would make <body> a scroll container, which would
+ * re-anchor the sticky `header.bar` / `.data-status-banner` to <body> and
+ * break their stickiness. `clip` clips the same horizontal overflow without
+ * establishing a scroll container, so the sticky shell chrome is untouched.
+ */
+body {
+  overflow-x: clip;
+}
+
+/*
  * ==========================================================================
  * Shell-level accessibility (DESIGN.md § Accessibility guarantees).
  * Per-section a11y (text/table equivalents, reduced-motion in charts/map,
@@ -231,19 +267,14 @@ html {
  * anomaly map's fly-to already self-handle `prefers-reduced-motion` (see
  * ForecastChart.tsx / AnomalyMap.tsx and the `@media` block further down in
  * this file); this covers what is left: the sticky header/footer/banner
- * chrome. (`nav[aria-label="Tabs"]` below predates the single-scroll IA and
- * matches nothing now that `page.tsx` no longer renders TabList; left in
- * place as inert CSS rather than an unrequested cleanup outside Task 3's
- * scope.) Duration-only overrides: nothing here changes layout.
+ * chrome. Duration-only overrides: nothing here changes layout.
  */
 @media (prefers-reduced-motion: reduce) {
   .bar,
   .bar *,
   .site-footer,
   .site-footer *,
-  .data-status-banner,
-  nav[aria-label='Tabs'],
-  nav[aria-label='Tabs'] * {
+  .data-status-banner {
     animation-duration: 0.01ms !important;
     animation-delay: 0s !important;
     transition-duration: 0.01ms !important;
@@ -253,42 +284,32 @@ html {
 
 /*
  * Reduced motion for the interactive micro-interactions added in the polish
- * pass (panel reveal, tab / legend hover lifts). Fully disables the animation
- * and neutralizes the hover transforms so no movement remains.
+ * pass (the forecast legend's hover lift). Fully disables the animation and
+ * neutralizes the hover transform so no movement remains.
  */
 @media (prefers-reduced-motion: reduce) {
-  .console-panel:not([hidden]),
-  .forecast-legend-btn,
-  nav[aria-label='Tabs'] button {
+  .forecast-legend-btn {
     animation: none !important;
     transition: none !important;
   }
 
-  .forecast-legend-btn:hover,
-  nav[aria-label='Tabs'] button:not([aria-current='page']):hover {
+  .forecast-legend-btn:hover {
     transform: none !important;
   }
 }
 
 /*
  * Touch targets ≥ 44px (DESIGN.md § Accessibility guarantees). Astryx's own
- * interactive elements are sized off `--size-element-{sm,md,lg}` (28/32/36px
- * — see @astryxdesign/core's compiled tokens), all under 44px, so the tabs
- * and the theme toggle need an explicit floor here. `min-height` (not
- * `height`) so it only raises the box when the native size is smaller,
- * without fighting Astryx's own `height` declaration (a used-value floor,
- * not a cascade override — both declarations coexist).
+ * interactive elements are sized off `--size-element-{sm,md,lg}` (28/32/36px,
+ * see @astryxdesign/core's compiled tokens), all under 44px, so the
+ * interactive controls need an explicit floor. `min-height` (not `height`) so
+ * it only raises the box when the native size is smaller, without fighting
+ * Astryx's own `height` declaration (a used-value floor, not a cascade
+ * override, both declarations coexist). The theme toggle's floor is set on
+ * `.bar-right button` further down; the forecast legend, semantic chips, and
+ * map-filter buttons each set their own `min-height: 44px` in their component
+ * rules; the records-list rows are floored here.
  */
-nav[aria-label='Tabs'] button {
-  min-height: 44px;
-  transition: transform var(--motion-fast) var(--ease-out);
-}
-
-/* Subtle hover lift on non-active tabs (the active tab already reads as
-   selected). Transform only; reduced-motion zeroes it via the shell block. */
-nav[aria-label='Tabs'] button:not([aria-current='page']):hover {
-  transform: translateY(-1px);
-}
 
 /* Records-list rows (Astryx ListItem renders its root as this `<li>`; see
    components/anomalies/RecordsList.tsx) — the map's accessible equivalent. */
@@ -310,6 +331,16 @@ nav[aria-label='Tabs'] button:not([aria-current='page']):hover {
 @media (min-width: 768px) {
   .shell-container {
     padding-inline: 32px;
+  }
+}
+
+/* Tighten the shell gutter on small screens (ported from the template's
+   `.wrap { padding: 0 18px }` at <=640px) so narrow acts keep more usable
+   content width. Below 768px the base 20px already applies; this trims it to
+   18px at the phone widths. */
+@media (max-width: 640px) {
+  .shell-container {
+    padding-inline: 18px;
   }
 }
 
@@ -394,6 +425,17 @@ header.bar {
   border-radius: var(--radius-full);
   background: var(--color-success);
   box-shadow: 0 0 0 3px var(--color-success-muted);
+}
+
+/* Hide the header's "Live model output" chip on narrow viewports (ported from
+   the template's `header .chip { display: none }` at <=640px) so the wordmark
+   and theme toggle keep the slim bar from crowding or wrapping. The chip is
+   only a redundant status cue; the sticky DataStatusBanner directly below
+   carries the authoritative live/commit/date line at every width. */
+@media (max-width: 640px) {
+  header.bar .chip {
+    display: none;
+  }
 }
 
 .data-status-banner {
@@ -604,10 +646,13 @@ h1.title em {
 }
 
 /* Narrow-viewport hero spacing (ported from the template's max-width:640px
-   block, hero-specific rules only). */
+   block, hero-specific rules only). `padding-inline: 18px` mirrors
+   `.shell-container`'s tightened narrow gutter so the headline/stats column
+   stays aligned with the acts below. */
 @media (max-width: 640px) {
   .hero-in {
     padding-block: 76px 56px;
+    padding-inline: 18px;
   }
 
   .herostats {
@@ -680,9 +725,15 @@ section.act {
   max-width: 62ch;
 }
 
-/* Narrow-viewport act header spacing (ported from the template's
-   max-width:640px block, act-header rules only). */
+/* Narrow-viewport act spacing (ported from the template's max-width:640px
+   block: `section.act { padding: 60px 0 }` plus the act-header rules). Each
+   act's vertical padding drops from 92px to 60px so three stacked acts don't
+   over-scroll on a phone. */
 @media (max-width: 640px) {
+  section.act {
+    padding-block: 60px;
+  }
+
   .acthead {
     gap: 12px;
   }
@@ -836,36 +887,6 @@ section.act {
   .methodology-summary::before {
     transition: none !important;
   }
-}
-
-.console-panel {
-  padding-block: 32px;
-}
-
-/* Motivated tab-switch / page-load reveal: the newly-shown panel fades and
-   settles up a few px. Transform + opacity only (compositor-friendly, no
-   reflow). Re-runs each time a panel goes from hidden to shown, giving the one
-   orchestrated reveal per section DESIGN.md calls for. Disabled under
-   reduced-motion below. */
-.console-panel:not([hidden]) {
-  animation: panel-reveal var(--motion-base) var(--ease-out) both;
-}
-
-@keyframes panel-reveal {
-  from {
-    opacity: 0;
-    transform: translateY(6px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-.console-panel-placeholder {
-  font-family: var(--font-body);
-  color: var(--color-text-secondary);
-  margin-top: 8px;
 }
 
 /* Nests inside `.acthead` (a flex row: act number + this row), so this needs

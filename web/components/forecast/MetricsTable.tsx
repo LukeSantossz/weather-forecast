@@ -130,6 +130,20 @@ export default function MetricsTable({ metrics }: MetricsTableProps) {
     },
   };
 
+  // The `rmse_bar` column is purely decorative: its cells are aria-hidden (see
+  // barCell) and the exact figure it visualizes lives in the real `rmse_c`
+  // column. Its "RMSE bar" header would otherwise still be announced during
+  // screen-reader column navigation as a labeled column with no perceivable
+  // content. Hiding just that `<th>` from the accessibility tree (its visible
+  // text stays for sighted users) drops the phantom column header; every other
+  // header, including `rmse_c`, is left untouched.
+  const barHeaderPlugin: TablePlugin<MetricsRow> = {
+    transformHeaderCell: (props, column) => {
+      if (column.key !== 'rmse_bar') return props;
+      return { ...props, htmlProps: { ...props.htmlProps, 'aria-hidden': true } };
+    },
+  };
+
   return (
     <div className="metrics-table-wrap">
       <Table<MetricsRow>
@@ -138,7 +152,7 @@ export default function MetricsTable({ metrics }: MetricsTableProps) {
         idKey="id"
         dividers="rows"
         density="balanced"
-        plugins={{ bestRow: bestRowPlugin }}
+        plugins={{ bestRow: bestRowPlugin, barHeader: barHeaderPlugin }}
       />
     </div>
   );

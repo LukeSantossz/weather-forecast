@@ -141,7 +141,11 @@ export default function AnomaliesSection() {
           <div className="mapwrap">
             <MapSkeleton />
             <div className="ticker" aria-hidden="true">
-              <Skeleton width="100%" height="100%" radius={0} />
+              {/* Definite height: `.ticker` has no explicit height in its
+                  loading state, so a `height="100%"` skeleton would resolve
+                  against an auto (0) basis and collapse. 380px matches the
+                  ready-state ticker's own `max-height`. */}
+              <Skeleton width="100%" height={380} radius={0} />
             </div>
           </div>
           <div className="records-list-wrap">
@@ -180,9 +184,13 @@ export default function AnomaliesSection() {
             ) : (
               <MapSkeleton />
             )}
-            <div className="ticker" aria-label="Most extreme flagged readings">
-              {ticker.map((r) => (
-                <div className="tkrow" key={`${r.ts}-${r.country}`}>
+            {/* role="list"/"listitem" so the aria-label is announced (a
+                role-less <div> makes aria-label inert for assistive tech) and
+                the "most extreme" readings read as a genuine list. The full
+                RecordsList below remains the map's primary text equivalent. */}
+            <div className="ticker" role="list" aria-label="Most extreme flagged readings">
+              {ticker.map((r, i) => (
+                <div className="tkrow" role="listitem" key={`${r.ts}-${r.country}-${i}`}>
                   <div>
                     <div className="cc">{r.country}</div>
                     <div className="cm">
