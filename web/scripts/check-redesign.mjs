@@ -33,22 +33,31 @@ const page = readFileSync(fileURLToPath(new URL('../app/page.tsx', import.meta.u
 if (page.includes('TabList')) fail('app/page.tsx still imports/uses TabList');
 
 // 3) The data contract is untouched by this branch.
-// Uses the local `main` branch as the base ref, not `origin/main` (this checkout may have
-// no `origin` remote, or `main` may not be fetched under that name). The diff is run with
-// cwd at the repo root so the `web/public/data` pathspec resolves correctly regardless of
-// where this script itself lives. This assertion must actually run: if the base ref cannot
-// be resolved (or the diff otherwise cannot be computed), that is a hard failure, not a
-// skip - a silent skip would let the check report overall success without ever having
-// verified the data contract.
+// Resolves the base ref to diff the data contract against, trying the local `main` branch
+// first (present in a normal working copy) and then `origin/main` (present in CI, where the
+// PR head is checked out and `main` is not created as a local branch). The diff runs with
+// cwd at the repo root so the `web/public/data` pathspec resolves regardless of where this
+// script lives. This assertion must actually run: if NO base ref resolves (or the diff
+// cannot be computed), that is a hard failure, not a skip - a silent skip would let the
+// check report overall success without ever having verified the data contract.
 const REPO_ROOT = fileURLToPath(new URL('../../', import.meta.url));
-const BASE_REF = 'main';
-try {
-  execSync(`git rev-parse --verify ${BASE_REF}`, { cwd: REPO_ROOT, stdio: 'ignore' });
-  const changed = execSync(`git diff --name-only ${BASE_REF} -- web/public/data`, { cwd: REPO_ROOT })
+const BASE_CANDIDATES = ['main', 'origin/main'];
+let baseRef = null;
+for (const ref of BASE_CANDIDATES) {
+  try {
+    execSync(`git rev-parse --verify ${ref}`, { cwd: REPO_ROOT, stdio: 'ignore' });
+    baseRef = ref;
+    break;
+  } catch {
+    // ref not present in this checkout; try the next candidate
+  }
+}
+if (baseRef === null) {
+  fail(`cannot resolve any base ref (${BASE_CANDIDATES.join(', ')}) to verify the data contract`);
+} else {
+  const changed = execSync(`git diff --name-only ${baseRef} -- web/public/data`, { cwd: REPO_ROOT })
     .toString().trim();
   if (changed) fail(`data contract changed:\n${changed}`);
-} catch (err) {
-  fail(`cannot resolve base ref '${BASE_REF}' to verify the data contract (${err.message.split('\n')[0]})`);
 }
 
 if (failed) { console.error('\nredesign check FAILED'); process.exit(1); }
