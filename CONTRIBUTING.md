@@ -18,8 +18,6 @@ pip install -r requirements.txt
 If you cloned without `--recurse-submodules`, run `git submodule update --init`
 so `.standards/` is populated.
 
-## Setup
-
 After cloning (with `--recurse-submodules`, or run `git submodule update --init` for
 `.standards`), activate the Git hooks once:
 
