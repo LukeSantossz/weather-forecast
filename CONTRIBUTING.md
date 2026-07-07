@@ -18,6 +18,16 @@ pip install -r requirements.txt
 If you cloned without `--recurse-submodules`, run `git submodule update --init`
 so `.standards/` is populated.
 
+## Setup
+
+After cloning (with `--recurse-submodules`, or run `git submodule update --init` for
+`.standards`), activate the Git hooks once:
+
+    bash scripts/setup.sh
+
+This sets `core.hooksPath` to `.githooks`, enabling the R2 pre-push review gate (it skips
+gracefully if the Codex CLI is not installed).
+
 ## Workflow
 
 1. **Specify before building.** For any non-trivial change, write a `SPEC.md`
