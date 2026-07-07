@@ -33,10 +33,11 @@ existing offline semantic search, which is restyled into the Anomalies act and c
 top matches highlight on the map. `.ulpi/design/DESIGN.md` is rewritten to the Observatory identity
 as the new locked source of truth.
 
-## Architecture Decisions (ADR candidates for `docs/adr/`)
+## Architecture Decisions
 
-To be promoted by the Developer at the Spec Gate; each is hard to reverse or supersedes a prior
-locked decision.
+Promoted to `docs/adr/` at the Spec Gate (`adr-f-observatory-identity.md`,
+`adr-g-single-scroll-narrative.md`, `adr-h-nextfont-typography.md`); each is hard to reverse or
+supersedes a prior locked decision. Summarised here.
 
 - **ADR-F. Replace the "instrument console" identity with "Observatory."** Supersedes the
   `DESIGN.md` lock and the presentation half of SPEC 0006. Rationale: for an ML-hiring skim, a
