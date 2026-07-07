@@ -55,9 +55,17 @@ for (const ref of BASE_CANDIDATES) {
 if (baseRef === null) {
   fail(`cannot resolve any base ref (${BASE_CANDIDATES.join(', ')}) to verify the data contract`);
 } else {
-  const changed = execSync(`git diff --name-only ${baseRef} -- web/public/data`, { cwd: REPO_ROOT })
-    .toString().trim();
-  if (changed) fail(`data contract changed:\n${changed}`);
+  // Only Modified/Deleted existing contract files are a violation; ADDED artifacts are
+  // allowed (a feature may ship a new Python-generated artifact, e.g. anomaly_model.json,
+  // without touching the existing contract). --diff-filter=MD keeps the "existing contract
+  // stays byte-identical" guarantee while permitting additive files.
+  const changed = execSync(
+    `git diff --name-only --diff-filter=MD ${baseRef} -- web/public/data`,
+    { cwd: REPO_ROOT },
+  )
+    .toString()
+    .trim();
+  if (changed) fail(`existing data-contract file changed:\n${changed}`);
 }
 
 if (failed) { console.error('\nredesign check FAILED'); process.exit(1); }
