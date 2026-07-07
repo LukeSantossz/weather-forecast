@@ -33,7 +33,7 @@ graphite-and-amber console default: warm-ink neutrals plus one ember accent and 
 predicting the aesthetic twice over.
 
 **Direction validated:** against the committed interactive preview
-(`docs/design/observatory-preview-template.html`), running on the real `2026-07-05` pipeline output,
+(the approved observatory design preview), running on the real `2026-07-05` pipeline output,
 approved by the owner before SPEC 0031 (ADR-F). This supersedes the "Inspiration DNA" citations of the
 prior identity; Observatory's reference is the approved preview itself, not a named external site.
 
@@ -41,7 +41,7 @@ prior identity; Observatory's reference is the approved preview itself, not a na
 
 Neutrals are warm-ink: a near-black ground with a warm, papery undertone in light mode and a warm
 near-black in dark mode, never a cool gray and never cream. Hex values below are the committed source of
-truth (`docs/design/observatory-preview-template.html`); the engineer verifies exact WCAG ratios in code.
+truth (the approved observatory design preview); the engineer verifies exact WCAG ratios in code.
 
 **Core surfaces (light / dark)**
 | role | light | dark | notes |

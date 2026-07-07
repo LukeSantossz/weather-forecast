@@ -9,8 +9,8 @@ import type { ForecastPoint, ForecastSeriesData } from '../../lib/contract';
 // § Section 1). Astryx has no chart layer, so this is hand-built; d3-scale
 // gives the scales and d3-shape the line generator (both pure, CSR-safe).
 //
-// Container-width viewBox geometry (ported from docs/design/
-// observatory-preview-template.html's FORECAST CHART IIFE `draw(force)` +
+// Container-width viewBox geometry (ported from the approved observatory design
+// preview's forecast-chart `draw(force)` +
 // ResizeObserver pattern): the SVG's viewBox is recomputed from the wrapper's
 // real measured width on mount and on resize, so every coordinate below lives
 // in a coordinate system that matches the container 1:1 - no fixed min-width,

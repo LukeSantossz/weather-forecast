@@ -59,9 +59,8 @@ export interface SemanticSearchProps {
 // DESIGN: a keyless, offline semantic-search demo over the precomputed anomaly
 // embeddings (issue #32). Selecting an example query ranks records by cosine
 // similarity in the browser -- no model, no network beyond the static JSON
-// already loaded via loadAnomalyEmbeddings. Restyled to the Observatory
-// `.semchip`/`.semrow`/`.semscorebar` (docs/design/
-// observatory-preview-template.html); the ranking algorithm above is
+// already loaded via loadAnomalyEmbeddings. Restyled to the approved observatory
+// design preview's `.semchip`/`.semrow`/`.semscorebar`; the ranking algorithm above is
 // unchanged.
 export default function SemanticSearch({ mapRef }: SemanticSearchProps) {
   const [status, setStatus] = useState<LoadStatus>('loading');

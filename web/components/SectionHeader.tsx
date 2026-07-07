@@ -17,8 +17,8 @@ type SectionHeaderProps = {
   actNumber?: string;
 };
 
-// The numbered "act" header (ported from docs/design/
-// observatory-preview-template.html's `.acthead`/`.actnum`/`.actt`/`.actlede`):
+// The numbered "act" header (ported from the approved observatory design
+// preview's `.acthead`/`.actnum`/`.actt`/`.actlede`):
 // a mono act number, the serif title, and a one-line lede. Shared by every
 // section; page.tsx threads the act number per section's order.
 export default function SectionHeader({ title, headingId, chip, description, actNumber }: SectionHeaderProps) {

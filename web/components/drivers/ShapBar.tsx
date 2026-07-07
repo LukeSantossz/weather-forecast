@@ -26,8 +26,8 @@ function formatShapValue(value: number): string {
 
 /**
  * Horizontal bars of `mean_abs_shap` per feature (dashboard-phase1.md § Section 3),
- * ported from the Observatory preview template's `.shap`/`.srow`/`.sbar`
- * (docs/design/observatory-preview-template.html). Sorted descending (standard
+ * ported from the approved observatory design preview's `.shap`/`.srow`/`.sbar`.
+ * Sorted descending (standard
  * SHAP importance ordering); direct mono value labels; a cool -> warm ramp keyed
  * to each feature's own magnitude (its `mean_abs_shap` as a fraction of the
  * largest one in this sample), built from the locked `--color-info` (cool pole)

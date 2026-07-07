@@ -32,7 +32,7 @@ function statusCell(row: MetricsRow): ReactNode {
   return <ProvenanceChip tone="pending" label="[ PENDING RE-RUN ]" title={row.note ?? PENDING_TITLE} />;
 }
 
-// The leaderboard bar (ported from docs/design/observatory-preview-template.html's
+// The leaderboard bar (ported from the approved observatory design preview's
 // `.bartrack`/`.bar`): a horizontal RMSE bar scaled to the weakest `final`
 // baseline (`maxRmse`), decorative only - the numeric RMSE cell already carries
 // the exact figure accessibly (DESIGN.md § Accessibility: never color/shape-only
