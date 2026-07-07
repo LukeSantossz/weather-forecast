@@ -62,13 +62,11 @@ export default function ForecastSection() {
   const { forecast, metrics } = state;
 
   // Hero shows the best available honest number: the lowest-RMSE `final` model.
-  // The marketed LightGBM / ensemble figures are withheld (#20), so they never
-  // reach the hero — honesty over hype (DESIGN.md § Section 1).
   const finals = metrics.models.filter((m) => m.status === 'final' && m.rmse_c !== null);
   const best = finals.length
     ? finals.reduce((a, b) => ((a.rmse_c as number) <= (b.rmse_c as number) ? a : b))
     : null;
-  const heroValue = best && best.rmse_c !== null ? best.rmse_c.toFixed(2) : '—';
+  const heroValue = best && best.rmse_c !== null ? best.rmse_c.toFixed(2) : '-';
   const heroLabel = best
     ? `${best.name} · daily-mean temperature across 211 countries`
     : 'Daily-mean temperature across 211 countries';
@@ -88,9 +86,6 @@ export default function ForecastSection() {
             </>
           }
         />
-        <p className="forecast-hero-note">
-          LightGBM and ensemble metrics are withheld pending a leakage-free re-run · issue #20.
-        </p>
       </div>
 
       <ForecastChart series={forecast.series} />

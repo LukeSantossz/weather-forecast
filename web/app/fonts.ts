@@ -1,12 +1,13 @@
 // Self-hosted Google Fonts for the locked type system (.ulpi/design/DESIGN.md § Type).
-// Archivo = display, Hanken Grotesk = body/UI, IBM Plex Mono = data/mono.
+// Fraunces = display (serif), Hanken Grotesk = body/UI, IBM Plex Mono = data/mono.
 // Each is exposed as a CSS variable and bound to Astryx's font-family tokens
 // in `theme.css` (--font-family-heading / --font-family-body / --font-family-code).
-import { Archivo, Hanken_Grotesk, IBM_Plex_Mono } from 'next/font/google';
+import { Fraunces, Hanken_Grotesk, IBM_Plex_Mono } from 'next/font/google';
 
-export const archivo = Archivo({
+export const display = Fraunces({
   subsets: ['latin'],
-  weight: ['500', '600', '700'],
+  weight: ['500', '600'],
+  style: ['normal', 'italic'],
   variable: '--font-display',
   display: 'swap',
 });

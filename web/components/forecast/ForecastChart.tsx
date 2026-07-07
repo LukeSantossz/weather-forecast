@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { scaleLinear, scaleUtc } from 'd3-scale';
 import { line } from 'd3-shape';
 import type { ForecastPoint, ForecastSeriesData } from '../../lib/contract';
@@ -9,18 +9,21 @@ import type { ForecastPoint, ForecastSeriesData } from '../../lib/contract';
 // § Section 1). Astryx has no chart layer, so this is hand-built; d3-scale
 // gives the scales and d3-shape the line generator (both pure, CSR-safe).
 //
-// Fixed viewBox geometry: the SVG scales to its container width, so every
-// coordinate lives in this internal system. All emitted coordinates are
-// rounded to integers — this keeps the instrument crisp and, deliberately,
-// guarantees no accidental two-decimal substring (e.g. the retracted "0.19")
-// can ever appear inside a path `d`.
-const VIEW_W = 920;
-const VIEW_H = 400;
-const MARGIN = { top: 16, right: 96, bottom: 34, left: 44 };
-const PLOT_LEFT = MARGIN.left;
-const PLOT_RIGHT = VIEW_W - MARGIN.right;
-const PLOT_TOP = MARGIN.top;
-const PLOT_BOTTOM = VIEW_H - MARGIN.bottom;
+// Container-width viewBox geometry (ported from docs/design/
+// observatory-preview-template.html's FORECAST CHART IIFE `draw(force)` +
+// ResizeObserver pattern): the SVG's viewBox is recomputed from the wrapper's
+// real measured width on mount and on resize, so every coordinate below lives
+// in a coordinate system that matches the container 1:1 - no fixed min-width,
+// no distortion from CSS scaling a mismatched viewBox down. All emitted
+// coordinates are rounded to integers - this keeps the instrument crisp and,
+// deliberately, guarantees no accidental two-decimal substring (e.g. the
+// retracted "0.19") can ever appear inside a path `d`.
+const DEFAULT_VIEW_W = 920; // seed for the very first paint, before the layout effect below measures the real container width
+const MOBILE_BREAKPOINT = 560;
+const VIEW_H_DESKTOP = 400;
+const VIEW_H_MOBILE = 300;
+const MARGIN_DESKTOP = { top: 16, right: 96, bottom: 34, left: 44 };
+const MARGIN_MOBILE = { top: 14, right: 60, bottom: 30, left: 32 };
 
 const round = (n: number): number => Math.round(n);
 const parseDate = (iso: string): Date => new Date(`${iso}T00:00:00Z`);
@@ -57,6 +60,20 @@ const DRAW_WEIGHT: Record<string, number> = {
   ensemble_weighted: 6,
 };
 
+// Abbreviated end-labels for the mobile branch (W < 560), ported from the
+// template's "Obs"/"Fc" shorthand pattern - same fixed series ids as
+// DRAW_WEIGHT above (not invented; every id here is a real model/series id
+// from the forecast contract).
+const MOBILE_END_LABEL: Record<string, string> = {
+  actual: 'Actual',
+  history: 'Hist',
+  ensemble_weighted: 'Ens',
+  lightgbm: 'LGBM',
+  sarima: 'SARIMA',
+  arima: 'ARIMA',
+  prophet: 'Proph',
+};
+
 interface HoverState {
   date: string;
   xPos: number;
@@ -75,6 +92,11 @@ export default function ForecastChart({ series }: ForecastChartProps) {
   // Draw-in animation runs only after mount and only when motion is allowed;
   // starting `false` means the prerendered/SSR output has static lines.
   const [animate, setAnimate] = useState(false);
+  // The wrapper's real measured width in CSS pixels, recomputed on mount and
+  // on resize (see the layout effect below). Doubles as the viewBox width, so
+  // 1 SVG user unit always equals 1 real CSS pixel - required for the ">=~9px
+  // axis text" accessibility floor to hold at any container width.
+  const [viewW, setViewW] = useState(DEFAULT_VIEW_W);
   const svgRef = useRef<SVGSVGElement>(null);
   const chartRef = useRef<HTMLDivElement>(null);
 
@@ -82,6 +104,54 @@ export default function ForecastChart({ series }: ForecastChartProps) {
     const mq = window.matchMedia('(prefers-reduced-motion: reduce)');
     setAnimate(!mq.matches);
   }, []);
+
+  // Container-width reflow (ported from the template's `draw(force)` +
+  // ResizeObserver pattern). Runs as a layout effect (not a plain effect) so
+  // the first real measurement lands before paint, avoiding a flash of the
+  // `DEFAULT_VIEW_W` desktop geometry on a narrow first load. Measures the
+  // SVG's own rendered box (not the padded wrapper), matching the template's
+  // `svg.getBoundingClientRect().width` - this is the same box `width: 100%`
+  // resolves to, so no manual padding/border arithmetic is needed here.
+  useLayoutEffect(() => {
+    const svg = svgRef.current;
+    const box = svg?.parentElement;
+    if (!svg || !box) return;
+
+    const measure = () => {
+      const measured = svg.getBoundingClientRect().width || box.clientWidth || DEFAULT_VIEW_W;
+      // Guards only against a literal zero/negative measurement (e.g. a
+      // transiently hidden layout); deliberately NOT clamped up to a larger
+      // "design minimum" the way the template clamps to 320 - doing that here
+      // would make the viewBox wider than the real rendered box, shrinking
+      // every font-size in this component below its real CSS-pixel value and
+      // silently breaking the ">=~9px axis text" a11y floor on narrow screens.
+      setViewW(Math.max(1, Math.round(measured)));
+    };
+
+    measure();
+
+    let debounce: ReturnType<typeof setTimeout> | undefined;
+    const ro = new ResizeObserver(() => {
+      clearTimeout(debounce);
+      debounce = setTimeout(measure, 120);
+    });
+    ro.observe(box);
+
+    return () => {
+      clearTimeout(debounce);
+      ro.disconnect();
+    };
+  }, []);
+
+  const mobile = viewW < MOBILE_BREAKPOINT;
+  const viewH = mobile ? VIEW_H_MOBILE : VIEW_H_DESKTOP;
+  const margin = mobile ? MARGIN_MOBILE : MARGIN_DESKTOP;
+  const plotLeft = margin.left;
+  const plotRight = viewW - margin.right;
+  const plotTop = margin.top;
+  const plotBottom = viewH - margin.bottom;
+  const axisFontSize = mobile ? 9.5 : 11;
+  const endLabelFontSize = mobile ? 10 : 11;
 
   const allSeries = useMemo<SeriesSpec[]>(() => {
     const byId = new Map(series.models.map((m) => [m.id, m]));
@@ -119,13 +189,13 @@ export default function ForecastChart({ series }: ForecastChartProps) {
     const pad = (vMax - vMin) * 0.08 || 1;
     const xs = scaleUtc()
       .domain([new Date(Math.min(...times)), new Date(Math.max(...times))])
-      .range([PLOT_LEFT, PLOT_RIGHT]);
+      .range([plotLeft, plotRight]);
     const ys = scaleLinear()
       .domain([vMin - pad, vMax + pad])
       .nice()
-      .range([PLOT_BOTTOM, PLOT_TOP]);
+      .range([plotBottom, plotTop]);
     return { x: xs, y: ys, yTicks: ys.ticks(6), xTicks: xs.ticks(6) };
-  }, [allSeries]);
+  }, [allSeries, plotLeft, plotRight, plotTop, plotBottom]);
 
   const pathFor = useMemo(() => {
     const gen = line<ForecastPoint>()
@@ -180,14 +250,14 @@ export default function ForecastChart({ series }: ForecastChartProps) {
     for (let i = 1; i < placed.length; i++) {
       if (placed[i].yLabel < placed[i - 1].yLabel + gap) placed[i].yLabel = placed[i - 1].yLabel + gap;
     }
-    if (placed.length && placed[placed.length - 1].yLabel > PLOT_BOTTOM) {
-      placed[placed.length - 1].yLabel = PLOT_BOTTOM;
+    if (placed.length && placed[placed.length - 1].yLabel > plotBottom) {
+      placed[placed.length - 1].yLabel = plotBottom;
       for (let i = placed.length - 2; i >= 0; i--) {
         if (placed[i].yLabel > placed[i + 1].yLabel - gap) placed[i].yLabel = placed[i + 1].yLabel - gap;
       }
     }
     return placed;
-  }, [allSeries, hidden, y, maxDate]);
+  }, [allSeries, hidden, y, maxDate, plotBottom]);
 
   const readoutItems = hover
     ? allSeries
@@ -214,8 +284,8 @@ export default function ForecastChart({ series }: ForecastChartProps) {
     if (!svg || !chart || datePositions.length === 0) return;
     const rect = svg.getBoundingClientRect();
     if (rect.width === 0) return;
-    const vx = ((e.clientX - rect.left) / rect.width) * VIEW_W;
-    if (vx < PLOT_LEFT || vx > PLOT_RIGHT) {
+    const vx = ((e.clientX - rect.left) / rect.width) * viewW;
+    if (vx < plotLeft || vx > plotRight) {
       setHover(null);
       return;
     }
@@ -245,7 +315,7 @@ export default function ForecastChart({ series }: ForecastChartProps) {
         <svg
           ref={svgRef}
           className="forecast-chart-svg"
-          viewBox={`0 0 ${VIEW_W} ${VIEW_H}`}
+          viewBox={`0 0 ${viewW} ${viewH}`}
           role="img"
           aria-label="Line chart of daily global mean temperature in degrees Celsius: training history, the 30-day holdout actuals, and five model forecasts. The equivalent data table follows."
           onMouseMove={handleMove}
@@ -256,25 +326,43 @@ export default function ForecastChart({ series }: ForecastChartProps) {
             const yp = round(y(t));
             return (
               <g key={`y-${t}`}>
-                <line className="forecast-grid-line" x1={PLOT_LEFT} x2={PLOT_RIGHT} y1={yp} y2={yp} />
-                <text className="forecast-tick-label" x={PLOT_LEFT - 8} y={yp + 4} textAnchor="end">
+                <line className="forecast-grid-line" x1={plotLeft} x2={plotRight} y1={yp} y2={yp} />
+                <text
+                  className="forecast-tick-label"
+                  x={plotLeft - 8}
+                  y={yp + 4}
+                  textAnchor="end"
+                  style={{ fontSize: axisFontSize }}
+                >
                   {fmtTick(t)}
                 </text>
               </g>
             );
           })}
-          <text className="forecast-axis-title" x={PLOT_LEFT - 8} y={PLOT_TOP - 4} textAnchor="start">
+          <text
+            className="forecast-axis-title"
+            x={plotLeft - 8}
+            y={plotTop - 4}
+            textAnchor="start"
+            style={{ fontSize: axisFontSize }}
+          >
             °C
           </text>
 
           {/* Bottom x-axis with precision ticks + date labels. */}
-          <line className="forecast-axis-line" x1={PLOT_LEFT} x2={PLOT_RIGHT} y1={PLOT_BOTTOM} y2={PLOT_BOTTOM} />
+          <line className="forecast-axis-line" x1={plotLeft} x2={plotRight} y1={plotBottom} y2={plotBottom} />
           {xTicks.map((t) => {
             const xp = round(x(t));
             return (
               <g key={`x-${t.getTime()}`}>
-                <line className="forecast-axis-line" x1={xp} x2={xp} y1={PLOT_BOTTOM} y2={PLOT_BOTTOM + 4} />
-                <text className="forecast-tick-label" x={xp} y={PLOT_BOTTOM + 18} textAnchor="middle">
+                <line className="forecast-axis-line" x1={xp} x2={xp} y1={plotBottom} y2={plotBottom + 4} />
+                <text
+                  className="forecast-tick-label"
+                  x={xp}
+                  y={plotBottom + 18}
+                  textAnchor="middle"
+                  style={{ fontSize: axisFontSize }}
+                >
                   {fmtDate(t)}
                 </text>
               </g>
@@ -282,8 +370,14 @@ export default function ForecastChart({ series }: ForecastChartProps) {
           })}
 
           {/* Train / holdout boundary at train_end. */}
-          <line className="forecast-boundary-line" x1={xBoundary} x2={xBoundary} y1={PLOT_TOP} y2={PLOT_BOTTOM} />
-          <text className="forecast-boundary-label" x={xBoundary + 4} y={PLOT_TOP + 10} textAnchor="start">
+          <line className="forecast-boundary-line" x1={xBoundary} x2={xBoundary} y1={plotTop} y2={plotBottom} />
+          <text
+            className="forecast-boundary-label"
+            x={xBoundary + 4}
+            y={plotTop + 10}
+            textAnchor="start"
+            style={{ fontSize: axisFontSize }}
+          >
             Holdout
           </text>
 
@@ -301,35 +395,37 @@ export default function ForecastChart({ series }: ForecastChartProps) {
               />
             ))}
 
-          {/* Direct end-labels with short leader lines. */}
+          {/* Direct end-labels with short leader lines (abbreviated on the
+              mobile branch, e.g. "Ensemble" -> "Ens", so the tighter right
+              margin doesn't clip them). */}
           {endLabels.map((l) => (
             <g key={`end-${l.id}`}>
               {/* Leader + label share the darker `-text` variant so both clear
                   contrast (label >=4.5:1 text, leader >=3:1 UI stroke) in light
                   mode; the plotted line above keeps the bright series color. */}
               <line
-                x1={PLOT_RIGHT}
+                x1={plotRight}
                 y1={l.y0}
-                x2={PLOT_RIGHT + 5}
+                x2={plotRight + 5}
                 y2={l.yLabel}
                 style={{ stroke: l.labelColor }}
                 strokeWidth={1}
               />
               <text
                 className="forecast-endlabel"
-                x={PLOT_RIGHT + 8}
+                x={plotRight + 8}
                 y={l.yLabel + 3}
                 textAnchor="start"
-                style={{ fill: l.labelColor }}
+                style={{ fill: l.labelColor, fontSize: endLabelFontSize }}
               >
-                {l.label}
+                {mobile ? (MOBILE_END_LABEL[l.id] ?? l.label) : l.label}
               </text>
             </g>
           ))}
 
           {/* Hover crosshair + per-series dots. */}
           {hover && (
-            <line className="forecast-crosshair" x1={hover.xPos} x2={hover.xPos} y1={PLOT_TOP} y2={PLOT_BOTTOM} />
+            <line className="forecast-crosshair" x1={hover.xPos} x2={hover.xPos} y1={plotTop} y2={plotBottom} />
           )}
           {hover &&
             readoutItems.map((it) => (

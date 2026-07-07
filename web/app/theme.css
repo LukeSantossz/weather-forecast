@@ -1,5 +1,5 @@
 /*
- * theme.css — binds Astryx's CSS-variable tokens to the locked design
+ * theme.css - binds Astryx's CSS-variable tokens to the locked design
  * language in `.ulpi/design/DESIGN.md`. Layered AFTER astryx.css and
  * theme-neutral/theme.css (see import order in app/layout.tsx).
  *
@@ -8,7 +8,7 @@
  * (see the "Layer order" note in @astryxdesign/core/reset.css). They target
  * `:root`, the same element that carries `data-astryx-theme="neutral"`.
  *
- * Hex values below are the ONLY off-token hex in this codebase — they are
+ * Hex values below are the ONLY off-token hex in this codebase - they are
  * DESIGN.md's locked palette, transcribed verbatim.
  */
 
@@ -17,7 +17,7 @@
  * set on <html>. Astryx's own theme-neutral/theme.css sets an unconditional
  * `:root { color-scheme: light dark }` inside `@layer astryx-theme`, which
  * outranks reset.css's `html[data-theme]` mapping (also layered, but in the
- * lower-priority `reset` layer) regardless of specificity — CSS layers beat
+ * lower-priority `reset` layer) regardless of specificity - CSS layers beat
  * specificity. These two rules are unlayered (this file has no @layer), so
  * they win over both and actually force the mode. Verified in-browser: the
  * toggle silently no-op'd on background/surface colors without this.
@@ -32,48 +32,48 @@ html[data-theme='dark'] {
 
 :root {
   /* --- Color: background / surface / elevated (DESIGN.md § Color) --- */
-  --color-background-body: light-dark(#f6f8fa, #14171c);
-  --color-background-surface: light-dark(#ffffff, #1b1f26);
-  --color-background-card: light-dark(#ffffff, #1b1f26);
-  --color-background-muted: light-dark(#f6f8fa, #14171c);
-  --color-background-popover: light-dark(#fbfcfe, #242a33);
+  --color-background-body: light-dark(#f7f6f3, #141210);
+  --color-background-surface: light-dark(#ffffff, #1b1815);
+  --color-background-card: light-dark(#ffffff, #1b1815);
+  --color-background-muted: light-dark(#f7f6f3, #141210);
+  --color-background-popover: light-dark(#ffffff, #24201b);
 
   /* --- Color: text (primary / muted / subtle) --- */
-  --color-text-primary: light-dark(#1c2128, #eef1f5);
-  --color-icon-primary: light-dark(#1c2128, #eef1f5);
-  --color-text-secondary: light-dark(#5b6672, #a3adba);
-  --color-icon-secondary: light-dark(#5b6672, #a3adba);
+  --color-text-primary: light-dark(#201c18, #f3ece2);
+  --color-icon-primary: light-dark(#201c18, #f3ece2);
+  --color-text-secondary: light-dark(#5e574e, #a79e92);
+  --color-icon-secondary: light-dark(#5e574e, #a79e92);
   /* "subtle": large/decorative only per DESIGN.md; essential small text uses
      the "muted" tier above. Mapped onto Astryx's disabled tier, the closest
      built-in de-emphasis role (assumption, cheap to revisit). */
-  --color-text-disabled: light-dark(#8592a0, #71808f);
-  --color-icon-disabled: light-dark(#8592a0, #71808f);
+  --color-text-disabled: light-dark(#8b8377, #6f6659);
+  --color-icon-disabled: light-dark(#8b8377, #6f6659);
 
   /* --- Color: border (hairlines, precision ticks) --- */
-  --color-border: light-dark(#dde2e9, #343c47);
-  --color-border-emphasized: light-dark(#dde2e9, #343c47);
+  --color-border: light-dark(#e5e0d8, #37312b);
+  --color-border-emphasized: light-dark(#d8d1c6, #453e36);
 
-  /* --- Color: the single amber accent --- */
-  --color-accent: #e0942e;
-  --color-text-accent: #e0942e;
-  --color-icon-accent: #e0942e;
+  /* --- Color: the single ember accent --- */
+  --color-accent: light-dark(#d8511c, #f2612c);
+  --color-text-accent: light-dark(#b8410f, #f7855a);
+  --color-icon-accent: light-dark(#d8511c, #f2612c);
   /* alpha tint of the same locked accent hex, following Astryx's own
      `accent-muted` convention (hex + alpha suffix), not a new color. */
-  --color-accent-muted: light-dark(#e0942e33, #e0942e3f);
-  --color-on-accent: #1c2128;
+  --color-accent-muted: light-dark(#d8511c1f, #f2612c33);
+  --color-on-accent: light-dark(#ffffff, #1b1712);
 
   /* --- Color: semantic warning/pending (needed by DataStatusBanner) --- */
-  --color-warning: light-dark(#b8902a, #d8b23a);
-  --color-warning-muted: light-dark(#b8902a33, #d8b23a3f);
-  --color-on-warning: #1c2128;
+  --color-warning: light-dark(#b8902a, #e0b341);
+  --color-warning-muted: light-dark(#b8902a29, #e0b34133);
+  --color-on-warning: #1b1712;
 
   /* --- Color: semantic success/danger/info (needed by ProvenanceChip) --- */
-  --color-success: light-dark(#1f8f5c, #3fae7a);
-  --color-success-muted: light-dark(#1f8f5c33, #3fae7a3f);
+  --color-success: light-dark(#1f8f5c, #46b482);
+  --color-success-muted: light-dark(#1f8f5c29, #46b48233);
   --color-danger: light-dark(#cc4a2e, #e0603f);
-  --color-danger-muted: light-dark(#cc4a2e33, #e0603f3f);
-  --color-info: light-dark(#2f88ab, #4aa6c9);
-  --color-info-muted: light-dark(#2f88ab33, #4aa6c93f);
+  --color-danger-muted: light-dark(#cc4a2e29, #e0603f33);
+  --color-info: light-dark(#0e86aa, #3fa9c7);
+  --color-info-muted: light-dark(#0e86aa29, #3fa9c733);
 
   /*
    * `-text` variants of the semantic tones for SMALL colored text sitting on
@@ -83,24 +83,24 @@ html[data-theme='dark'] {
    * fills, borders and icons. These are the light-darkened / dark-brightened
    * hue-preserving pairs that reach >=4.5:1 for 12px chip text in BOTH themes.
    */
-  --color-warning-text: light-dark(#7e631d, #ddbc53);
-  --color-success-text: light-dark(#187148, #76c5a0);
-  --color-danger-text: light-dark(#a93d26, #eb9781);
-  --color-info-text: light-dark(#256b86, #7dbfd8);
+  --color-warning-text: light-dark(#7e631d, #e6c463);
+  --color-success-text: light-dark(#187148, #79c9a4);
+  --color-danger-text: light-dark(#a93d26, #ef9a80);
+  --color-info-text: light-dark(#1f6f8a, #7ec9dd);
 
   /*
-   * --- Dataviz palette (charts only) — DESIGN.md § Dataviz palette ---
+   * --- Dataviz palette (charts only) - DESIGN.md § Dataviz palette ---
    * The forecast series categorical scale, transcribed verbatim from
    * DESIGN.md. Series that coincide with a semantic role reuse its
    * theme-aware token (better light-mode contrast); violet and rose have no
    * semantic role, so they carry DESIGN.md's single locked hex (the only
    * off-token hex, same convention as the palette above). Never encode a
-   * series by hue alone — every line also carries a direct label + legend
+   * series by hue alone - every line also carries a direct label + legend
    * text + the a11y table (see components/forecast/ForecastChart.tsx).
    */
   --viz-actual: var(--color-text-primary); /* high-contrast neutral (thick) */
   --viz-history: var(--color-text-secondary); /* thin muted context */
-  --viz-ensemble: var(--color-accent); /* amber — the hero series */
+  --viz-ensemble: var(--color-accent); /* ember, the hero series */
   --viz-lightgbm: var(--color-info); /* info-cyan */
   --viz-sarima: #8b7fd6; /* violet */
   --viz-arima: var(--color-success); /* teal/green */
@@ -122,7 +122,7 @@ html[data-theme='dark'] {
 
   /*
    * Astryx's Badge component hardcodes literal colors for its semantic
-   * variants (success/warning/error/info — see
+   * variants (success/warning/error/info - see
    * @astryxdesign/theme-neutral/dist/theme.css `.astryx-badge.success` etc.),
    * so those variants cannot be retheme'd via CSS variables. Its non-semantic
    * "color" variants (green/yellow/red/cyan/gray), however, read
@@ -155,11 +155,85 @@ html[data-theme='dark'] {
   --radius-page: 16px;
   --radius-full: 9999px;
 
-  /* --- Motion (DESIGN.md § Structural scales · Motion) — transcribed tokens.
+  /* --- Motion (DESIGN.md § Structural scales · Motion) - transcribed tokens.
      "no bounce/elastic; honor prefers-reduced-motion; motion must be motivated." */
   --motion-fast: 120ms;
   --motion-base: 260ms;
   --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+
+  /* --- Shell layout: the sticky header's content height (Task 3, single-scroll
+     shell). Not a DESIGN.md-locked token; exists so `.data-status-banner`'s
+     sticky offset below can't drift out of sync with `header.bar`'s height. */
+  --bar-height: 58px;
+
+  /* Budget for `.data-status-banner`'s tallest realistic state: two wrapped
+     lines of its mono text. The banner has no `white-space: nowrap`, so its
+     longest line (the "real" status, e.g. "[ REAL ] generated 2026-07-05 ·
+     commit 24b7120") wraps to 2 lines at narrow viewports (from 320px, where
+     the ~47-character string no longer fits the ~288px content box at the
+     banner's 14px monospace metrics). Two lines at the inherited 1.5
+     line-height (reset.css) is 2 * 14px * 1.5 = 42px of text, plus the
+     banner's own 8px+8px `padding-block` and 1px `border-bottom` = 59px;
+     rounded up to 64px as a small margin against cross-browser font-metric
+     rounding. Used below by the deep-link `scroll-padding-top`. */
+  --banner-height: 64px;
+}
+
+/*
+ * Deep-link scroll offset (Task 3 review fix): `header.bar` and
+ * `.data-status-banner` are both `position: sticky` at the top of the
+ * viewport (see their rules further down), stacked to a combined height of
+ * `--bar-height` + `--banner-height`. Native anchor scrolling (`/#forecast`,
+ * `/#anomalies`, `/#drivers` - the single-scroll shell's `<section id="...">`
+ * targets in `app/page.tsx`) otherwise aligns the target's top edge to
+ * viewport y=0, so that sticky pair would cover the target's `SectionHeader`.
+ * `scroll-padding-top` on the scrolling box (html) reserves that space for
+ * both fragment navigation and `scrollIntoView`, without affecting ordinary
+ * wheel/scrollbar scrolling. One rule for every current and future anchor
+ * target, instead of `scroll-margin-top` duplicated per section. The 16px
+ * addition is breathing room so the heading doesn't sit flush under the
+ * banner; `--banner-height` already budgets for the tallest (two-line, 320px)
+ * banner state, so this single constant offset is sufficient at every
+ * viewport width, not just the narrowest.
+ */
+html {
+  scroll-padding-top: calc(var(--bar-height) + var(--banner-height) + 16px);
+}
+
+/*
+ * scroll-padding-top responsiveness (Task 9a). `--banner-height` above budgets
+ * for the banner's tallest state: its ~47-char uppercase-mono status line
+ * ("Live model output · commit 1234567 · 2026-07-05") wraps to two lines only
+ * at narrow viewports, where its content box can't fit that string on one line.
+ * From 640px up the banner is always a single line, so the two-line budget
+ * over-reserves ~22px at the top of every deep-linked section. Re-budget the
+ * banner to its one-line height here (padding-block 16 + border 1 + one ~21px
+ * line ≈ 38px, rounded up to 42px for cross-browser font-metric slack); the
+ * `scroll-padding-top` calc above re-resolves from the variable automatically.
+ * Below 640px the base two-line budget still holds. Verified a `/#anomalies`
+ * deep link lands the SectionHeader clear of the sticky header+banner at both
+ * 320px (two-line budget) and 1280px (one-line budget).
+ */
+@media (min-width: 640px) {
+  :root {
+    --banner-height: 42px;
+  }
+}
+
+/*
+ * Horizontal-overflow guard (Task 9a): no body horizontal scroll at any width
+ * from 320 to 1536. Wide content already scrolls inside its own `overflow-x: auto`
+ * container (`.forecast-chart-wrap`, `.metrics-table-wrap`), wide rows wrap
+ * (`.section-header-row`, `.forecast-legend`, `.close .foot`), and the mobile
+ * breakpoints further down collapse every multi-column grid to one column, so
+ * this is a defensive backstop rather than the primary mechanism. `clip` (not
+ * `hidden`): `hidden` would make <body> a scroll container, which would
+ * re-anchor the sticky `header.bar` / `.data-status-banner` to <body> and
+ * break their stickiness. `clip` clips the same horizontal overflow without
+ * establishing a scroll container, so the sticky shell chrome is untouched.
+ */
+body {
+  overflow-x: clip;
 }
 
 /*
@@ -174,7 +248,7 @@ html[data-theme='dark'] {
 
 /*
  * Global visible focus ring: "visible focus ring (2px, accent, 2px offset)".
- * Plain, unlayered author CSS — per the note at the top of this file, this
+ * Plain, unlayered author CSS - per the note at the top of this file, this
  * wins over Astryx's own `@layer astryx-theme` focus-visible rules
  * regardless of specificity, so every native interactive element (buttons,
  * links, the Tab/ThemeToggle buttons, ListItem's invisible row button, and
@@ -189,21 +263,18 @@ html[data-theme='dark'] {
 }
 
 /*
- * Reduced motion — shell chrome only. The forecast chart's draw-in and the
+ * Reduced motion - shell chrome only. The forecast chart's draw-in and the
  * anomaly map's fly-to already self-handle `prefers-reduced-motion` (see
  * ForecastChart.tsx / AnomalyMap.tsx and the `@media` block further down in
- * this file); this covers what is left: the header/footer/banner chrome and
- * the section Tabs (`nav[aria-label="Tabs"]`, the literal label TabList.tsx
- * renders). Duration-only overrides: nothing here changes layout.
+ * this file); this covers what is left: the sticky header/footer/banner
+ * chrome. Duration-only overrides: nothing here changes layout.
  */
 @media (prefers-reduced-motion: reduce) {
-  .console-header,
-  .console-header *,
-  .console-footer,
-  .console-footer *,
-  .data-status-banner,
-  nav[aria-label='Tabs'],
-  nav[aria-label='Tabs'] * {
+  .bar,
+  .bar *,
+  .site-footer,
+  .site-footer *,
+  .data-status-banner {
     animation-duration: 0.01ms !important;
     animation-delay: 0s !important;
     transition-duration: 0.01ms !important;
@@ -213,49 +284,35 @@ html[data-theme='dark'] {
 
 /*
  * Reduced motion for the interactive micro-interactions added in the polish
- * pass (panel reveal, tab / legend hover lifts). Fully disables the animation
- * and neutralizes the hover transforms so no movement remains.
+ * pass (the forecast legend's hover lift). Fully disables the animation and
+ * neutralizes the hover transform so no movement remains.
  */
 @media (prefers-reduced-motion: reduce) {
-  .console-panel:not([hidden]),
-  .forecast-legend-btn,
-  nav[aria-label='Tabs'] button {
+  .forecast-legend-btn {
     animation: none !important;
     transition: none !important;
   }
 
-  .forecast-legend-btn:hover,
-  nav[aria-label='Tabs'] button:not([aria-current='page']):hover {
+  .forecast-legend-btn:hover {
     transform: none !important;
   }
 }
 
 /*
  * Touch targets ≥ 44px (DESIGN.md § Accessibility guarantees). Astryx's own
- * interactive elements are sized off `--size-element-{sm,md,lg}` (28/32/36px
- * — see @astryxdesign/core's compiled tokens), all under 44px, so the tabs
- * and the theme toggle need an explicit floor here. `min-height` (not
- * `height`) so it only raises the box when the native size is smaller,
- * without fighting Astryx's own `height` declaration (a used-value floor,
- * not a cascade override — both declarations coexist).
+ * interactive elements are sized off `--size-element-{sm,md,lg}` (28/32/36px,
+ * see @astryxdesign/core's compiled tokens), all under 44px, so the
+ * interactive controls need an explicit floor. `min-height` (not `height`) so
+ * it only raises the box when the native size is smaller, without fighting
+ * Astryx's own `height` declaration (a used-value floor, not a cascade
+ * override, both declarations coexist). The theme toggle's floor is set on
+ * `.bar-right button` further down; the forecast legend, semantic chips, and
+ * map-filter buttons each set their own `min-height: 44px` in their component
+ * rules; the records-list rows are floored here.
  */
-nav[aria-label='Tabs'] button {
-  min-height: 44px;
-  transition: transform var(--motion-fast) var(--ease-out);
-}
-
-/* Subtle hover lift on non-active tabs (the active tab already reads as
-   selected). Transform only; reduced-motion zeroes it via the shell block. */
-nav[aria-label='Tabs'] button:not([aria-current='page']):hover {
-  transform: translateY(-1px);
-}
-
-.console-header-actions button {
-  min-height: 44px;
-}
 
 /* Records-list rows (Astryx ListItem renders its root as this `<li>`; see
-   components/anomalies/RecordsList.tsx) — the map's accessible equivalent. */
+   components/anomalies/RecordsList.tsx) - the map's accessible equivalent. */
 .records-list-wrap li {
   min-height: 44px;
 }
@@ -277,70 +334,115 @@ nav[aria-label='Tabs'] button:not([aria-current='page']):hover {
   }
 }
 
-/* Precision tick / graticule: a ruled line with short perpendicular ticks,
-   the console-bezel signature. Used under the header and every section
-   header instead of a plain rule. */
-.tick-rule {
-  height: 5px;
+/* Tighten the shell gutter on small screens (ported from the template's
+   `.wrap { padding: 0 18px }` at <=640px) so narrow acts keep more usable
+   content width. Below 768px the base 20px already applies; this trims it to
+   18px at the phone widths. */
+@media (max-width: 640px) {
+  .shell-container {
+    padding-inline: 18px;
+  }
+}
+
+/*
+ * header.bar: the slim sticky bar (ported from the "Observatory" design
+ * preview template's `<header class="bar">` - docs/design/
+ * observatory-preview-template.html). Sticky at DESIGN.md's "fixed" z-index
+ * tier (40); `.data-status-banner` below stays at the "sticky" tier (30) and
+ * is pushed down by `--bar-height` so the two never overlap on scroll (only
+ * the banner was sticky before this task, at top:0, with nothing above it).
+ */
+header.bar {
+  position: sticky;
+  top: 0;
+  z-index: 40;
+  backdrop-filter: saturate(1.2) blur(10px);
+  background: color-mix(in srgb, var(--color-background-body) 82%, transparent);
   border-bottom: 1px solid var(--color-border);
-  background-image: linear-gradient(to right, var(--color-border) 1px, transparent 1px);
-  background-repeat: repeat-x;
-  background-position: bottom left;
-  background-size: 12px 5px;
 }
 
-.console-header {
-  /* Not sticky: only the honesty banner below pins to the top on scroll, so
-     the two bars never overlap at top:0 (they previously did). */
-  background: var(--color-background-surface);
-}
-
-.console-header-row {
+.bar-in {
   display: flex;
-  flex-wrap: wrap;
   align-items: center;
   justify-content: space-between;
-  gap: 8px 16px;
-  padding-block: 12px;
+  gap: 16px;
+  height: var(--bar-height);
 }
 
-/* Brand column: the mark stacked over the one-line value statement. min-width:0
-   lets the column shrink (and the tagline wrap) inside the flex row rather than
-   forcing horizontal overflow on narrow viewports. */
-.console-header-brand {
+.wordmark {
   display: flex;
-  flex-direction: column;
-  gap: 2px;
-  min-width: 0;
-}
-
-.console-mark {
-  font-family: var(--font-display);
-  font-size: 16px;
-  font-weight: 600;
-  letter-spacing: -0.02em;
+  align-items: center;
+  gap: 10px;
+  font-family: var(--font-mono);
+  font-size: 13px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
   color: var(--color-text-primary);
+  white-space: nowrap;
 }
 
-/* The value statement: a plain, honest one-liner so the project reads in a few
-   seconds. Body font, muted tier (>=4.5:1), sits directly under the mark. */
-.console-tagline {
-  font-family: var(--font-body);
-  font-size: 14px;
-  line-height: 1.35;
-  color: var(--color-text-secondary);
-  max-width: 62ch;
+.wordmark .dot {
+  flex: none;
+  width: 8px;
+  height: 8px;
+  border-radius: var(--radius-full);
+  background: var(--color-accent);
+  box-shadow: 0 0 0 4px var(--color-accent-muted);
 }
 
-.console-header-actions {
+.bar-right {
   display: flex;
   align-items: center;
   gap: 12px;
+  min-width: 0;
+}
+
+/* Touch target floor for the bar's interactive elements (the ThemeToggle
+   button) - see the "Touch targets ≥ 44px" note further up this file. */
+.bar-right button {
+  min-height: 44px;
+}
+
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--color-text-secondary);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-inner);
+  padding: 5px 9px;
+  white-space: nowrap;
+}
+
+.chip .live {
+  flex: none;
+  width: 6px;
+  height: 6px;
+  border-radius: var(--radius-full);
+  background: var(--color-success);
+  box-shadow: 0 0 0 3px var(--color-success-muted);
+}
+
+/* Hide the header's "Live model output" chip on narrow viewports (ported from
+   the template's `header .chip { display: none }` at <=640px) so the wordmark
+   and theme toggle keep the slim bar from crowding or wrapping. The chip is
+   only a redundant status cue; the sticky DataStatusBanner directly below
+   carries the authoritative live/commit/date line at every width. */
+@media (max-width: 640px) {
+  header.bar .chip {
+    display: none;
+  }
 }
 
 .data-status-banner {
   position: sticky;
-  top: 0;
+  /* Sits directly under the sticky header.bar (see --bar-height above) so
+     the two never overlap on scroll; this banner must never be hidden. */
+  top: var(--bar-height);
   z-index: 30;
   font-family: var(--font-mono);
   font-size: 14px;
@@ -353,19 +455,320 @@ nav[aria-label='Tabs'] button:not([aria-current='page']):hover {
   background: var(--color-background-surface);
 }
 
-.console-footer {
+.site-footer {
   margin-top: 40px;
+  border-top: 1px solid var(--color-border);
 }
 
-.console-footer-row {
+.site-footer-line {
+  padding-block: 20px;
+  font-family: var(--font-mono);
+  font-size: 11.5px;
+  letter-spacing: 0.04em;
+  color: var(--color-text-secondary);
+}
+
+/*
+ * Hero (components/Hero.tsx) - the warming-stripes signature (DESIGN.md §
+ * Signature), ported from the Observatory preview template's `.hero*` rules
+ * (docs/design/observatory-preview-template.html). Renders as a direct child
+ * of <body>, before `<main class="shell-container">` (see app/layout.tsx;
+ * Task 4 review fix), so `.hero` is full-bleed to the true document/viewport
+ * edge, matching the template's unconstrained mockup - no `100vw` break-out
+ * and no `overflow-x` hack, just its natural block width against an
+ * unpadded, unmargined <body>. `.hero-in` below carries its own max-width +
+ * padding-inline so the headline/stats column still lines up with
+ * `.shell-container`'s column used by every act. `--ease-out` is this
+ * project's port of the template's `--ease` token.
+ */
+.hero {
+  position: relative;
+  overflow: hidden;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.stripes {
+  position: absolute;
+  inset: 0;
   display: flex;
-  flex-wrap: wrap;
-  justify-content: space-between;
-  gap: 8px;
-  padding-block: 16px;
+  opacity: 0.9;
+}
+
+.stripes span {
+  flex: 1 1 0;
+  transform: scaleY(0);
+  transform-origin: bottom;
+}
+
+.hero-veil {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    to bottom,
+    color-mix(in srgb, var(--color-background-body) 22%, transparent) 0%,
+    color-mix(in srgb, var(--color-background-body) 66%, transparent) 52%,
+    var(--color-background-body) 100%
+  );
+}
+
+/* max-width + padding-inline mirror .shell-container exactly (same 1200px /
+   20px / 32px-at-768px values) so the hero's own content column lines up
+   with every act below, now that `.hero` itself is no longer nested inside
+   `.shell-container` (Task 4 review fix). `padding-block`/`padding-inline`
+   (not the `padding` shorthand) so the max-width:640px override further
+   down can vary only the vertical rhythm without re-zeroing this
+   horizontal inset. */
+.hero-in {
+  position: relative;
+  max-width: 1200px;
+  margin-inline: auto;
+  padding-block: 104px 76px;
+  padding-inline: 20px;
+}
+
+@media (min-width: 768px) {
+  .hero-in {
+    padding-inline: 32px;
+  }
+}
+
+.eyebrow {
   font-family: var(--font-mono);
   font-size: 12px;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--color-text-accent);
+  margin-bottom: 22px;
+}
+
+/* Plain <h1>, not Astryx's Heading component (that reads --font-family-heading
+   internally; this element does not), so the display font/weight are set
+   directly here alongside the template's size/measure treatment. */
+h1.title {
+  margin: 0;
+  font-family: var(--font-family-heading);
+  font-weight: 600;
+  text-wrap: balance;
+  font-size: clamp(35px, 6.2vw, 74px);
+  line-height: 1.03;
+  letter-spacing: -0.025em;
+  max-width: 16ch;
+}
+
+h1.title em {
+  font-style: italic;
+  color: var(--color-text-accent);
+}
+
+.lede {
+  margin-top: 24px;
+  font-family: var(--font-body);
+  font-size: clamp(17px, 2.2vw, 21px);
   color: var(--color-text-secondary);
+  max-width: 56ch;
+}
+
+.herostats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 36px 40px;
+  margin-top: 44px;
+}
+
+.hstat .v {
+  font-family: var(--font-family-heading);
+  font-size: clamp(32px, 5vw, 52px);
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  line-height: 1;
+}
+
+.hstat .v small {
+  font-family: var(--font-mono);
+  font-size: 0.38em;
+  letter-spacing: 0;
+  color: var(--color-text-secondary);
+  font-weight: 400;
+  margin-left: 4px;
+}
+
+/* `k` labels are small (11.5px) essential text, not decorative, so this uses
+   the "muted" tier (--color-text-secondary) rather than the template's
+   `--subtle` - the same DESIGN.md contrast rule already applied to
+   .metrics-num--muted above (the disabled/"subtle" tier does not reach
+   4.5:1 at this size in both themes). */
+.hstat .k {
+  font-family: var(--font-mono);
+  font-size: 11.5px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--color-text-secondary);
+  margin-top: 12px;
+}
+
+.scrollcue {
+  margin-top: 52px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--color-text-secondary);
+}
+
+.scrollcue .ln {
+  flex: none;
+  position: relative;
+  width: 46px;
+  height: 1px;
+  background: var(--color-border);
+  overflow: hidden;
+}
+
+.scrollcue .ln::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  width: 40%;
+  background: var(--color-accent);
+  animation: hero-scrollcue-slide 2.4s var(--ease-out) infinite;
+}
+
+@keyframes hero-scrollcue-slide {
+  0% {
+    transform: translateX(-120%);
+  }
+  100% {
+    transform: translateX(320%);
+  }
+}
+
+/* Narrow-viewport hero spacing (ported from the template's max-width:640px
+   block, hero-specific rules only). `padding-inline: 18px` mirrors
+   `.shell-container`'s tightened narrow gutter so the headline/stats column
+   stays aligned with the acts below. */
+@media (max-width: 640px) {
+  .hero-in {
+    padding-block: 76px 56px;
+    padding-inline: 18px;
+  }
+
+  .herostats {
+    gap: 24px 30px;
+    margin-top: 36px;
+  }
+
+  .scrollcue {
+    margin-top: 40px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .stripes span {
+    transform: none !important;
+  }
+
+  .scrollcue .ln::after {
+    animation: none;
+  }
+}
+
+/*
+ * .act / .acthead / .actnum / .actt / .actlede: the per-act scaffold for the
+ * single-scroll narrative (ported from the template's `section.act` /
+ * `.acthead` / `.actnum` / `h2.actt` / `.actlede`). `SectionHeader.tsx` renders
+ * `.acthead` (act number + serif title) and `.actlede` (the one-line lede);
+ * `app/page.tsx` threads the "01"/"02"/"03" act number per section by order
+ * (Task 5). `.section-header-row` (further down this file) nests inside
+ * `.acthead` so a section's optional chip (DriversSection's PM2.5 tag) still
+ * has somewhere to sit without widening the act number/title baseline row.
+ */
+section.act {
+  padding-block: 92px;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.acthead {
+  display: flex;
+  align-items: baseline;
+  gap: 18px;
+  margin-bottom: 10px;
+}
+
+.actnum {
+  flex: none;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--color-text-accent);
+}
+
+/* Serif act title (ported from the template's `h2.actt`; font-family/weight
+   already come from Astryx's `.astryx-heading.level-2` rule reading
+   `--font-family-heading`). */
+.actt {
+  font-size: clamp(27px, 4vw, 40px);
+  letter-spacing: -0.02em;
+}
+
+/* One-line act lede under the act header (ported from the template's
+   `.actlede`); numeric tokens inside wear mono via `.section-desc-num`
+   (defined further down this file, alongside `.section-header-row`). */
+.actlede {
+  margin-top: 14px;
+  font-family: var(--font-body);
+  font-size: 18px;
+  color: var(--color-text-secondary);
+  max-width: 62ch;
+}
+
+/* Narrow-viewport act spacing (ported from the template's max-width:640px
+   block: `section.act { padding: 60px 0 }` plus the act-header rules). Each
+   act's vertical padding drops from 92px to 60px so three stacked acts don't
+   over-scroll on a phone. */
+@media (max-width: 640px) {
+  section.act {
+    padding-block: 60px;
+  }
+
+  .acthead {
+    gap: 12px;
+  }
+
+  .actlede {
+    font-size: 16.5px;
+  }
+}
+
+/*
+ * .reveal / .reveal.in: the shared per-act scroll-reveal (ported from the
+ * template). `app/page.tsx` toggles `.in` via an IntersectionObserver
+ * (threshold 0.12) and unobserves once revealed; reduced-motion adds `.in` to
+ * every `.reveal` immediately in that same effect. This media query is a CSS
+ * backstop so a `.reveal` is never stuck invisible before that effect runs.
+ */
+.reveal {
+  opacity: 0;
+  transform: translateY(18px);
+  transition:
+    opacity 0.7s var(--ease-out),
+    transform 0.7s var(--ease-out);
+}
+
+.reveal.in {
+  opacity: 1;
+  transform: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .reveal {
+    opacity: 1 !important;
+    transform: none !important;
+    transition: none !important;
+  }
 }
 
 /*
@@ -486,53 +889,18 @@ nav[aria-label='Tabs'] button:not([aria-current='page']):hover {
   }
 }
 
-.console-panel {
-  padding-block: 32px;
-}
-
-/* Motivated tab-switch / page-load reveal: the newly-shown panel fades and
-   settles up a few px. Transform + opacity only (compositor-friendly, no
-   reflow). Re-runs each time a panel goes from hidden to shown, giving the one
-   orchestrated reveal per section DESIGN.md calls for. Disabled under
-   reduced-motion below. */
-.console-panel:not([hidden]) {
-  animation: panel-reveal var(--motion-base) var(--ease-out) both;
-}
-
-@keyframes panel-reveal {
-  from {
-    opacity: 0;
-    transform: translateY(6px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-.console-panel-placeholder {
-  font-family: var(--font-body);
-  color: var(--color-text-secondary);
-  margin-top: 8px;
-}
-
+/* Nests inside `.acthead` (a flex row: act number + this row), so this needs
+   its own flex-grow to actually claim the remaining width - otherwise it
+   would hug its content and `justify-content: space-between` below would
+   have no extra space to distribute between the title and an optional chip. */
 .section-header-row {
   display: flex;
+  flex: 1 1 auto;
+  min-width: 0;
   flex-wrap: wrap;
   align-items: baseline;
   justify-content: space-between;
   gap: 8px 12px;
-}
-
-/* One-line section descriptor under the ruled tick line: orients the section in
-   a sentence. Body font, muted; numeric tokens wear mono via .section-desc-num. */
-.section-desc {
-  margin-top: 12px;
-  font-family: var(--font-body);
-  font-size: 15px;
-  line-height: 1.45;
-  color: var(--color-text-secondary);
-  max-width: 70ch;
 }
 
 .section-desc-num {
@@ -571,7 +939,7 @@ nav[aria-label='Tabs'] button:not([aria-current='page']):hover {
  * StatBlock (components/StatBlock.tsx): the hero/stat-strip number treatment.
  * Value is mono + tabular-nums (the "honesty voice" wears mono); label uses
  * Astryx's own Text component (body font). `--stat-block-value-size` is
- * DESIGN.md's Type modular scale top step (49px) — "numbers in the hero stat
+ * DESIGN.md's Type modular scale top step (49px) - "numbers in the hero stat
  * may go larger" than the rest of the scale.
  */
 .stat-block {
@@ -617,7 +985,7 @@ nav[aria-label='Tabs'] button:not([aria-current='page']):hover {
 
 /*
  * ==========================================================================
- * Forecast section (components/forecast/*) — DESIGN.md § Section 1.
+ * Forecast section (components/forecast/*) - DESIGN.md § Section 1.
  * Structure only; all color/type/spacing bind to the tokens above.
  * ==========================================================================
  */
@@ -628,19 +996,14 @@ nav[aria-label='Tabs'] button:not([aria-current='page']):hover {
   gap: 32px;
 }
 
-/* Hero row: the StatBlock + the honesty note beside/under it. */
+/* Hero row: the StatBlock (the honesty note that used to sit beside it -
+   "withheld pending a leakage-free re-run" - is gone; every metric shown here
+   is final, so the hero no longer hedges). */
 .forecast-hero {
   display: flex;
   flex-wrap: wrap;
   align-items: flex-end;
   gap: 16px 32px;
-}
-
-.forecast-hero-note {
-  font-family: var(--font-body);
-  font-size: 14px;
-  color: var(--color-text-secondary);
-  max-width: 42ch;
 }
 
 /* Chart lives in its own horizontal-scroll container so the page body never
@@ -653,10 +1016,13 @@ nav[aria-label='Tabs'] button:not([aria-current='page']):hover {
   padding: 12px;
 }
 
+/* No min-width: the SVG's viewBox is recomputed to the container's real
+   measured width (ForecastChart.tsx's ResizeObserver `draw`/reflow effect),
+   so it reflows to any container width instead of forcing this wrapper's
+   overflow-x:auto to kick in on narrow viewports. */
 .forecast-chart-svg {
   display: block;
   width: 100%;
-  min-width: 640px;
   height: auto;
 }
 
@@ -851,7 +1217,7 @@ nav[aria-label='Tabs'] button:not([aria-current='page']):hover {
   opacity: 0.5;
 }
 
-/* Inline error panel — never a blank screen (DESIGN.md state table). */
+/* Inline error panel - never a blank screen (DESIGN.md state table). */
 .forecast-error {
   padding: 16px 20px;
   font-family: var(--font-body);
@@ -905,6 +1271,22 @@ nav[aria-label='Tabs'] button:not([aria-current='page']):hover {
   color: var(--color-text-primary);
 }
 
+/* Leaderboard RMSE bar (ported from the template's `.bartrack`/`.bar`):
+   decorative reinforcement of the numeric RMSE cell, scaled to the weakest
+   `final` baseline. See MetricsTable.tsx's `barCell`. */
+.metrics-bartrack {
+  width: 100%;
+  height: 10px;
+  border-radius: var(--radius-inner);
+  background: var(--color-background-muted);
+}
+
+.metrics-bar {
+  height: 100%;
+  border-radius: var(--radius-inner);
+  background: var(--color-accent);
+}
+
 /* Best final row: the accent left-border emphasis. Set on the row's first
    cell via an inset box-shadow so it hugs the row's left edge regardless of
    Astryx's cell padding. The row is marked with data-best-row by a Table
@@ -924,4 +1306,286 @@ nav[aria-label='Tabs'] button:not([aria-current='page']):hover {
   clip: rect(0, 0, 0, 0);
   white-space: nowrap;
   border: 0;
+}
+
+/*
+ * ==========================================================================
+ * Anomalies act - shared "act-level" cards (components/anomalies/
+ * MethodStrip.tsx + AnomaliesSection.tsx). Ported verbatim (class names) from
+ * the Observatory preview template's `.metricstrip`/`.mcard` and
+ * `.ticker`/`.tkrow` (docs/design/observatory-preview-template.html). The rest
+ * of the Anomalies act's styling (map, records list, semantic search) stays
+ * component-local in components/anomalies/anomalies.css, per that file's own
+ * header comment; these two groups are shared/reusable enough to live here
+ * alongside the other act-scaffold classes above.
+ * ==========================================================================
+ */
+
+.metricstrip {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+  margin-top: 36px;
+}
+
+.mcard {
+  background: var(--color-background-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-container);
+  padding: 20px;
+}
+
+/* Big stat figure: the "hero stat" serif treatment already established for
+   .hstat .v (Hero.tsx) - DESIGN.md's modular scale lets hero-adjacent numbers
+   go larger than the 12-49px scale. `font-variant-numeric` folds in what the
+   template's separate `.mono` utility class contributed on top of `.mv`. */
+.mcard .mv {
+  font-family: var(--font-family-heading);
+  font-variant-numeric: tabular-nums;
+  font-size: 40px;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  line-height: 1;
+  color: var(--color-text-primary);
+}
+
+.mcard .mk {
+  font-family: var(--font-mono);
+  font-size: 11.5px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--color-text-secondary);
+  margin-top: 12px;
+}
+
+/* Essential small text (not decorative), so this uses the "muted" tier
+   (--color-text-secondary) rather than the template's `--subtle` - the same
+   contrast rule already applied to `.hstat .k` above. */
+.mcard .ms {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-top: 8px;
+  font-family: var(--font-body);
+  font-size: 14px;
+  color: var(--color-text-secondary);
+  line-height: 1.45;
+}
+
+.mcard.hero-card {
+  border-color: color-mix(in srgb, var(--color-accent) 42%, var(--color-border));
+}
+
+.mcard.hero-card .mv {
+  color: var(--color-text-accent);
+}
+
+/* Map + "most extreme" ticker row (components/anomalies/AnomaliesSection.tsx
+   `.mapwrap`; the map itself is `.anomaly-map-wrap`, anomalies.css). Unlike
+   the template (one shared `.panel` with an internal `.ticker` divider), this
+   codebase gives each side its own bordered box - the same independent-panel
+   convention already used for the map + records list pairing. */
+.mapwrap {
+  display: grid;
+  grid-template-columns: 1fr 300px;
+  gap: 16px;
+  align-items: start;
+  margin-top: 36px;
+}
+
+.ticker {
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-container);
+  background: var(--color-background-surface);
+  padding: 14px 4px;
+  max-height: 380px;
+  overflow-y: auto;
+}
+
+.tkrow {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 8px;
+  padding: 9px 16px;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.tkrow:last-child {
+  border-bottom: none;
+}
+
+.tkrow .cc {
+  font-family: var(--font-body);
+  font-size: 13.5px;
+  color: var(--color-text-primary);
+}
+
+.tkrow .cm {
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  color: var(--color-text-secondary);
+  margin-top: 2px;
+  letter-spacing: 0.03em;
+}
+
+.tkrow .tt {
+  font-family: var(--font-mono);
+  font-size: 15px;
+  font-weight: 600;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+.tkrow .tz {
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  text-align: right;
+  color: var(--color-text-secondary);
+  margin-top: 2px;
+}
+
+@media (max-width: 1024px) {
+  .mapwrap {
+    grid-template-columns: 1fr 260px;
+  }
+}
+
+@media (max-width: 860px) {
+  .mapwrap {
+    grid-template-columns: 1fr;
+  }
+
+  .ticker {
+    max-height: none;
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 8px;
+  }
+}
+
+@media (max-width: 768px) {
+  .metricstrip {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 640px) {
+  .ticker {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 560px) {
+  .mcard .mv {
+    font-size: 34px;
+  }
+}
+
+/*
+ * ==========================================================================
+ * Close act (components/CloseSection.tsx) - the reproducibility close.
+ * Class names ported from the Observatory preview template's `.close` /
+ * `.repro` / `.colophon` + its section-scoped footer (docs/design/
+ * observatory-preview-template.html). `.close` carries no border-bottom
+ * (unlike `.act`, further up this file): it is the last section on the page,
+ * nothing needs to divide it from what follows, and its own footer already
+ * carries a border-top.
+ * ==========================================================================
+ */
+
+.close {
+  padding-block: 92px 40px;
+}
+
+.repro {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 40px;
+  margin-top: 36px;
+}
+
+.repro h3 {
+  margin: 0 0 10px;
+  font-family: var(--font-family-heading);
+  font-size: 21px;
+}
+
+.repro p {
+  margin: 0;
+  font-family: var(--font-body);
+  font-size: 15.5px;
+  color: var(--color-text-secondary);
+}
+
+.colophon {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1px;
+  margin-top: 28px;
+  background: var(--color-border);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-container);
+  overflow: hidden;
+}
+
+.colophon > div {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 16px 18px;
+  background: var(--color-background-surface);
+}
+
+.colophon dt {
+  margin: 0;
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--color-text-secondary);
+}
+
+.colophon dd {
+  margin: 0;
+  font-family: var(--font-mono);
+  font-size: 13px;
+  color: var(--color-text-primary);
+}
+
+/* Scoped to `.close` (a descendant selector, not a bare `footer` element
+   selector) so this never leaks onto the unrelated site-wide
+   `<footer className="site-footer">` in app/layout.tsx, which sits outside
+   `.close` entirely. */
+.close footer {
+  margin-top: 8px;
+  padding-block: 26px 60px;
+  border-top: 1px solid var(--color-border);
+}
+
+.close .foot {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 16px;
+  font-family: var(--font-mono);
+  font-size: 11.5px;
+  letter-spacing: 0.04em;
+  color: var(--color-text-secondary);
+}
+
+@media (max-width: 768px) {
+  .repro {
+    grid-template-columns: 1fr;
+    gap: 28px;
+  }
+}
+
+@media (max-width: 640px) {
+  .close {
+    padding-block: 64px 32px;
+  }
+
+  .colophon {
+    grid-template-columns: 1fr;
+  }
 }

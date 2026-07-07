@@ -9,11 +9,11 @@ import ProvenanceChip from '../ProvenanceChip';
 
 // Astryx `Table` requires the row type to carry an index signature
 // (`T extends Record<string, unknown>`). MetricsModel is the real shape; the
-// intersection just satisfies that constraint. The cast is type-only — the
+// intersection just satisfies that constraint. The cast is type-only - the
 // rendered objects are the untouched contract rows.
 type MetricsRow = MetricsModel & Record<string, unknown>;
 
-const PENDING = '—';
+const PENDING = '-';
 const PENDING_TITLE = 'Withdrawn pending evaluation-leakage fix (#20)';
 
 // A numeric metric cell: mono tabular value for `final` rows, a muted dash for
@@ -32,6 +32,22 @@ function statusCell(row: MetricsRow): ReactNode {
   return <ProvenanceChip tone="pending" label="[ PENDING RE-RUN ]" title={row.note ?? PENDING_TITLE} />;
 }
 
+// The leaderboard bar (ported from docs/design/observatory-preview-template.html's
+// `.bartrack`/`.bar`): a horizontal RMSE bar scaled to the weakest `final`
+// baseline (`maxRmse`), decorative only - the numeric RMSE cell already carries
+// the exact figure accessibly (DESIGN.md § Accessibility: never color/shape-only
+// for the essential value; this bar is a supplementary visual, so it's
+// aria-hidden). Pending/missing rows render an empty track, matching `numCell`'s
+// own never-fabricate-a-number rule.
+function barCell(row: MetricsRow, maxRmse: number): ReactNode {
+  const pct = row.status === 'final' && row.rmse_c !== null && maxRmse > 0 ? Math.max(3, (row.rmse_c / maxRmse) * 100) : 0;
+  return (
+    <div className="metrics-bartrack" aria-hidden="true">
+      {pct > 0 && <div className="metrics-bar" style={{ width: `${pct}%` }} />}
+    </div>
+  );
+}
+
 export interface MetricsTableProps {
   metrics: Metrics;
 }
@@ -44,6 +60,9 @@ export default function MetricsTable({ metrics }: MetricsTableProps) {
   const bestId = finals.length
     ? finals.reduce((a, b) => ((a.rmse_c as number) <= (b.rmse_c as number) ? a : b)).id
     : null;
+  // Bars scale to the weakest `final` baseline (the template's leaderboard
+  // note: "Bars scaled to the weakest baseline").
+  const maxRmse = finals.length ? Math.max(...finals.map((m) => m.rmse_c as number)) : 0;
 
   const columns: TableColumn<MetricsRow>[] = [
     {
@@ -52,6 +71,13 @@ export default function MetricsTable({ metrics }: MetricsTableProps) {
       width: proportional(2),
       align: 'start',
       renderCell: (row) => <span className="metrics-model">{row.name}</span>,
+    },
+    {
+      key: 'rmse_bar',
+      header: 'RMSE bar',
+      width: proportional(3),
+      align: 'start',
+      renderCell: (row) => barCell(row, maxRmse),
     },
     {
       key: 'rmse_c',
@@ -104,6 +130,20 @@ export default function MetricsTable({ metrics }: MetricsTableProps) {
     },
   };
 
+  // The `rmse_bar` column is purely decorative: its cells are aria-hidden (see
+  // barCell) and the exact figure it visualizes lives in the real `rmse_c`
+  // column. Its "RMSE bar" header would otherwise still be announced during
+  // screen-reader column navigation as a labeled column with no perceivable
+  // content. Hiding just that `<th>` from the accessibility tree (its visible
+  // text stays for sighted users) drops the phantom column header; every other
+  // header, including `rmse_c`, is left untouched.
+  const barHeaderPlugin: TablePlugin<MetricsRow> = {
+    transformHeaderCell: (props, column) => {
+      if (column.key !== 'rmse_bar') return props;
+      return { ...props, htmlProps: { ...props.htmlProps, 'aria-hidden': true } };
+    },
+  };
+
   return (
     <div className="metrics-table-wrap">
       <Table<MetricsRow>
@@ -112,7 +152,7 @@ export default function MetricsTable({ metrics }: MetricsTableProps) {
         idKey="id"
         dividers="rows"
         density="balanced"
-        plugins={{ bestRow: bestRowPlugin }}
+        plugins={{ bestRow: bestRowPlugin, barHeader: barHeaderPlugin }}
       />
     </div>
   );

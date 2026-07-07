@@ -4,8 +4,8 @@ import { Badge } from '@astryxdesign/core/Badge';
 export type ProvenanceTone = 'sample' | 'pending' | 'final' | 'holdout' | 'info' | 'danger';
 
 export interface ProvenanceChipProps {
-  /** Real, visible text — provenance is never color-only (DESIGN.md § Accessibility).
-   * Callers include the literal bracket motif, e.g. `[ PENDING RE-RUN ]`, matching
+  /** Real, visible text - provenance is never color-only (DESIGN.md § Accessibility).
+   * Callers include the literal bracket motif, e.g. `[ HOLDOUT ]`, matching
    * the existing DataStatusBanner convention. */
   label: string;
   /** Maps to a DESIGN.md semantic color token; see the overrides in app/theme.css. */

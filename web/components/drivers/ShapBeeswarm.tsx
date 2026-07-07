@@ -64,16 +64,24 @@ function scaleXPercent(value: number, domainMax: number): number {
 }
 
 /** Diverging color for a single point, keyed by its own `feature_value_norm`
- * (0 = low value, 1 = high value) — DESIGN.md § Dataviz: the amber(high)
+ * (0 = low value, 1 = high value) - DESIGN.md § Dataviz: the amber(high)
  * <-> cyan(low) diverging pair, built via `color-mix()` from the locked
- * `--color-accent` / `--color-info` tokens (no new hex). This is the ONLY
- * channel colored by hue in this chart: SHAP push-direction (the x position)
- * is conveyed by position plus the words in the axis line + legend below, so
- * no single color stands in for two different meanings at once. */
+ * `--color-accent` / `--color-info` tokens (no new hex). Mixed `in srgb`
+ * (plain per-channel blending, matching the brief's `mix(#3fa9c7, #f2612c,
+ * t)` formula) rather than `in oklch`: interpolating hue between this
+ * accent's orange (~39°) and this info's teal-blue (~230°) takes the
+ * *shorter* arc, which runs backward through magenta/purple instead of
+ * through a sensible warm<->cool midpoint - confirmed in-browser, visible as
+ * a garish pink band across the mid-magnitude dots/bars. `in srgb` blends the
+ * R/G/B channels directly, so the midpoint reads as a muted warm/cool blend
+ * instead. This is the ONLY channel colored by hue in this chart: SHAP
+ * push-direction (the x position) is conveyed by position plus the words in
+ * the axis line + legend below, so no single color stands in for two
+ * different meanings at once. */
 function dotColor(norm: number): string {
   const clamped = Math.max(0, Math.min(1, norm));
   const amberPct = Math.round(clamped * 100);
-  return `color-mix(in oklch, var(--color-accent) ${amberPct}%, var(--color-info) ${100 - amberPct}%)`;
+  return `color-mix(in srgb, var(--color-accent) ${amberPct}%, var(--color-info) ${100 - amberPct}%)`;
 }
 
 const ROW_HEIGHT = 36;
@@ -148,7 +156,7 @@ export default function ShapBeeswarm({ features, beeswarm }: ShapBeeswarmProps) 
             <span
               className={styles.beeswarmLegendSwatch}
               style={{
-                backgroundColor: 'color-mix(in oklch, var(--color-accent) 85%, var(--color-info) 15%)',
+                backgroundColor: 'color-mix(in srgb, var(--color-accent) 85%, var(--color-info) 15%)',
               }}
               aria-hidden="true"
             />

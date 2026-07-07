@@ -7,7 +7,7 @@
 // separately with a dynamic import() in the mount effect below.
 import 'maplibre-gl/dist/maplibre-gl.css';
 
-import { useEffect, useRef, useState } from 'react';
+import { forwardRef, useEffect, useImperativeHandle, useRef, useState } from 'react';
 import type {
   MapLibreMap,
   Popup as MapLibrePopup,
@@ -26,6 +26,14 @@ export interface AnomalyMapProps {
   selectedIndex: number | null;
   /** Clicking a marker selects it (kept in sync with the records list). */
   onSelect: (index: number | null) => void;
+}
+
+// Imperative cross-link for the semantic-search panel (SemanticSearch.tsx):
+// selecting a query ranks records offline, then rings the top matches on this
+// real map via a dedicated `sem-highlights` source, without the map needing to
+// know anything about embeddings/search.
+export interface AnomalyMapHandle {
+  highlightRecords(records: { lat: number; lon: number }[]): void;
 }
 
 // DESIGN.md § Anomaly explorer: a graphite dark / light map matching the theme,
@@ -48,6 +56,43 @@ const METHOD_NAME: Record<AnomalyDetectedBy, string> = {
   isolation_forest: 'Isolation Forest',
   both: 'Both methods',
 };
+
+// Diverging temperature scale (DESIGN.md § Dataviz palette: "the one scale
+// every chart and map reuses"), ported verbatim from the Observatory preview
+// template's tempColor helper: cool -> neutral -> warm. Fixed light/dark
+// endpoints plus one neutral midpoint, not a themed token -- same convention
+// already locked for this exact scale in Hero.tsx's warming stripes.
+const TEMP_COOL_LIGHT = '#2e8aa8';
+const TEMP_COOL_DARK = '#3fa9c7';
+const TEMP_NEUTRAL_MID = '#c9c3b6';
+const TEMP_WARM_LIGHT = '#d8511c';
+const TEMP_WARM_DARK = '#f2612c';
+
+// The semantic-search cross-link: a dedicated GeoJSON source + a pulsing
+// "ember ring" circle layer (plus a small solid center dot), driven by
+// `highlightRecords` below. Kept separate from the `anomalies` source/layers
+// above so search highlighting never interferes with the marker filter/select
+// state machine.
+const SRC_SEM = 'sem-highlights';
+const LAYER_SEM_RING = 'sem-highlight-ring';
+const LAYER_SEM_DOT = 'sem-highlight-dot';
+const SEM_RING_MIN_RADIUS = 8;
+const SEM_RING_MAX_RADIUS = 15;
+const SEM_RING_STATIC_RADIUS = 12;
+const SEM_PULSE_DURATION_MS = 1800;
+
+/** Builds the `sem-highlights` source data; `rank` (1-based) is the only
+ * property the ring/dot layers need, matching the brief's handle contract. */
+function toSemFeatureCollection(records: { lat: number; lon: number }[]) {
+  return {
+    type: 'FeatureCollection' as const,
+    features: records.map((r, i) => ({
+      type: 'Feature' as const,
+      properties: { rank: i + 1 },
+      geometry: { type: 'Point' as const, coordinates: [r.lon, r.lat] },
+    })),
+  };
+}
 
 function currentTheme(): 'light' | 'dark' {
   return document.documentElement.getAttribute('data-theme') === 'light' ? 'light' : 'dark';
@@ -113,10 +158,15 @@ function filterFor(active: Set<AnomalyDetectedBy>): FilterSpecification | null {
 }
 
 // DESIGN.md § Anomaly explorer: point markers (a circle layer, NOT a
-// choropleth), coloured by detection method, sized by |z|, hover tooltip,
-// legend filter, and no fly-to under reduced motion. The records list is the
-// keyboard-accessible equivalent.
-export default function AnomalyMap({ records, selectedIndex, onSelect }: AnomalyMapProps) {
+// choropleth), coloured by temperature via the diverging scale and shaped by
+// detection method, sized by |z|, hover tooltip, legend filter, and no fly-to
+// under reduced motion. The records list is the keyboard-accessible
+// equivalent. Wrapped in forwardRef so AnomaliesSection can drive
+// `highlightRecords` (the semantic-search cross-link) from a shared ref.
+const AnomalyMap = forwardRef<AnomalyMapHandle, AnomalyMapProps>(function AnomalyMap(
+  { records, selectedIndex, onSelect },
+  ref,
+) {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const mapRef = useRef<MapLibreMap | null>(null);
   const popupRef = useRef<MapLibrePopup | null>(null);
@@ -130,9 +180,20 @@ export default function AnomalyMap({ records, selectedIndex, onSelect }: Anomaly
   const selectedRef = useRef(selectedIndex);
   const prevSelectedRef = useRef<number | null>(null);
   const activeMethodsRef = useRef<Set<AnomalyDetectedBy>>(new Set(ALL_METHODS));
+  // Latest semantic-search highlight request (survives across theme-driven
+  // source/layer rebuilds and across a `highlightRecords` call that arrives
+  // before the map has finished loading -- see the `load`/`styledata`
+  // handlers below, which re-seed the source from this ref).
+  const semHighlightsRef = useRef(toSemFeatureCollection([]));
+  const pulseFrameRef = useRef<number | null>(null);
+  const pulseStartRef = useRef(0);
   // Imperative API published by the mount effect, so the prop-driven effects
   // below can drive the map without re-running setup.
-  const apiRef = useRef<{ applyFilter: () => void; applySelection: () => void } | null>(null);
+  const apiRef = useRef<{
+    applyFilter: () => void;
+    applySelection: () => void;
+    updateSemPulse: () => void;
+  } | null>(null);
 
   recordsRef.current = records;
   onSelectRef.current = onSelect;
@@ -183,7 +244,8 @@ export default function AnomalyMap({ records, selectedIndex, onSelect }: Anomaly
       map.addControl(new maplibre.NavigationControl({ showCompass: false }), 'top-right');
 
       const addAnomalyLayers = () => {
-        const data = toFeatureCollection(recordsRef.current);
+        const currentRecords = recordsRef.current;
+        const data = toFeatureCollection(currentRecords);
         const existing = map.getSource(SRC) as GeoJSONSource | undefined;
         if (existing) {
           existing.setData(data);
@@ -191,11 +253,41 @@ export default function AnomalyMap({ records, selectedIndex, onSelect }: Anomaly
           map.addSource(SRC, { type: 'geojson', data });
         }
 
-        const info = resolveColor('var(--color-info)');
-        const violet = resolveColor('var(--color-violet)');
-        const danger = resolveColor('var(--color-danger)');
         const accent = resolveColor('var(--color-accent)');
         const ring = resolveColor('var(--color-background-surface)');
+
+        // Diverging temperature scale (DESIGN.md § Dataviz palette), scaled to
+        // this record set's real min/max so the full cool -> warm range is
+        // used. Nudged apart when every record shares one temperature so
+        // `interpolate`'s stops stay strictly increasing.
+        const temps = currentRecords.map((r) => r.temp_c);
+        let minTemp = temps.length ? Math.min(...temps) : 0;
+        let maxTemp = temps.length ? Math.max(...temps) : 1;
+        if (minTemp === maxTemp) {
+          minTemp -= 0.5;
+          maxTemp += 0.5;
+        }
+        const midTemp = (minTemp + maxTemp) / 2;
+        const theme = currentTheme();
+        const coolHex = theme === 'light' ? TEMP_COOL_LIGHT : TEMP_COOL_DARK;
+        const warmHex = theme === 'light' ? TEMP_WARM_LIGHT : TEMP_WARM_DARK;
+        const tempColorExpr = [
+          'interpolate',
+          ['linear'],
+          ['get', 'temp_c'],
+          minTemp,
+          coolHex,
+          midTemp,
+          TEMP_NEUTRAL_MID,
+          maxTemp,
+          warmHex,
+        ];
+        // DESIGN.md § Dataviz palette: "anomaly methods: encoded by marker
+        // shape, not hue" -- a filled dot is z-score/both, an open ring
+        // (transparent fill, temperature-coloured stroke) is isolation-forest.
+        // The both-methods overlap is called out as a stat (MethodStrip), not
+        // a third map hue/shape.
+        const isIsolationForest = ['==', ['get', 'detected_by'], 'isolation_forest'];
 
         // maplibre models paint expressions as deep tuple unions that reject
         // programmatically-built arrays; assert at this single, runtime-validated
@@ -214,28 +306,116 @@ export default function AnomalyMap({ records, selectedIndex, onSelect }: Anomaly
             type: 'circle',
             source: SRC,
             paint: {
-              'circle-color': [
-                'match',
-                ['get', 'detected_by'],
-                'zscore',
-                info,
-                'isolation_forest',
-                violet,
-                'both',
-                danger,
-                info,
-              ],
+              'circle-color': ['case', isIsolationForest, 'transparent', tempColorExpr],
               'circle-radius': ['interpolate', ['linear'], ['abs', ['get', 'z']], 3, 5, 4.6, 13],
               'circle-opacity': 0.85,
-              'circle-stroke-width': ['case', ['boolean', ['feature-state', 'selected'], false], 3, 1],
+              'circle-stroke-width': [
+                'case',
+                ['boolean', ['feature-state', 'selected'], false],
+                3,
+                isIsolationForest,
+                2,
+                1,
+              ],
               'circle-stroke-color': [
                 'case',
                 ['boolean', ['feature-state', 'selected'], false],
                 accent,
+                isIsolationForest,
+                tempColorExpr,
                 ring,
               ],
             },
           } as unknown as LayerSpecification);
+        }
+      };
+
+      // The semantic-search cross-link: a pulsing ember ring + a small solid
+      // center dot, bound to the dedicated `sem-highlights` source. Re-added
+      // (with freshly resolved colours) alongside the anomaly layers on
+      // `load` and after every theme-driven `setStyle` below.
+      const addSemHighlightLayer = () => {
+        const existingSem = map.getSource(SRC_SEM) as GeoJSONSource | undefined;
+        if (existingSem) {
+          existingSem.setData(semHighlightsRef.current);
+        } else {
+          map.addSource(SRC_SEM, { type: 'geojson', data: semHighlightsRef.current });
+        }
+
+        const emberAccent = resolveColor('var(--color-accent)');
+
+        if (!map.getLayer(LAYER_SEM_RING)) {
+          map.addLayer({
+            id: LAYER_SEM_RING,
+            type: 'circle',
+            source: SRC_SEM,
+            paint: {
+              'circle-radius': SEM_RING_MIN_RADIUS,
+              'circle-color': 'transparent',
+              'circle-stroke-color': emberAccent,
+              'circle-stroke-width': 2,
+              'circle-stroke-opacity': 0.9,
+            },
+          } as unknown as LayerSpecification);
+        }
+        if (!map.getLayer(LAYER_SEM_DOT)) {
+          map.addLayer({
+            id: LAYER_SEM_DOT,
+            type: 'circle',
+            source: SRC_SEM,
+            paint: { 'circle-radius': 3, 'circle-color': emberAccent },
+          } as unknown as LayerSpecification);
+        }
+      };
+
+      // rAF-driven pulse (maplibre has no built-in paint-property animation):
+      // grows/shrinks the ring's radius and stroke-opacity on a sine wave.
+      // Static under reduced motion (DESIGN.md § Accessibility) and stopped
+      // entirely once there is nothing to highlight.
+      const stopSemPulse = () => {
+        if (pulseFrameRef.current !== null) {
+          cancelAnimationFrame(pulseFrameRef.current);
+          pulseFrameRef.current = null;
+        }
+      };
+
+      const setStaticSemRing = () => {
+        if (!map.getLayer(LAYER_SEM_RING)) return;
+        map.setPaintProperty(LAYER_SEM_RING, 'circle-radius', SEM_RING_STATIC_RADIUS);
+        map.setPaintProperty(LAYER_SEM_RING, 'circle-stroke-opacity', 0.9);
+      };
+
+      const tickSemPulse = (now: number) => {
+        if (!map.getLayer(LAYER_SEM_RING)) {
+          pulseFrameRef.current = null;
+          return;
+        }
+        if (!pulseStartRef.current) pulseStartRef.current = now;
+        const phase = ((now - pulseStartRef.current) % SEM_PULSE_DURATION_MS) / SEM_PULSE_DURATION_MS;
+        const wave = (Math.sin(phase * Math.PI * 2 - Math.PI / 2) + 1) / 2;
+        map.setPaintProperty(
+          LAYER_SEM_RING,
+          'circle-radius',
+          SEM_RING_MIN_RADIUS + wave * (SEM_RING_MAX_RADIUS - SEM_RING_MIN_RADIUS),
+        );
+        map.setPaintProperty(LAYER_SEM_RING, 'circle-stroke-opacity', 0.9 - wave * 0.55);
+        pulseFrameRef.current = requestAnimationFrame(tickSemPulse);
+      };
+
+      const updateSemPulse = () => {
+        if (semHighlightsRef.current.features.length === 0) {
+          stopSemPulse();
+          return;
+        }
+        const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+        if (reduce) {
+          stopSemPulse();
+          setStaticSemRing();
+          return;
+        }
+        if (pulseFrameRef.current === null) {
+          pulseStartRef.current = 0;
+          pulseFrameRef.current = requestAnimationFrame(tickSemPulse);
         }
       };
 
@@ -265,10 +445,11 @@ export default function AnomalyMap({ records, selectedIndex, onSelect }: Anomaly
         prevSelectedRef.current = sel;
       };
 
-      apiRef.current = { applyFilter, applySelection };
+      apiRef.current = { applyFilter, applySelection, updateSemPulse };
 
       map.on('load', () => {
         addAnomalyLayers();
+        addSemHighlightLayer();
         const recs = recordsRef.current;
         if (recs.length > 0) {
           const bounds = new maplibre.LngLatBounds();
@@ -278,6 +459,7 @@ export default function AnomalyMap({ records, selectedIndex, onSelect }: Anomaly
         readyRef.current = true;
         applyFilter();
         applySelection();
+        updateSemPulse();
       });
 
       map.on('mousemove', LAYER_HIT, (e) => {
@@ -303,8 +485,10 @@ export default function AnomalyMap({ records, selectedIndex, onSelect }: Anomaly
         map.setStyle(styleUrl(currentTheme()));
         map.once('styledata', () => {
           addAnomalyLayers();
+          addSemHighlightLayer();
           applyFilter();
           applySelection();
+          updateSemPulse();
         });
       });
       themeObserver.observe(document.documentElement, {
@@ -318,6 +502,10 @@ export default function AnomalyMap({ records, selectedIndex, onSelect }: Anomaly
 
     return () => {
       cancelled = true;
+      if (pulseFrameRef.current !== null) {
+        cancelAnimationFrame(pulseFrameRef.current);
+        pulseFrameRef.current = null;
+      }
       themeObserver?.disconnect();
       resizeObserver?.disconnect();
       popupRef.current?.remove();
@@ -336,6 +524,26 @@ export default function AnomalyMap({ records, selectedIndex, onSelect }: Anomaly
   useEffect(() => {
     apiRef.current?.applyFilter();
   }, [activeMethods]);
+
+  // The semantic-search cross-link: SemanticSearch calls this on every
+  // active-query change. Always records the latest request in
+  // `semHighlightsRef` (so a call arriving before the map has loaded is
+  // applied once `addSemHighlightLayer` seeds the source), then pushes it
+  // straight to the live source + pulse state when the map is ready.
+  useImperativeHandle(
+    ref,
+    () => ({
+      highlightRecords(newRecords) {
+        const fc = toSemFeatureCollection(newRecords);
+        semHighlightsRef.current = fc;
+        if (!readyRef.current) return;
+        const source = mapRef.current?.getSource(SRC_SEM) as GeoJSONSource | undefined;
+        source?.setData(fc);
+        apiRef.current?.updateSemPulse();
+      },
+    }),
+    [],
+  );
 
   const toggleMethod = (method: AnomalyDetectedBy) => {
     setActiveMethods((prev) => {
@@ -383,4 +591,8 @@ export default function AnomalyMap({ records, selectedIndex, onSelect }: Anomaly
       </div>
     </div>
   );
-}
+});
+
+AnomalyMap.displayName = 'AnomalyMap';
+
+export default AnomalyMap;

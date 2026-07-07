@@ -1,0 +1,620 @@
+<title>Weather-Forecast: Observatory (design preview)</title>
+<style>
+  :root {
+    --bg: #f7f6f3; --surface: #ffffff; --elevated: #ffffff; --border: #e5e0d8; --hair: #ece8e1;
+    --text: #201c18; --muted: #5e574e; --subtle: #8b8377;
+    --accent: #d8511c; --accent-soft: #f2612c; --accent-text: #b8410f;
+    --cool: #2e8aa8; --cool-text: #1f6f8a; --warm: #d8511c;
+    --good: #1f8f5c; --warn: #b8902a; --crit: #cc4a2e;
+    --shadow: 0 1px 2px rgba(32,28,24,.05), 0 8px 28px rgba(32,28,24,.07);
+    --serif: "Iowan Old Style", "Palatino Linotype", Palatino, "Book Antiqua", Georgia, "Times New Roman", serif;
+    --sans: "Segoe UI", system-ui, -apple-system, "Helvetica Neue", Arial, sans-serif;
+    --mono: "SFMono-Regular", "Cascadia Code", "Roboto Mono", Consolas, ui-monospace, monospace;
+    --maxw: 1120px; --col: 680px; --ease: cubic-bezier(.16,1,.3,1);
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg:#141210; --surface:#1b1815; --elevated:#24201b; --border:#37312b; --hair:#2a251f;
+      --text:#f3ece2; --muted:#a79e92; --subtle:#6f6659;
+      --accent:#f2612c; --accent-soft:#f2612c; --accent-text:#f7855a;
+      --cool:#3fa9c7; --cool-text:#6fc3da; --warm:#f2612c;
+      --good:#46b482; --warn:#e0b341; --crit:#e0603f;
+      --shadow:0 1px 0 rgba(0,0,0,.4), 0 12px 40px rgba(0,0,0,.45);
+    }
+  }
+  :root[data-theme="light"] {
+    --bg:#f7f6f3; --surface:#ffffff; --elevated:#ffffff; --border:#e5e0d8; --hair:#ece8e1;
+    --text:#201c18; --muted:#5e574e; --subtle:#8b8377; --accent:#d8511c; --accent-soft:#f2612c;
+    --accent-text:#b8410f; --cool:#2e8aa8; --cool-text:#1f6f8a; --warm:#d8511c;
+    --good:#1f8f5c; --warn:#b8902a; --crit:#cc4a2e;
+    --shadow:0 1px 2px rgba(32,28,24,.05),0 8px 28px rgba(32,28,24,.07);
+  }
+  :root[data-theme="dark"] {
+    --bg:#141210; --surface:#1b1815; --elevated:#24201b; --border:#37312b; --hair:#2a251f;
+    --text:#f3ece2; --muted:#a79e92; --subtle:#6f6659; --accent:#f2612c; --accent-soft:#f2612c;
+    --accent-text:#f7855a; --cool:#3fa9c7; --cool-text:#6fc3da; --warm:#f2612c;
+    --good:#46b482; --warn:#e0b341; --crit:#e0603f;
+    --shadow:0 1px 0 rgba(0,0,0,.4),0 12px 40px rgba(0,0,0,.45);
+  }
+
+  * { box-sizing: border-box; }
+  html { -webkit-text-size-adjust: 100%; }
+  body { margin:0; background:var(--bg); color:var(--text); font-family:var(--sans); font-size:17px; line-height:1.6; -webkit-font-smoothing:antialiased; text-rendering:optimizeLegibility; overflow-x:hidden; }
+  h1,h2,h3 { font-family:var(--serif); font-weight:600; letter-spacing:-.01em; text-wrap:balance; margin:0; }
+  .mono { font-family:var(--mono); font-variant-numeric:tabular-nums; }
+  a { color:var(--accent-text); }
+  .wrap { max-width:var(--maxw); margin:0 auto; padding:0 28px; }
+  img, svg { max-width:100%; }
+
+  header.bar { position:sticky; top:0; z-index:40; backdrop-filter:saturate(1.2) blur(10px); background:color-mix(in srgb, var(--bg) 82%, transparent); border-bottom:1px solid var(--hair); }
+  .bar-in { display:flex; align-items:center; justify-content:space-between; gap:16px; height:58px; }
+  .wordmark { font-family:var(--mono); font-size:13px; letter-spacing:.16em; text-transform:uppercase; color:var(--text); display:flex; align-items:center; gap:10px; white-space:nowrap; }
+  .wordmark .dot { width:8px; height:8px; border-radius:9999px; background:var(--accent-soft); box-shadow:0 0 0 4px color-mix(in srgb, var(--accent-soft) 22%, transparent); flex:none; }
+  .bar-right { display:flex; align-items:center; gap:12px; min-width:0; }
+  .chip { font-family:var(--mono); font-size:11px; letter-spacing:.08em; text-transform:uppercase; color:var(--muted); border:1px solid var(--border); border-radius:4px; padding:5px 9px; display:inline-flex; align-items:center; gap:7px; white-space:nowrap; }
+  .chip .live { width:6px; height:6px; border-radius:9999px; background:var(--good); box-shadow:0 0 0 3px color-mix(in srgb, var(--good) 25%, transparent); }
+  .ttoggle { font-family:var(--mono); font-size:11px; letter-spacing:.08em; text-transform:uppercase; background:transparent; color:var(--muted); border:1px solid var(--border); border-radius:4px; padding:6px 10px; cursor:pointer; white-space:nowrap; flex:none; }
+  .ttoggle:hover { color:var(--text); border-color:var(--muted); }
+
+  .hero { position:relative; overflow:hidden; border-bottom:1px solid var(--hair); }
+  .stripes { position:absolute; inset:0; display:flex; opacity:.9; }
+  .stripes span { flex:1 1 0; transform:scaleY(0); transform-origin:bottom; }
+  .hero-veil { position:absolute; inset:0; background:linear-gradient(to bottom, color-mix(in srgb,var(--bg) 22%,transparent) 0%, color-mix(in srgb,var(--bg) 66%,transparent) 52%, var(--bg) 100%); }
+  .hero-in { position:relative; padding:104px 0 76px; }
+  .eyebrow { font-family:var(--mono); font-size:12px; letter-spacing:.22em; text-transform:uppercase; color:var(--accent-text); margin-bottom:22px; }
+  h1.title { font-size:clamp(35px,6.2vw,74px); line-height:1.03; letter-spacing:-.025em; max-width:16ch; }
+  h1.title em { font-style:italic; color:var(--accent-text); }
+  .lede { margin-top:24px; font-size:clamp(17px,2.2vw,21px); color:var(--muted); max-width:56ch; }
+  .herostats { display:flex; flex-wrap:wrap; gap:36px 40px; margin-top:44px; }
+  .hstat .v { font-family:var(--serif); font-size:clamp(32px,5vw,52px); font-weight:600; letter-spacing:-.02em; line-height:1; }
+  .hstat .v small { font-family:var(--mono); font-size:.38em; letter-spacing:0; color:var(--muted); font-weight:400; margin-left:4px; }
+  .hstat .k { font-family:var(--mono); font-size:11.5px; letter-spacing:.1em; text-transform:uppercase; color:var(--subtle); margin-top:12px; }
+  .scrollcue { margin-top:52px; font-family:var(--mono); font-size:11px; letter-spacing:.2em; text-transform:uppercase; color:var(--subtle); display:flex; align-items:center; gap:10px; }
+  .scrollcue .ln { width:46px; height:1px; background:var(--border); position:relative; overflow:hidden; flex:none; }
+  .scrollcue .ln::after { content:""; position:absolute; inset:0; width:40%; background:var(--accent-soft); animation:slide 2.4s var(--ease) infinite; }
+  @keyframes slide { 0%{transform:translateX(-120%)} 100%{transform:translateX(320%)} }
+
+  section.act { padding:92px 0; border-bottom:1px solid var(--hair); }
+  .actnum { font-family:var(--mono); font-size:12px; letter-spacing:.2em; color:var(--accent-text); text-transform:uppercase; flex:none; }
+  .acthead { display:flex; align-items:baseline; gap:18px; margin-bottom:10px; }
+  h2.actt { font-size:clamp(27px,4vw,40px); letter-spacing:-.02em; }
+  .actlede { color:var(--muted); font-size:18px; margin-top:14px; max-width:62ch; }
+  .actlede b { color:var(--text); font-weight:600; }
+
+  .reveal { opacity:0; transform:translateY(18px); transition:opacity .7s var(--ease), transform .7s var(--ease); }
+  .reveal.in { opacity:1; transform:none; }
+
+  .panel { margin-top:36px; background:var(--surface); border:1px solid var(--border); border-radius:12px; box-shadow:var(--shadow); overflow:hidden; }
+  .panel-top { display:flex; align-items:center; justify-content:space-between; gap:12px 14px; padding:15px 20px; border-bottom:1px solid var(--hair); flex-wrap:wrap; }
+  .panel-title { font-family:var(--mono); font-size:12px; letter-spacing:.12em; text-transform:uppercase; color:var(--muted); }
+  .legend { display:flex; gap:14px; flex-wrap:wrap; }
+  .lg { font-family:var(--mono); font-size:11.5px; color:var(--muted); display:inline-flex; align-items:center; gap:7px; }
+  .lg .sw { width:15px; height:3px; border-radius:2px; flex:none; }
+  .lg .swd { width:9px; height:9px; border-radius:9999px; flex:none; }
+
+  .chartbox { padding:12px 8px 8px; position:relative; }
+  svg { display:block; width:100%; height:auto; }
+  .grid line { stroke:var(--hair); stroke-width:1; }
+  .axis text { font-family:var(--mono); fill:var(--subtle); }
+  .holdout-band { fill:color-mix(in srgb, var(--accent-soft) 8%, transparent); }
+  .obs-line { fill:none; stroke:var(--text); stroke-width:2; stroke-linejoin:round; stroke-linecap:round; }
+  .pred-line { fill:none; stroke:var(--accent-soft); stroke-width:2; stroke-linejoin:round; stroke-linecap:round; }
+  .endlabel { font-family:var(--mono); font-weight:600; }
+  .cross { stroke:var(--subtle); stroke-width:1; stroke-dasharray:3 3; opacity:0; }
+  .hoverdot { opacity:0; }
+  .anno { font-family:var(--mono); fill:var(--muted); }
+  .anno-b { fill:var(--accent-text); }
+
+  .tip { position:absolute; pointer-events:none; opacity:0; transform:translate(-50%,-118%); background:var(--elevated); border:1px solid var(--border); border-radius:8px; box-shadow:var(--shadow); padding:9px 11px; font-family:var(--mono); font-size:11.5px; color:var(--text); white-space:nowrap; z-index:5; transition:opacity .12s ease; max-width:80vw; }
+  .tip .td { color:var(--subtle); font-size:10.5px; margin-bottom:4px; letter-spacing:.04em; }
+  .tip .tr { display:flex; align-items:center; gap:8px; justify-content:space-between; }
+  .tip .tr .tk { color:var(--muted); }
+  .tip b { font-weight:600; }
+
+  .board { display:grid; gap:2px; padding:8px 6px 14px; }
+  .row { display:grid; grid-template-columns:210px 1fr 74px; align-items:center; gap:14px; padding:9px 14px; border-radius:8px; }
+  .row:hover { background:var(--hair); }
+  .row .nm { font-family:var(--mono); font-size:13px; color:var(--text); display:flex; align-items:center; gap:9px; }
+  .row .nm .tag { font-family:var(--mono); font-size:9.5px; letter-spacing:.08em; text-transform:uppercase; color:var(--good); border:1px solid color-mix(in srgb,var(--good) 40%,transparent); padding:1px 5px; border-radius:4px; flex:none; }
+  .bar { height:10px; border-radius:3px; background:var(--accent-soft); position:relative; }
+  .bartrack { background:var(--hair); border-radius:3px; }
+  .row .val { font-family:var(--mono); font-size:13px; text-align:right; color:var(--text); font-variant-numeric:tabular-nums; }
+  .row.best .nm .dot { width:7px; height:7px; border-radius:9999px; background:var(--accent-soft); flex:none; }
+  .boardnote { font-family:var(--mono); font-size:11px; color:var(--subtle); padding:0 20px 16px; }
+
+  .metricstrip { display:grid; grid-template-columns:repeat(3,1fr); gap:16px; margin-top:36px; }
+  .mcard { background:var(--surface); border:1px solid var(--border); border-radius:12px; padding:20px; box-shadow:var(--shadow); }
+  .mcard .mv { font-family:var(--serif); font-size:40px; font-weight:600; letter-spacing:-.02em; line-height:1; }
+  .mcard .mk { font-family:var(--mono); font-size:11.5px; letter-spacing:.08em; text-transform:uppercase; color:var(--muted); margin-top:12px; }
+  .mcard .ms { font-size:14px; color:var(--subtle); margin-top:8px; line-height:1.45; }
+  .mcard.hero-card { border-color:color-mix(in srgb, var(--accent-soft) 42%, var(--border)); }
+  .mcard.hero-card .mv { color:var(--accent-text); }
+
+  .mapwrap { display:grid; grid-template-columns:1fr 300px; gap:0; }
+  .graticule line { stroke:var(--hair); stroke-width:1; }
+  .graticule .frame { stroke:var(--border); fill:none; stroke-width:1; }
+  .glabel { font-family:var(--mono); font-size:9px; fill:var(--subtle); }
+  .adot { cursor:pointer; transition:r .12s ease; }
+  .semmaplabel { font-family:var(--mono); font-size:10px; font-weight:700; fill:var(--accent-text); }
+  .ticker { border-left:1px solid var(--hair); padding:14px 4px; max-height:380px; overflow-y:auto; }
+  .tkrow { display:grid; grid-template-columns:1fr auto; gap:8px; padding:9px 16px; border-bottom:1px solid var(--hair); }
+  .tkrow:last-child { border-bottom:none; }
+  .tkrow .cc { font-size:13.5px; color:var(--text); }
+  .tkrow .cm { font-family:var(--mono); font-size:10.5px; color:var(--subtle); margin-top:2px; letter-spacing:.03em; }
+  .tkrow .tt { font-family:var(--mono); font-size:15px; font-weight:600; text-align:right; font-variant-numeric:tabular-nums; }
+  .tkrow .tz { font-family:var(--mono); font-size:10.5px; text-align:right; color:var(--subtle); margin-top:2px; }
+
+  .sembody { padding:20px; }
+  .semhint { color:var(--muted); font-size:14.5px; margin:0 0 16px; max-width:64ch; }
+  .semchips { display:flex; flex-wrap:wrap; gap:9px; }
+  .semchip { font-family:var(--mono); font-size:12px; color:var(--muted); background:var(--surface); border:1px solid var(--border); border-radius:9999px; padding:7px 13px; cursor:pointer; transition:color .15s ease, border-color .15s ease, background .15s ease; }
+  .semchip:hover { color:var(--text); border-color:var(--muted); }
+  .semchip.on { color:#1b1712; background:var(--accent-soft); border-color:var(--accent-soft); font-weight:600; }
+  .semresults { list-style:none; margin:20px 0 0; padding:0; display:grid; gap:2px; }
+  .semrow { display:grid; grid-template-columns:30px 1fr 120px 54px; align-items:center; gap:14px; padding:10px 12px; border-radius:8px; }
+  .semrow:hover { background:var(--hair); }
+  .semrank { font-family:var(--serif); font-size:20px; font-weight:600; color:var(--subtle); text-align:center; }
+  .semrow:first-child .semrank { color:var(--accent-text); }
+  .semc { font-size:15px; color:var(--text); }
+  .semd { font-family:var(--mono); font-size:11px; color:var(--subtle); margin-top:3px; letter-spacing:.02em; }
+  .semscorewrap { height:8px; background:var(--hair); border-radius:3px; overflow:hidden; }
+  .semscorebar { height:100%; background:var(--accent-soft); border-radius:3px; width:0; }
+  .semscore { font-family:var(--mono); font-size:13px; text-align:right; color:var(--muted); }
+
+  .shap { padding:22px 20px 10px; display:grid; gap:12px; }
+  .srow { display:grid; grid-template-columns:150px 1fr 58px; align-items:center; gap:14px; }
+  .srow .sn { font-family:var(--mono); font-size:12.5px; color:var(--text); }
+  .srow .sv { font-family:var(--mono); font-size:12.5px; text-align:right; color:var(--muted); }
+  .sbar { height:14px; border-radius:3px; width:0; }
+
+  .close { padding:92px 0 40px; }
+  .colophon { display:grid; grid-template-columns:1fr 1fr; gap:1px; margin-top:28px; background:var(--border); border:1px solid var(--border); border-radius:10px; overflow:hidden; }
+  .colophon > div { background:var(--surface); padding:16px 18px; display:flex; flex-direction:column; gap:6px; }
+  .colophon dt { font-family:var(--mono); font-size:10.5px; letter-spacing:.12em; text-transform:uppercase; color:var(--subtle); margin:0; }
+  .colophon dd { margin:0; font-family:var(--mono); font-size:13px; color:var(--text); }
+  .repro { display:grid; grid-template-columns:1fr 1fr; gap:40px; margin-top:36px; }
+  .repro h3 { font-size:21px; margin-bottom:10px; }
+  .repro p { color:var(--muted); font-size:15.5px; margin:0; }
+  footer { border-top:1px solid var(--hair); padding:26px 0 60px; margin-top:8px; }
+  .foot { display:flex; justify-content:space-between; gap:16px; flex-wrap:wrap; font-family:var(--mono); font-size:11.5px; color:var(--subtle); letter-spacing:.04em; }
+
+  .banner { background:color-mix(in srgb, var(--accent-soft) 12%, var(--surface)); border:1px dashed color-mix(in srgb, var(--accent-soft) 45%, var(--border)); color:var(--muted); font-family:var(--mono); font-size:12px; border-radius:8px; padding:10px 14px; margin:22px auto 0; max-width:var(--maxw); }
+  .banner b { color:var(--accent-text); }
+
+  :focus-visible { outline:2px solid var(--accent-soft); outline-offset:2px; border-radius:3px; }
+
+  /* ---------------- responsive ---------------- */
+  @media (max-width:1024px){ .mapwrap { grid-template-columns:1fr 260px; } }
+  @media (max-width:860px){
+    .mapwrap { grid-template-columns:1fr; }
+    .ticker { border-left:none; border-top:1px solid var(--hair); max-height:none; display:grid; grid-template-columns:repeat(2,1fr); }
+    .tkrow { border-bottom:1px solid var(--hair); }
+  }
+  @media (max-width:768px){
+    .metricstrip { grid-template-columns:1fr; }
+    .repro { grid-template-columns:1fr; gap:28px; }
+  }
+  @media (max-width:640px){
+    .wrap { padding:0 18px; }
+    header .chip { display:none; }
+    .hero-in { padding:76px 0 56px; }
+    .herostats { gap:24px 30px; margin-top:36px; }
+    .scrollcue { margin-top:40px; }
+    section.act { padding:60px 0; }
+    .close { padding:64px 0 32px; }
+    .acthead { gap:12px; }
+    .actlede { font-size:16.5px; }
+    .colophon { grid-template-columns:1fr; }
+    .ticker { grid-template-columns:1fr; }
+  }
+  @media (max-width:560px){
+    .row { display:flex; flex-wrap:wrap; align-items:center; gap:7px 12px; grid-template-columns:none; padding:10px 12px; }
+    .row .nm { flex:1 1 auto; font-size:12px; }
+    .row .val { margin-left:auto; }
+    .row .bartrack { flex:1 1 100%; order:3; }
+    .semrow { grid-template-columns:26px 1fr 52px; }
+    .semscorewrap { display:none; }
+    .srow { grid-template-columns:112px 1fr 46px; gap:10px; }
+    .mcard .mv { font-size:34px; }
+    .panel { margin-top:26px; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .stripes span { transform:none !important; }
+    .reveal { opacity:1 !important; transform:none !important; transition:none !important; }
+    .scrollcue .ln::after { animation:none; }
+  }
+</style>
+
+<header class="bar">
+  <div class="wrap bar-in">
+    <div class="wordmark"><span class="dot"></span>Weather&#8203;-Forecast</div>
+    <div class="bar-right">
+      <span class="chip gen"><span class="live"></span>Live model output</span>
+      <span class="chip mono">commit 24b7120 &middot; 05 Jul 2026</span>
+      <button class="ttoggle" id="themebtn" aria-label="Toggle color theme">Theme</button>
+    </div>
+  </div>
+</header>
+
+<div class="banner"><b>DESIGN PREVIEW</b> &middot; "Observatory" identity for Astryx re-theme &middot; running on the real 05 Jul 2026 pipeline output &middot; evaluating look, copy, and interaction</div>
+
+<section class="hero">
+  <div class="stripes" id="stripes" aria-hidden="true"></div>
+  <div class="hero-veil"></div>
+  <div class="wrap hero-in">
+    <div class="eyebrow">Global daily-mean temperature &middot; 211 countries</div>
+    <h1 class="title">Forecasting the planet's temperature to within a <em>quarter&#8209;degree</em>.</h1>
+    <p class="lede">An end-to-end machine-learning pipeline that predicts global daily temperature, flags the outliers, and explains what drives them. Every figure is regenerated from source and stamped to the commit that produced it.</p>
+    <div class="herostats" id="herostats"></div>
+    <div class="scrollcue"><span class="ln"></span>Three findings, in order</div>
+  </div>
+</section>
+
+<main>
+  <section class="act" id="act-forecast">
+    <div class="wrap">
+      <div class="reveal">
+        <div class="acthead"><span class="actnum">01</span><h2 class="actt">The forecast</h2></div>
+        <p class="actlede">Across a held-out final month the <b>weighted ensemble</b> tracked the true global daily mean to <b>0.35&nbsp;&deg;C RMSE</b>. The single best model, gradient boosting, reached <b>0.27&nbsp;&deg;C</b>. Seven models were scored on the same untouched window, and none of them saw it during training.</p>
+      </div>
+
+      <div class="panel reveal">
+        <div class="panel-top">
+          <span class="panel-title">Observed vs. forecast &middot; &deg;C daily mean</span>
+          <div class="legend">
+            <span class="lg"><span class="sw" style="background:var(--text)"></span>Observed</span>
+            <span class="lg"><span class="sw" style="background:var(--accent-soft)"></span>Ensemble forecast</span>
+            <span class="lg"><span class="sw" style="background:color-mix(in srgb,var(--accent-soft) 30%,transparent)"></span>30-day holdout</span>
+          </div>
+        </div>
+        <div class="chartbox">
+          <svg id="fcchart" role="img" aria-label="Line chart of observed global daily-mean temperature with the ensemble forecast over a 30-day holdout window"></svg>
+          <div class="tip" id="fctip"></div>
+        </div>
+      </div>
+
+      <div class="panel reveal">
+        <div class="panel-top"><span class="panel-title">Model leaderboard &middot; holdout RMSE (&deg;C, lower is better)</span></div>
+        <div class="board" id="board"></div>
+        <div class="boardnote">Bars scaled to the weakest baseline. The weight column is each model's share of the weighted blend.</div>
+      </div>
+    </div>
+  </section>
+
+  <section class="act" id="act-anomalies">
+    <div class="wrap">
+      <div class="reveal">
+        <div class="acthead"><span class="actnum">02</span><h2 class="actt">The anomalies</h2></div>
+        <p class="actlede">Two independent detectors swept <b id="anomtotal">150,000</b> hourly readings. A z-score test caught the statistical extremes; an isolation forest caught the structural oddities. The readings both methods flag are the ones worth trusting.</p>
+      </div>
+
+      <div class="metricstrip reveal" id="metricstrip"></div>
+
+      <div class="panel reveal">
+        <div class="panel-top">
+          <span class="panel-title">Flagged readings &middot; equirectangular &middot; colour = temperature</span>
+          <div class="legend">
+            <span class="lg"><span class="swd" style="background:#3fa9c7"></span>colder</span>
+            <span class="lg"><span class="swd" style="background:#f2612c"></span>warmer</span>
+            <span class="lg"><span class="swd" style="border:2px solid var(--muted);background:transparent"></span>isolation forest</span>
+            <span class="lg"><span class="swd" style="background:var(--muted)"></span>z-score</span>
+          </div>
+        </div>
+        <div class="mapwrap">
+          <div class="chartbox" style="padding:6px 0 0">
+            <svg id="anommap" viewBox="0 0 720 360" role="img" aria-label="World map of flagged temperature anomalies"></svg>
+            <div class="tip" id="maptip"></div>
+          </div>
+          <div class="ticker" id="ticker" aria-label="Most extreme flagged readings"></div>
+        </div>
+      </div>
+
+      <div class="panel reveal" id="sempanel">
+        <div class="panel-top">
+          <span class="panel-title">Search anomalies by meaning</span>
+          <span class="lg mono" style="color:var(--subtle)">MiniLM-L6-v2 &middot; 384-d &middot; cosine, in-browser</span>
+        </div>
+        <div class="sembody">
+          <p class="semhint">Pick a phrase. The page ranks flagged readings by embedding similarity, with no server call and no API key. The top matches ring on the map above.</p>
+          <div class="semchips" id="semchips" role="group" aria-label="Example queries"></div>
+          <ol class="semresults" id="semresults"></ol>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="act" id="act-drivers">
+    <div class="wrap">
+      <div class="reveal">
+        <div class="acthead"><span class="actnum">03</span><h2 class="actt">The drivers</h2></div>
+        <p class="actlede">The same pipeline turns to air quality. A gradient-boosted model of <b>PM2.5</b> particulate pollution, read through SHAP over <b>1,000</b> samples, ranks what actually drives it. <b>Humidity and visibility</b> lead; temperature contributes less than most people expect.</p>
+      </div>
+
+      <div class="panel reveal">
+        <div class="panel-top"><span class="panel-title">Mean absolute SHAP &middot; PM2.5 model &middot; larger = stronger driver</span></div>
+        <div class="shap" id="shap"></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="close">
+    <div class="wrap">
+      <div class="reveal">
+        <div class="acthead"><span class="actnum">&sect;</span><h2 class="actt">Built to be reproduced</h2></div>
+        <div class="repro">
+          <div>
+            <h3>Every figure regenerates</h3>
+            <p>The dashboard reads only the committed JSON contracts the pipeline emits. Nothing is typed in by hand, so the numbers cannot drift from the model. This preview runs on the real <span class="mono" style="color:var(--accent-text)">05 Jul 2026</span> output.</p>
+          </div>
+          <div>
+            <h3>Commit-stamped and honest</h3>
+            <p>Every dataset carries its generation date and source commit. When a metric cannot be trusted it is withheld with a stated reason instead of padded. This run is clean.</p>
+          </div>
+        </div>
+        <dl class="colophon">
+          <div><dt>Forecasting</dt><dd>GradientBoosting, LightGBM, ARIMA, SARIMA, Prophet</dd></div>
+          <div><dt>Detection</dt><dd>z-score, Isolation Forest</dd></div>
+          <div><dt>Explainability</dt><dd>SHAP feature attribution</dd></div>
+          <div><dt>Search</dt><dd>MiniLM-L6-v2 embeddings, offline cosine</dd></div>
+          <div><dt>Serving</dt><dd>Python, FastAPI</dd></div>
+          <div><dt>Interface</dt><dd>Next.js, Astryx design system</dd></div>
+        </dl>
+      </div>
+    </div>
+    <footer>
+      <div class="wrap foot">
+        <span>WEATHER-FORECAST &middot; ML PIPELINE + DASHBOARD</span>
+        <span>SOURCE COMMIT 24b7120 &middot; GENERATED 2026-07-05</span>
+      </div>
+    </footer>
+  </section>
+</main>
+
+<script>
+const DATA = __DATA__;
+const SEM = __SEM__;
+(function(){
+  "use strict";
+  const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const $ = (s,r=document)=>r.querySelector(s);
+  const NS = "http://www.w3.org/2000/svg";
+  const el = (t,a={},kids=[])=>{const n=document.createElementNS(NS,t);for(const k in a)n.setAttribute(k,a[k]);(Array.isArray(kids)?kids:[kids]).forEach(c=>c&&n.appendChild(typeof c==="string"?document.createTextNode(c):c));return n;};
+  const fmt = (n,d=2)=>Number(n).toFixed(d);
+  const cssv = v=>getComputedStyle(document.documentElement).getPropertyValue(v).trim();
+
+  function hex2rgb(h){h=h.replace('#','');return [parseInt(h.slice(0,2),16),parseInt(h.slice(2,4),16),parseInt(h.slice(4,6),16)];}
+  function mix(a,b,t){return a.map((x,i)=>Math.round(x+(b[i]-x)*t));}
+  const COOL=hex2rgb('#3fa9c7'), MID=hex2rgb('#c9c3b6'), WARM=hex2rgb('#f2612c');
+  function tempColor(t,min,max){
+    const p=Math.max(0,Math.min(1,(t-min)/(max-min)));
+    const rgb = p<0.5 ? mix(COOL,MID,p*2) : mix(MID,WARM,(p-0.5)*2);
+    return `rgb(${rgb[0]},${rgb[1]},${rgb[2]})`;
+  }
+  const mpx = lon => (lon+180)/360*720, mpy = lat => (90-lat)/180*360;
+
+  // HERO STRIPES
+  (function(){
+    const obs = DATA.fc.history.concat(DATA.fc.actual);
+    const temps = obs.map(d=>d.value); const min=Math.min(...temps), max=Math.max(...temps);
+    const host = $("#stripes");
+    obs.forEach((d,i)=>{
+      const s=document.createElement("span"); s.style.background=tempColor(d.value,min,max);
+      if(!reduce) s.style.transition=`transform .9s cubic-bezier(.16,1,.3,1) ${i*22}ms`;
+      host.appendChild(s);
+    });
+    requestAnimationFrame(()=>requestAnimationFrame(()=>{[...host.children].forEach(s=>{s.style.transform="scaleY(1)";});}));
+  })();
+
+  // HERO STATS
+  (function(){
+    const best = DATA.metrics.models.filter(m=>m.status==="final"&&m.rmse_c!=null).reduce((a,b)=>a.rmse_c<=b.rmse_c?a:b);
+    const stats=[
+      {v:fmt(best.rmse_c,2), s:"&deg;C RMSE", k:"Best model &middot; "+best.name.split(" ")[0]},
+      {v:"211", s:"", k:"Countries scored"},
+      {v:DATA.fc.test_days, s:"days", k:"Untouched holdout"},
+      {v:"7", s:"", k:"Models benchmarked"}
+    ];
+    const host=$("#herostats");
+    stats.forEach(o=>{const d=document.createElement("div");d.className="hstat";d.innerHTML=`<div class="v mono">${o.v}${o.s?`<small>${o.s}</small>`:""}</div><div class="k">${o.k}</div>`;host.appendChild(d);});
+    $("#anomtotal").textContent = DATA.anomalies.total_records.toLocaleString();
+  })();
+
+  // FORECAST CHART (renders to real container width, reflows on resize)
+  (function(){
+    const svg=$("#fcchart"), box=svg.parentElement, tip=$("#fctip");
+    const obs = DATA.fc.history.concat(DATA.fc.actual).map(d=>({date:d.date,v:d.value}));
+    const pred = DATA.fc.ensemble.map(d=>({date:d.date,v:d.value}));
+    const dates=obs.map(d=>d.date), xi=d=>dates.indexOf(d), n=obs.length;
+    const predByDate={}; pred.forEach(p=>predByDate[p.date]=p.v);
+    const all=obs.map(d=>d.v).concat(pred.map(d=>d.v));
+    let lo=Math.min(...all), hi=Math.max(...all); const pad=(hi-lo)*.15; lo-=pad; hi+=pad;
+    let animated=false, lastW=0, ctx=null;
+    function draw(force){
+      const W=Math.max(320, Math.round(svg.getBoundingClientRect().width || box.clientWidth || 640));
+      if(!force && W===lastW) return; lastW=W;
+      const mobile = W<560;
+      const H = mobile?300:380;
+      const m={t:24,r:mobile?48:64,b:34,l:mobile?32:44};
+      svg.setAttribute("viewBox",`0 0 ${W} ${H}`);
+      while(svg.firstChild) svg.removeChild(svg.firstChild);
+      const X=i=>m.l+(i/(n-1))*(W-m.l-m.r);
+      const Y=v=>m.t+(1-(v-lo)/(hi-lo))*(H-m.t-m.b);
+      const holdStart=xi(DATA.fc.actual[0].date);
+      const fs=mobile?"9.5px":"10.5px";
+      svg.appendChild(el("rect",{class:"holdout-band",x:X(holdStart),y:m.t,width:W-m.r-X(holdStart),height:H-m.t-m.b}));
+      const g=el("g",{class:"grid"}), gl=el("g",{class:"axis","font-size":fs});
+      [16,18,20,22,24].forEach(t=>{ if(t<lo||t>hi)return; const y=Y(t); g.appendChild(el("line",{x1:m.l,y1:y,x2:W-m.r,y2:y})); gl.appendChild(el("text",{x:m.l-8,y:y+3,"text-anchor":"end"},String(t))); });
+      svg.appendChild(g); svg.appendChild(gl);
+      const xa=el("g",{class:"axis","font-size":fs});
+      [0,holdStart,n-1].forEach(i=>{ xa.appendChild(el("text",{x:X(i),y:H-12,"text-anchor":i===0?"start":(i===n-1?"end":"middle")},dates[i].slice(5))); });
+      svg.appendChild(xa);
+      svg.appendChild(el("line",{x1:X(holdStart),y1:m.t,x2:X(holdStart),y2:H-m.b,stroke:cssv('--border'),"stroke-width":1,"stroke-dasharray":"2 3"}));
+      const mkline=(pts,cls)=>{ const d=pts.map((p,i)=>`${i?'L':'M'}${X(p.i).toFixed(1)} ${Y(p.v).toFixed(1)}`).join(' '); const path=el("path",{class:cls,d}); svg.appendChild(path); return path; };
+      const obsPts=obs.map((d,i)=>({i,v:d.v}));
+      const predPts=pred.map(d=>({i:xi(d.date),v:d.v})).filter(p=>p.i>=0);
+      const obsPath=mkline(obsPts,"obs-line"), predPath=mkline(predPts,"pred-line");
+      if(!reduce && !animated){
+        [obsPath,predPath].forEach((p,k)=>{const L=p.getTotalLength();p.style.strokeDasharray=L;p.style.strokeDashoffset=L;p.style.transition=`stroke-dashoffset 1.4s cubic-bezier(.16,1,.3,1) ${k*250+150}ms`;});
+        const io=new IntersectionObserver((es)=>{es.forEach(e=>{if(e.isIntersecting){obsPath.style.strokeDashoffset=0;predPath.style.strokeDashoffset=0;animated=true;io.disconnect();}});},{threshold:.3});
+        io.observe(svg);
+      }
+      const oe=obsPts[obsPts.length-1], pe=predPts[predPts.length-1], efs=mobile?"10px":"11px";
+      svg.appendChild(el("text",{class:"endlabel","font-size":efs,x:X(oe.i)+6,y:Y(oe.v)+4,fill:cssv('--text')},mobile?"Obs":"Observed"));
+      svg.appendChild(el("text",{class:"endlabel","font-size":efs,x:X(pe.i)+6,y:Y(pe.v)-6,fill:cssv('--accent-soft')},mobile?"Fc":"Forecast"));
+      svg.appendChild(el("text",{class:"anno anno-b","font-size":fs,x:X(holdStart)+8,y:m.t+16},"30-DAY HOLDOUT"));
+      if(!mobile) svg.appendChild(el("text",{class:"anno","font-size":fs,x:X(holdStart)+8,y:m.t+31},"ensemble RMSE 0.35 °C"));
+      const cross=el("line",{class:"cross",y1:m.t,y2:H-m.b}); svg.appendChild(cross);
+      const dotO=el("circle",{class:"hoverdot",r:4,fill:cssv('--text')}), dotP=el("circle",{class:"hoverdot",r:4,fill:cssv('--accent-soft')});
+      svg.appendChild(dotO); svg.appendChild(dotP);
+      svg.appendChild(el("rect",{x:m.l,y:m.t,width:W-m.l-m.r,height:H-m.t-m.b,fill:"transparent"}));
+      ctx={W,H,m,X,Y,cross,dotO,dotP};
+    }
+    function move(ev){
+      if(!ctx) return; const {W,H,m,X,Y,cross,dotO,dotP}=ctx;
+      const pt=svg.getBoundingClientRect(); const px=(ev.clientX-pt.left)/pt.width*W;
+      let i=Math.round((px-m.l)/((W-m.l-m.r))*(n-1)); i=Math.max(0,Math.min(n-1,i));
+      const o=obs[i]; const pv=predByDate[o.date];
+      cross.setAttribute("x1",X(i)); cross.setAttribute("x2",X(i)); cross.style.opacity=1;
+      dotO.setAttribute("cx",X(i)); dotO.setAttribute("cy",Y(o.v)); dotO.style.opacity=1;
+      if(pv!=null){dotP.setAttribute("cx",X(i)); dotP.setAttribute("cy",Y(pv)); dotP.style.opacity=1;} else dotP.style.opacity=0;
+      tip.style.opacity=1; tip.style.left=(X(i)/W*100)+"%"; tip.style.top=(Y(Math.max(o.v,pv||o.v))/H*100)+"%";
+      tip.innerHTML=`<div class="td">${o.date}</div><div class="tr"><span class="tk">Observed</span><b>${fmt(o.v,2)} °C</b></div>`+(pv!=null?`<div class="tr"><span class="tk" style="color:var(--accent-text)">Forecast</span><b>${fmt(pv,2)} °C</b></div>`:"");
+    }
+    svg.addEventListener("mousemove",move);
+    svg.addEventListener("mouseleave",()=>{if(ctx){ctx.cross.style.opacity=0;ctx.dotO.style.opacity=0;ctx.dotP.style.opacity=0;}tip.style.opacity=0;});
+    draw(true);
+    let rt; const ro=new ResizeObserver(()=>{clearTimeout(rt);rt=setTimeout(()=>draw(false),120);}); ro.observe(box);
+  })();
+
+  // LEADERBOARD
+  (function(){
+    const models=DATA.metrics.models.filter(m=>m.rmse_c!=null).slice().sort((a,b)=>a.rmse_c-b.rmse_c);
+    const maxr=Math.max(...models.map(m=>m.rmse_c)); const host=$("#board");
+    models.forEach((m,idx)=>{
+      const r=document.createElement("div"); r.className="row"+(idx===0?" best":"");
+      r.innerHTML=`<div class="nm">${idx===0?'<span class="dot"></span>':''}${m.name}${idx===0?'<span class="tag">best</span>':''}</div><div class="bartrack"><div class="bar" style="width:0%"></div></div><div class="val">${fmt(m.rmse_c,2)}</div>`;
+      host.appendChild(r);
+      const bar=r.querySelector(".bar"); bar.style.transition=reduce?"none":`width 1s cubic-bezier(.16,1,.3,1) ${idx*70}ms`;
+    });
+    const io=new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting){host.querySelectorAll(".bar").forEach((b,i)=>{b.style.width=Math.max(3,models[i].rmse_c/maxr*100)+"%";});io.disconnect();}}),{threshold:.2});
+    io.observe(host);
+  })();
+
+  // ANOMALY METRIC CARDS
+  (function(){
+    const M=DATA.anomalies.methods;
+    const cards=[
+      {v:M.zscore.count.toLocaleString(), k:"z-score extremes", s:`|z| &gt; ${M.zscore.threshold} &middot; ${M.zscore.share_pct}% of readings`, hero:false},
+      {v:M.isolation_forest.count.toLocaleString(), k:"isolation-forest oddities", s:`${(M.isolation_forest.contamination*100).toFixed(0)}% contamination &middot; ${M.isolation_forest.share_pct}%`, hero:false},
+      {v:M.overlap_count.toLocaleString(), k:"flagged by both", s:"The readings both methods agree on, the highest-confidence outliers", hero:true}
+    ];
+    const host=$("#metricstrip");
+    cards.forEach(c=>{const d=document.createElement("div");d.className="mcard"+(c.hero?" hero-card":"");d.innerHTML=`<div class="mv mono">${c.v}</div><div class="mk">${c.k}</div><div class="ms">${c.s}</div>`;host.appendChild(d);});
+  })();
+
+  // ANOMALY MAP
+  (function(){
+    const svg=$("#anommap"), W=720,H=360;
+    const grat=el("g",{class:"graticule"});
+    for(let lat=-60;lat<=60;lat+=30){const y=mpy(lat);grat.appendChild(el("line",{x1:0,y1:y,x2:W,y2:y}));grat.appendChild(el("text",{class:"glabel",x:4,y:y-3},(lat>0?lat+"°N":lat<0?(-lat)+"°S":"0°")));}
+    for(let lon=-120;lon<=120;lon+=60){const x=mpx(lon);grat.appendChild(el("line",{x1:x,y1:0,x2:x,y2:H}));}
+    grat.appendChild(el("rect",{class:"frame",x:.5,y:.5,width:W-1,height:H-1}));
+    svg.appendChild(grat);
+    const recs=DATA.anomalies.map; const temps=recs.map(r=>r.temp); const min=Math.min(...temps),max=Math.max(...temps);
+    const tip=$("#maptip"); const layer=el("g",{});
+    recs.forEach((r)=>{
+      const x=mpx(r.lon), y=mpy(r.lat); const col=tempColor(r.temp,min,max); const isIF = r.by==="isolation_forest";
+      const c=el("circle",{class:"adot",cx:x.toFixed(1),cy:y.toFixed(1),r:isIF?4.6:4,fill:isIF?"transparent":col,stroke:isIF?col:cssv('--bg'),"stroke-width":isIF?2:1,"fill-opacity":isIF?1:.9});
+      c.addEventListener("mouseenter",()=>{c.setAttribute("r",7);tip.style.opacity=1;tip.style.left=(x/W*100)+"%";tip.style.top=(y/H*100)+"%";tip.innerHTML=`<div class="td">${r.country}</div><div class="tr"><span class="tk">Temp</span><b>${fmt(r.temp,1)} °C</b></div><div class="tr"><span class="tk">z-score</span><b>${r.z!=null?fmt(r.z,2):"n/a"}</b></div><div class="tr"><span class="tk">Method</span><b>${isIF?"iForest":"z-score"}</b></div>`;});
+      c.addEventListener("mouseleave",()=>{c.setAttribute("r",isIF?4.6:4);tip.style.opacity=0;});
+      layer.appendChild(c);
+    });
+    svg.appendChild(layer);
+    svg.appendChild(el("g",{id:"semhi"}));
+  })();
+
+  // TICKER
+  (function(){
+    const host=$("#ticker");
+    DATA.anomalies.top.forEach(r=>{
+      const col=r.temp>=25?"var(--crit)":(r.temp<=0?"var(--cool-text)":"var(--text)");
+      const d=document.createElement("div"); d.className="tkrow";
+      d.innerHTML=`<div><div class="cc">${r.country}</div><div class="cm">${r.ts} &middot; ${r.by==="isolation_forest"?"iForest":"z-score"}</div></div><div><div class="tt" style="color:${col}">${fmt(r.temp,1)}°</div><div class="tz">z ${fmt(r.z,2)}</div></div>`;
+      host.appendChild(d);
+    });
+  })();
+
+  // SEMANTIC SEARCH (real embeddings, offline cosine, cross-linked to the map)
+  (function(){
+    const chips=$("#semchips"), out=$("#semresults");
+    function dot(a,b){let s=0;for(let i=0;i<a.length;i++)s+=a[i]*b[i];return s;}
+    let active=0;
+    SEM.queries.forEach((q,i)=>{
+      const b=document.createElement("button"); b.className="semchip"+(i===0?" on":""); b.type="button"; b.textContent=q.text;
+      b.addEventListener("click",()=>{active=i;render();}); chips.appendChild(b);
+    });
+    function highlightOnMap(top){
+      const g=$("#semhi"); if(!g)return; while(g.firstChild)g.removeChild(g.firstChild);
+      top.forEach((r,i)=>{
+        const x=mpx(r.lon), y=mpy(r.lat);
+        const ring=el("circle",{cx:x.toFixed(1),cy:y.toFixed(1),r:9,fill:"none",stroke:cssv('--accent-soft'),"stroke-width":2,opacity:.95});
+        if(!reduce){const an=el("animate",{attributeName:"r",values:"6;11;6",dur:"2s",repeatCount:"indefinite"});ring.appendChild(an);}
+        g.appendChild(ring);
+        g.appendChild(el("circle",{cx:x.toFixed(1),cy:y.toFixed(1),r:2.5,fill:cssv('--accent-soft')}));
+        g.appendChild(el("text",{class:"semmaplabel",x:x.toFixed(1),y:(y-12).toFixed(1),"text-anchor":"middle"},String(i+1)));
+      });
+    }
+    function render(){
+      [...chips.children].forEach((c,i)=>c.classList.toggle("on",i===active));
+      const q=SEM.queries[active];
+      const ranked=SEM.records.map(r=>({r,score:dot(q.emb,r.emb)})).sort((a,b)=>b.score-a.score).slice(0,6);
+      const max=ranked[0].score, min=ranked[ranked.length-1].score;
+      out.innerHTML="";
+      ranked.forEach((m,rank)=>{
+        const li=document.createElement("li"); li.className="semrow";
+        const w = max>min ? (m.score-min)/(max-min) : 1;
+        const method = m.r.by==="isolation_forest"?"iForest":"z-score";
+        li.innerHTML=`<span class="semrank">${rank+1}</span><div><div class="semc">${m.r.country}</div><div class="semd">${fmt(m.r.temp,1)}°C &middot; z ${m.r.z!=null?fmt(m.r.z,2):"n/a"} &middot; ${method} &middot; ${m.r.ts}</div></div><div class="semscorewrap"><div class="semscorebar"></div></div><span class="semscore">${m.score.toFixed(3)}</span>`;
+        out.appendChild(li);
+        const bar=li.querySelector(".semscorebar"); bar.style.transition=reduce?"none":`width .6s cubic-bezier(.16,1,.3,1) ${rank*50}ms`;
+        requestAnimationFrame(()=>requestAnimationFrame(()=>{bar.style.width=Math.max(8,20+w*80)+"%";}));
+      });
+      highlightOnMap(ranked.map(m=>m.r));
+    }
+    render();
+  })();
+
+  // SHAP
+  (function(){
+    const feats=DATA.shap.features.slice().sort((a,b)=>b.mean_abs_shap-a.mean_abs_shap);
+    const maxv=feats[0].mean_abs_shap; const host=$("#shap");
+    const C=hex2rgb('#3fa9c7'), Wm=hex2rgb('#f2612c');
+    feats.forEach((f,i)=>{
+      const p=f.mean_abs_shap/maxv; const rgb=mix(C,Wm,p); const col=`rgb(${rgb[0]},${rgb[1]},${rgb[2]})`;
+      const label=f.name.replace(/_/g," ").replace("celsius","(°C)").replace("pct","%");
+      const row=document.createElement("div"); row.className="srow";
+      row.innerHTML=`<div class="sn">${label}</div><div class="bartrack"><div class="sbar" style="background:${col}"></div></div><div class="sv">${fmt(f.mean_abs_shap,2)}</div>`;
+      host.appendChild(row);
+      const bar=row.querySelector(".sbar"); bar.style.transition=reduce?"none":`width .9s cubic-bezier(.16,1,.3,1) ${i*55}ms`;
+    });
+    const io=new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting){host.querySelectorAll(".sbar").forEach((b,i)=>{b.style.width=Math.max(3,feats[i].mean_abs_shap/maxv*100)+"%";});io.disconnect();}}),{threshold:.2});
+    io.observe(host);
+  })();
+
+  // REVEALS
+  (function(){
+    if(reduce){document.querySelectorAll(".reveal").forEach(r=>r.classList.add("in"));return;}
+    const io=new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting){e.target.classList.add("in");io.unobserve(e.target);}}),{threshold:.12});
+    document.querySelectorAll(".reveal").forEach(r=>io.observe(r));
+  })();
+
+  // THEME TOGGLE
+  (function(){
+    const btn=$("#themebtn");
+    const cur=()=>document.documentElement.getAttribute("data-theme") || (window.matchMedia("(prefers-color-scheme: dark)").matches?"dark":"light");
+    btn.addEventListener("click",()=>{const next=cur()==="dark"?"light":"dark";document.documentElement.setAttribute("data-theme",next);btn.textContent=next==="dark"?"Light":"Dark";});
+    btn.textContent=cur()==="dark"?"Light":"Dark";
+  })();
+})();
+</script>

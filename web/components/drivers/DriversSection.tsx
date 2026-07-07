@@ -62,7 +62,12 @@ export default function DriversSection({ headingId = 'drivers-subhead' }: Driver
 
   return (
     <div className={styles.driversSection}>
-      <SectionHeader title="What drives air-quality (PM2.5) predictions" headingId={headingId} chip={chip} />
+      <SectionHeader
+        title="What drives air-quality (PM2.5) predictions"
+        headingId={headingId}
+        chip={chip}
+        description="Humidity and visibility lead; temperature contributes less than most people expect."
+      />
 
       {state.status === 'loading' && (
         <div className={styles.loadingBlock} aria-live="polite" aria-busy="true">

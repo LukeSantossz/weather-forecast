@@ -1,71 +1,20 @@
 /*
- * anomalies.css — section-local styling for the Anomaly explorer.
- *
- * Component-local per the task: theme.css is NOT edited here. Every value binds
- * to a DESIGN.md token exposed as an Astryx CSS variable in app/theme.css. The
+ * anomalies.css: section-local styling for the Anomaly explorer - the map,
+ * the records list (the map's accessible equivalent), and semantic search.
+ * The metric trio (`.metricstrip`/`.mcard`) and the map + ticker panel
+ * (`.mapwrap`/`.ticker`/`.tkrow`) are shared/reusable enough that Task 6
+ * ported them into app/theme.css instead (see that file's "Anomalies act"
+ * block); everything below stays component-local. Every value binds to a
+ * DESIGN.md token exposed as an Astryx CSS variable in app/theme.css. The
  * only new token is `--color-violet` (the anomaly-methods dataviz violet
- * `#8b7fd6` from DESIGN.md § Dataviz), which theme.css does not define; it is
- * re-derived darker for light mode so it clears AA contrast on the light
- * surface, matching how DESIGN.md re-derives (not inverts) the light palette.
+ * `#8b7fd6` from DESIGN.md § Dataviz, used by the records-list method dot),
+ * which theme.css does not define; it is re-derived darker for light mode so
+ * it clears AA contrast on the light surface, matching how DESIGN.md
+ * re-derives (not inverts) the light palette.
  */
 
 :root {
   --color-violet: light-dark(#6f61c4, #8b7fd6);
-}
-
-/* --- Method stat-strip -------------------------------------------------- */
-
-.anomalies-method-strip {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: 16px;
-  margin-bottom: 24px;
-}
-
-@media (min-width: 640px) {
-  .anomalies-method-strip {
-    grid-template-columns: repeat(3, 1fr);
-  }
-}
-
-/* Each method carries its map-legend colour as a left accent, so the strip and
-   the map share one colour key (DESIGN.md: methods carry a label + colour, and
-   never colour alone — the label text names the method). */
-.method-strip-item {
-  padding-left: 16px;
-  border-left: 3px solid var(--color-border);
-}
-
-.method-strip-item--zscore {
-  border-left-color: var(--color-info);
-}
-
-.method-strip-item--iforest {
-  border-left-color: var(--color-violet);
-}
-
-.method-strip-item--overlap {
-  border-left-color: var(--color-danger);
-}
-
-/* Overlap is the agreed, strongest signal: danger tone on the figure itself. */
-.method-strip-item--overlap .stat-block-value-num {
-  color: var(--color-danger);
-}
-
-/* --- Explorer layout: map dominant, records beside / below ------------- */
-
-.anomalies-explorer {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: 16px;
-}
-
-@media (min-width: 1024px) {
-  .anomalies-explorer {
-    grid-template-columns: minmax(0, 1fr) 340px;
-    align-items: start;
-  }
 }
 
 /* --- Map --------------------------------------------------------------- */
@@ -147,16 +96,27 @@
   border-radius: var(--radius-full);
 }
 
+/* DESIGN.md § Dataviz palette: "anomaly methods: encoded by marker shape, not
+   hue" - color on the map is reserved for temperature (see AnomalyMap.tsx's
+   circle-color/circle-stroke-color expressions), so these swatches hint at
+   the same filled-dot / open-ring shapes instead of the old per-method hues.
+   "Both" is not a third map shape (DESIGN.md: "not a third map hue"); its
+   swatch adds an outline to flag its filter button distinctly in this legend
+   only, matching MethodStrip's hero-card + danger provenance chip for the
+   overlap stat. */
 .anomaly-legend-swatch--zscore {
-  background: var(--color-info);
+  background: var(--color-text-secondary);
 }
 
 .anomaly-legend-swatch--iforest {
-  background: var(--color-violet);
+  background: transparent;
+  border: 2px solid var(--color-text-secondary);
 }
 
 .anomaly-legend-swatch--both {
-  background: var(--color-danger);
+  background: var(--color-text-secondary);
+  outline: 2px solid var(--color-danger);
+  outline-offset: 1px;
 }
 
 .anomaly-legend-count {
@@ -220,7 +180,10 @@
 
 /* --- Records list (map's accessible equivalent) ----------------------- */
 
+/* Stands alone below the map + ticker panel (`.mapwrap`, app/theme.css), not
+   a grid sibling of the map anymore, so it needs its own top rhythm. */
 .records-list-wrap {
+  margin-top: 16px;
   max-height: clamp(360px, 60vh, 560px);
   overflow: auto;
   border: 1px solid var(--color-border);
@@ -306,7 +269,9 @@
   margin-bottom: 24px;
 }
 
-@media (min-width: 640px) {
+/* Matches .metricstrip's own breakpoint (app/theme.css) so the loading
+   skeleton never reflows differently than the real content it stands in for. */
+@media (min-width: 769px) {
   .anomalies-skeleton-strip {
     grid-template-columns: repeat(3, 1fr);
   }
@@ -327,7 +292,10 @@
   font-family: var(--font-mono);
 }
 
-/* --- Semantic search (issue #32) --------------------------------------- */
+/* --- Semantic search (issue #32), restyled to the Observatory
+   .semchip/.semrow/.semscorebar (docs/design/
+   observatory-preview-template.html); the offline cosine-ranking algorithm
+   in SemanticSearch.tsx is unchanged. --------------------------------- */
 
 .semantic-search {
   margin-top: 24px;
@@ -344,62 +312,141 @@
   margin-bottom: 16px;
 }
 
-.semantic-search-chips {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  margin-bottom: 16px;
+.semantic-search-model {
+  font-family: var(--font-mono);
+  font-size: 11.5px;
+  color: var(--color-text-secondary);
 }
 
-.semantic-search-results {
-  list-style: none;
-  margin: 0;
-  padding: 0;
+.sembody {
   display: flex;
   flex-direction: column;
-  gap: 4px;
 }
 
-.semantic-search-result {
-  display: grid;
-  grid-template-columns: 24px 1fr auto;
-  align-items: baseline;
-  gap: 12px;
-  padding: 8px 12px;
-  border-radius: var(--radius-inner);
-  border: 1px solid var(--color-border);
-}
-
-.semantic-search-rank {
-  font-family: var(--font-mono);
+.semhint {
+  margin: 0 0 16px;
   color: var(--color-text-secondary);
-  text-align: right;
+  font-size: 14.5px;
+  max-width: 64ch;
 }
 
-.semantic-search-country {
+.semchips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 9px;
+}
+
+.semchip {
+  display: inline-flex;
+  align-items: center;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--color-text-secondary);
+  background: var(--color-background-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-full);
+  padding: 7px 13px;
+  min-height: 44px;
+  cursor: pointer;
+  transition:
+    color var(--motion-fast) var(--ease-out),
+    border-color var(--motion-fast) var(--ease-out),
+    background var(--motion-fast) var(--ease-out);
+}
+
+.semchip:hover {
   color: var(--color-text-primary);
+  border-color: var(--color-text-secondary);
+}
+
+.semchip.on {
+  color: var(--color-on-accent);
+  background: var(--color-accent);
+  border-color: var(--color-accent);
   font-weight: 600;
 }
 
-.semantic-search-detail {
-  color: var(--color-text-secondary);
-  font-family: var(--font-mono);
-  font-size: 0.85em;
+.semresults {
+  list-style: none;
+  margin: 20px 0 0;
+  padding: 0;
+  display: grid;
+  gap: 2px;
 }
 
-.semantic-search-score {
+.semrow {
+  display: grid;
+  grid-template-columns: 30px 1fr 120px 54px;
+  align-items: center;
+  gap: 14px;
+  padding: 10px 12px;
+  border-radius: var(--radius-inner);
+}
+
+.semrow:hover {
+  background: var(--color-background-muted);
+}
+
+.semrank {
+  font-family: var(--font-family-heading);
+  font-size: 20px;
+  font-weight: 600;
+  color: var(--color-text-secondary);
+  text-align: center;
+}
+
+.semrow:first-child .semrank {
+  color: var(--color-text-accent);
+}
+
+.semc {
+  font-size: 15px;
+  color: var(--color-text-primary);
+}
+
+.semd {
   font-family: var(--font-mono);
-  color: var(--color-accent);
+  font-size: 11px;
+  color: var(--color-text-secondary);
+  margin-top: 3px;
+  letter-spacing: 0.02em;
+}
+
+.semscorewrap {
+  height: 8px;
+  background: var(--color-background-muted);
+  border-radius: var(--radius-inner);
+  overflow: hidden;
+}
+
+.semscorebar {
+  height: 100%;
+  background: var(--color-accent);
+  border-radius: var(--radius-inner);
+  width: 0;
+  transition: width 0.6s var(--ease-out);
+}
+
+.semscore {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  color: var(--color-text-secondary);
   text-align: right;
 }
 
-@media (max-width: 520px) {
-  .semantic-search-result {
-    grid-template-columns: 20px 1fr;
+@media (max-width: 560px) {
+  .semrow {
+    grid-template-columns: 26px 1fr 52px;
   }
 
-  .semantic-search-score {
-    grid-column: 2;
-    text-align: left;
+  .semscorewrap {
+    display: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .semchip,
+  .semscorebar {
+    transition: none !important;
   }
 }
