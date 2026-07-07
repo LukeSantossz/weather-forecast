@@ -34,3 +34,6 @@ jobs:
 
       - name: Redesign acceptance checks
         run: npm run check
+
+      - name: Unit tests
+        run: npm test
