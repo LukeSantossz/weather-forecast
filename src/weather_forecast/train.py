@@ -15,7 +15,7 @@ from pathlib import Path
 import pandas as pd
 
 from weather_forecast.config import PipelineConfig, set_global_seed
-from weather_forecast.data_loader import load_raw_weather
+from weather_forecast.data_loader import daily_global_mean
 from weather_forecast.evaluation import compute_metrics, rmse
 from weather_forecast.features import create_features
 from weather_forecast.logging_setup import configure_logging, get_logger
@@ -110,16 +110,6 @@ def run_forecast(
     return results
 
 
-def _daily_from_raw(project_root: Path) -> pd.DataFrame:
-    df = load_raw_weather(project_root)
-    daily = (
-        df.groupby(df["last_updated"].dt.normalize())["temperature_celsius"].mean().reset_index()
-    )
-    daily.columns = ["ds", "y"]
-    daily["ds"] = pd.to_datetime(daily["ds"])
-    return daily.sort_values("ds").reset_index(drop=True)
-
-
 def main(argv: list[str] | None = None) -> int:
     """CLI: train the daily forecast and print per-model metrics."""
     parser = argparse.ArgumentParser(
@@ -161,7 +151,7 @@ def main(argv: list[str] | None = None) -> int:
     configure_logging()
     log = get_logger("weather_forecast.train")
     log.info("loading raw data from %s", args.project_root)
-    daily = _daily_from_raw(args.project_root)
+    daily = daily_global_mean(args.project_root)
     log.info("running forecast on %d daily points (seed=%d)", len(daily), config.seed)
 
     results = run_forecast(daily, config=config)

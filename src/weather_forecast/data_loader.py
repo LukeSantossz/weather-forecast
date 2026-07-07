@@ -49,6 +49,28 @@ def load_raw_weather(
     return df
 
 
+def daily_global_mean(project_root: Path) -> pd.DataFrame:
+    """Global daily-mean temperature series as a ``(ds, y)`` frame.
+
+    Averages ``temperature_celsius`` across all rows sharing a calendar day,
+    ascending by day. Shared by the forecast (``train``) and drift paths.
+
+    Args:
+        project_root: Root directory of the project.
+
+    Returns:
+        A frame with columns ``["ds", "y"]``: ``ds`` datetime-normalized and
+        ascending, ``y`` the mean temperature for that day.
+    """
+    df = load_raw_weather(project_root)
+    daily = (
+        df.groupby(df["last_updated"].dt.normalize())["temperature_celsius"].mean().reset_index()
+    )
+    daily.columns = ["ds", "y"]
+    daily["ds"] = pd.to_datetime(daily["ds"])
+    return daily.sort_values("ds").reset_index(drop=True)
+
+
 def add_region_column(df: pd.DataFrame) -> pd.DataFrame:
     """
     Add a 'region' column derived from continent or timezone.

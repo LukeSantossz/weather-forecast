@@ -20,6 +20,8 @@ from typing import Any
 
 import pandas as pd
 
+from weather_forecast.data_loader import daily_global_mean
+
 # Evidently metric type tags (matched instead of display names). These are
 # internal to Evidently and may change across versions; _summarize fails loudly
 # if the expected drift-count metric is absent rather than reporting a zero.
@@ -100,17 +102,6 @@ def _summarize(metrics: list[dict[str, Any]]) -> dict[str, Any]:
     }
 
 
-def _daily_from_raw(project_root: Path) -> pd.DataFrame:
-    from weather_forecast.data_loader import load_raw_weather
-
-    df = load_raw_weather(project_root)
-    daily = (
-        df.groupby(df["last_updated"].dt.normalize())["temperature_celsius"].mean().reset_index()
-    )
-    daily.columns = ["ds", "y"]
-    return daily.sort_values("ds").reset_index(drop=True)
-
-
 def main(argv: list[str] | None = None) -> int:
     """CLI: report data drift between an earlier and a recent window of the series."""
     parser = argparse.ArgumentParser(
@@ -127,7 +118,7 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--html", type=Path, default=None, help="Optional HTML report path.")
     args = parser.parse_args(argv)
 
-    daily = _daily_from_raw(args.project_root)
+    daily = daily_global_mean(args.project_root)
     w = args.window_days
     if len(daily) < 2 * w:
         parser.error(f"Not enough data for two {w}-day windows: only {len(daily)} rows available.")
