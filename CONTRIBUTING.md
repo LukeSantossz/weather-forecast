@@ -19,12 +19,13 @@ If you cloned without `--recurse-submodules`, run `git submodule update --init`
 so `.standards/` is populated.
 
 After cloning (with `--recurse-submodules`, or run `git submodule update --init` for
-`.standards`), activate the Git hooks once:
+`.standards`), run the setup script once from your activated virtualenv:
 
     bash scripts/setup.sh
 
-This sets `core.hooksPath` to `.githooks`, enabling the R2 pre-push review gate (it skips
-gracefully if the Codex CLI is not installed).
+It installs the package with its dev extras (`pip install -e ".[dev]"`, so the pre-push
+hook's `pytest` and `ruff` resolve) and sets `core.hooksPath` to `.githooks`, enabling the
+R2 pre-push review gate (it skips gracefully if the Codex CLI is not installed).
 
 ## Workflow
 
