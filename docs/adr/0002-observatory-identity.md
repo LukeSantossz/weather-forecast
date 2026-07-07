@@ -1,4 +1,4 @@
-# ADR-F: Replace the "instrument console" identity with "Observatory"
+# ADR 0002: Replace the "instrument console" identity with "Observatory"
 
 - Status: Accepted (2026-07-07). Approved at the SPEC 0031 Spec Gate; implemented on
   `feat/observatory-visual-redesign` (PR #59).
@@ -31,6 +31,6 @@ is rewritten to the Observatory identity as the new locked source of truth.
   the Astryx component library stay as they are (ADR-D holds).
 - `.ulpi/design/DESIGN.md` is now the Observatory identity; the prior console lock is retired.
 - Type and colour choices are locked; individual faces remain a swappable build detail
-  (see ADR-H).
+  (see ADR 0004).
 - If a specific Astryx component resists token theming, the fallback is a thin CSS wrapper
   for that one component, not a new component library.
