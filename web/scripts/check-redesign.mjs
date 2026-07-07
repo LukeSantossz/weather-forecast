@@ -55,12 +55,13 @@ for (const ref of BASE_CANDIDATES) {
 if (baseRef === null) {
   fail(`cannot resolve any base ref (${BASE_CANDIDATES.join(', ')}) to verify the data contract`);
 } else {
-  // Only Modified/Deleted existing contract files are a violation; ADDED artifacts are
-  // allowed (a feature may ship a new Python-generated artifact, e.g. anomaly_model.json,
-  // without touching the existing contract). --diff-filter=MD keeps the "existing contract
-  // stays byte-identical" guarantee while permitting additive files.
+  // Only Modified/Deleted/Renamed existing contract files are a violation; ADDED artifacts
+  // are allowed (a feature may ship a new Python-generated artifact, e.g. anomaly_model.json,
+  // without touching the existing contract). --diff-filter=MDR keeps the "existing contract
+  // stays byte-identical and in place" guarantee (R also catches a rename-away of an existing
+  // file, which git can classify as R rather than D) while permitting additive files.
   const changed = execSync(
-    `git diff --name-only --diff-filter=MD ${baseRef} -- web/public/data`,
+    `git diff --name-only --diff-filter=MDR ${baseRef} -- web/public/data`,
     { cwd: REPO_ROOT },
   )
     .toString()
