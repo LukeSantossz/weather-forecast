@@ -6,7 +6,6 @@ import pytest
 
 from weather_forecast.models import (
     carve_validation_tail,
-    chronological_split,
     fit_arima,
     fit_sarima,
     forecast_steps,
@@ -33,13 +32,6 @@ def _xy(n: int = 60, k: int = 3):
 
 
 class TestSplitHelpers:
-    def test_chronological_split_is_time_ordered(self) -> None:
-        df = _series(50).to_frame("y")
-        cutoff = df.index[39]
-        train, test = chronological_split(df, cutoff)
-        assert len(train) == 40 and len(test) == 10
-        assert train.index.max() <= cutoff < test.index.min()
-
     def test_carve_validation_tail_takes_last_val_size(self) -> None:
         X, y = _xy(40)
         X_tr, X_val, y_tr, y_val = carve_validation_tail(X, y, 10)

@@ -159,39 +159,6 @@ def normalize_numeric_features(
     return df, scaler, cols_to_scale
 
 
-def transform_numeric_features(
-    df: pd.DataFrame,
-    scaler: MinMaxScaler,
-    cols_to_scale: list[str],
-) -> pd.DataFrame:
-    """
-    Apply a previously fitted MinMaxScaler to numeric columns (transform only).
-
-    This is the transform-only counterpart to ``normalize_numeric_features``: it
-    never calls ``fit``, so a scaler fitted on the training split can be reused on
-    validation, test, or inference data without leaking their distributions. Values
-    outside the training range map outside [0, 1], as expected for an honest split.
-
-    Args:
-        df: Input DataFrame (not modified in place).
-        scaler: A MinMaxScaler already fitted on the training data.
-        cols_to_scale: Columns to scale, in the same order used at fit time
-            (the list returned by normalize_numeric_features).
-
-    Returns:
-        New DataFrame with cols_to_scale replaced by their scaled values.
-
-    Raises:
-        ValueError: If any column in cols_to_scale is absent from df.
-    """
-    missing = [c for c in cols_to_scale if c not in df.columns]
-    if missing:
-        raise ValueError(f"Columns to scale are missing from the DataFrame: {missing}")
-    df = df.copy()
-    df[cols_to_scale] = scaler.transform(df[cols_to_scale])
-    return df
-
-
 def encode_categorical_features(
     df: pd.DataFrame,
     categorical_cols: pd.Index | list[str],
@@ -223,27 +190,6 @@ def encode_categorical_features(
     if not to_encode:
         return result
     return pd.get_dummies(result, columns=to_encode, drop_first=False, dummy_na=False)
-
-
-def align_to_encoded_columns(
-    df: pd.DataFrame,
-    expected_columns: pd.Index | list[str],
-) -> pd.DataFrame:
-    """
-    Align an encoded DataFrame to a fixed set of expected columns.
-
-    Missing columns are added and zero-filled, unexpected columns are dropped,
-    and column order follows expected_columns. This makes inference
-    deterministic when the categories present differ from training.
-
-    Args:
-        df: An already-encoded DataFrame (not modified in place).
-        expected_columns: The column set captured at fit time.
-
-    Returns:
-        New DataFrame with exactly expected_columns, in order.
-    """
-    return df.reindex(columns=list(expected_columns), fill_value=0)
 
 
 def run_preprocessing_pipeline(

@@ -44,11 +44,6 @@ GB_PARAMS: dict[str, Any] = {
 }
 
 
-def chronological_split(data: pd.DataFrame, cutoff: Any) -> tuple[Any, Any]:
-    """Split a time-indexed frame/series at ``cutoff`` (no shuffle): (train, test)."""
-    return data[data.index <= cutoff], data[data.index > cutoff]
-
-
 def carve_validation_tail(
     X_train: pd.DataFrame, y_train: pd.Series, val_size: int
 ) -> tuple[pd.DataFrame, pd.DataFrame, pd.Series, pd.Series]:
