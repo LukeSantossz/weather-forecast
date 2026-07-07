@@ -28,3 +28,6 @@ jobs:
 
       - name: Build static export (type-checked)
         run: npm run build
+
+      - name: Redesign acceptance checks
+        run: npm run check
