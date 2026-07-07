@@ -1,0 +1,98 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://weather-forecast.local/schema/anomaly_model.schema.json",
+  "title": "Dashboard anomaly-model contract",
+  "description": "The fitted anomaly models serialized for browser-side inference: the z-score baseline and the Isolation Forest (as leaf-valued trees plus the StandardScaler parameters, median fill values, observed feature ranges, max_samples and offset). Regenerated from the committed data by weather_forecast.anomaly.build_anomaly_model.",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "generated_at",
+    "data_status",
+    "features",
+    "scaler",
+    "medians",
+    "feature_ranges",
+    "zscore",
+    "isolation_forest"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": {
+      "type": "string",
+      "const": "1.0"
+    },
+    "generated_at": {
+      "type": "string"
+    },
+    "data_status": {
+      "type": "string",
+      "enum": ["sample", "real"]
+    },
+    "features": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "scaler": {
+      "type": "object",
+      "required": ["mean", "scale"],
+      "additionalProperties": false,
+      "properties": {
+        "mean": { "type": "array", "items": { "type": "number" } },
+        "scale": { "type": "array", "items": { "type": "number" } }
+      }
+    },
+    "medians": {
+      "type": "array",
+      "items": { "type": "number" }
+    },
+    "feature_ranges": {
+      "type": "object",
+      "required": ["min", "max"],
+      "additionalProperties": false,
+      "properties": {
+        "min": { "type": "array", "items": { "type": "number" } },
+        "max": { "type": "array", "items": { "type": "number" } }
+      }
+    },
+    "zscore": {
+      "type": "object",
+      "required": ["mu", "sigma", "threshold"],
+      "additionalProperties": false,
+      "properties": {
+        "mu": { "type": "number" },
+        "sigma": { "type": "number" },
+        "threshold": { "type": "number" }
+      }
+    },
+    "isolation_forest": {
+      "type": "object",
+      "required": ["max_samples", "offset", "trees"],
+      "additionalProperties": false,
+      "properties": {
+        "max_samples": { "type": "integer" },
+        "offset": { "type": "number" },
+        "trees": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "feature",
+              "threshold",
+              "children_left",
+              "children_right",
+              "n_node_samples"
+            ],
+            "additionalProperties": false,
+            "properties": {
+              "feature": { "type": "array", "items": { "type": "number" } },
+              "threshold": { "type": "array", "items": { "type": "number" } },
+              "children_left": { "type": "array", "items": { "type": "number" } },
+              "children_right": { "type": "array", "items": { "type": "number" } },
+              "n_node_samples": { "type": "array", "items": { "type": "number" } }
+            }
+          }
+        }
+      }
+    }
+  }
+}
