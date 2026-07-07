@@ -4,7 +4,7 @@
 
 **Goal:** Re-theme the Astryx dashboard into the "Observatory" identity and restructure the three tabs into one scrollytelling narrative, without touching the Python pipeline or the data contract.
 
-**Architecture:** The identity is applied by rewriting the CSS-variable token values and structural classes in `web/app/theme.css` (Astryx components read these tokens, so they reskin for free), swapping the display font in `web/app/fonts.ts`, and replacing the tab shell in `web/app/layout.tsx` + `web/app/page.tsx` with a single-scroll page of sections. The bespoke dataviz (forecast chart, MapLibre map, SHAP bars) and the offline semantic search are restyled and re-laid-out, not rebuilt. Every pixel-level style, markup structure, and interaction is already realised in the approved preview at `docs/design/observatory-preview-template.html` (readable source) and `docs/design/observatory-preview.html` (runnable, data inlined); port from there.
+**Architecture:** The identity is applied by rewriting the CSS-variable token values and structural classes in `web/app/theme.css` (Astryx components read these tokens, so they reskin for free), swapping the display font in `web/app/fonts.ts`, and replacing the tab shell in `web/app/layout.tsx` + `web/app/page.tsx` with a single-scroll page of sections. The bespoke dataviz (forecast chart, MapLibre map, SHAP bars) and the offline semantic search are restyled and re-laid-out, not rebuilt. Every pixel-level style, markup structure, and interaction is already realised in the approved observatory design preview (now implemented in web/); port from there.
 
 **Tech Stack:** Next.js 16 (`output: 'export'`), React 19, `@astryxdesign/core` 0.1.2 (themed via CSS vars, never re-implemented), `next/font/google`, d3-scale/d3-shape (forecast chart), maplibre-gl (anomaly map). No new dependencies.
 
@@ -36,7 +36,7 @@ Each task's "verify" steps name which gates apply. A task is done only when its 
 
 **Modify**
 - `web/app/fonts.ts` - swap the display face (Archivo -> a serif) exposed as `--font-display`; keep `--font-body`, `--font-mono`.
-- `web/app/theme.css` - rewrite the token values (Observatory palette) and the structural/shell/section classes; add hero/stripes/act/leaderboard/metric-card/semantic/colophon classes; add responsive + reduced-motion rules. Source of truth for styles: `docs/design/observatory-preview-template.html`.
+- `web/app/theme.css` - rewrite the token values (Observatory palette) and the structural/shell/section classes; add hero/stripes/act/leaderboard/metric-card/semantic/colophon classes; add responsive + reduced-motion rules. Source of truth for styles: the approved observatory design preview (now implemented in web/).
 - `web/app/layout.tsx` - shell becomes a slim sticky header (wordmark + live-output chip + theme toggle) + the reframed banner; footer becomes the colophon; drop the bottom `MethodologyNote` mount (moves into the Anomalies act as a short aside). Update the font `className`.
 - `web/app/page.tsx` - replace `TabList`/`Tab` with one scroll of `<section>`s (`#forecast`, `#anomalies`, `#drivers`) plus a hero and close; add an IntersectionObserver reveal.
 - `web/components/DataStatusBanner.tsx` - confident `Live model output - commit - date` for the `real` state; keep a non-default `sample` state.
@@ -56,8 +56,8 @@ Each task's "verify" steps name which gates apply. A task is done only when its 
 - `web/scripts/check-redesign.mjs` - the automated redesign check (forbidden strings, no `TabList`, contract untouched).
 
 **Reference (already committed this session)**
-- `docs/design/observatory-preview-template.html` - the exact CSS, markup, and JS to port (readable).
-- `docs/design/observatory-preview.html` - the same, runnable with data inlined.
+- the approved observatory design preview (now implemented in web/) - the exact CSS, markup, and JS to port (readable).
+- the approved observatory design preview (now implemented in web/) - the same, runnable with data inlined.
 
 ---
 
@@ -68,7 +68,7 @@ Each task's "verify" steps name which gates apply. A task is done only when its 
 - Create: `web/scripts/check-redesign.mjs`
 
 **Interfaces:**
-- Produces: `docs/design/observatory-preview-template.html` is the style source referenced by later tasks; `web/scripts/check-redesign.mjs` is the automated gate reused by every later task.
+- Produces: the approved observatory design preview (now implemented in web/) is the style source referenced by later tasks; `web/scripts/check-redesign.mjs` is the automated gate reused by every later task.
 
 - [ ] **Step 1: Rewrite `.ulpi/design/DESIGN.md` to the Observatory identity.** Replace the "instrument console" register, palette, and type sections with: register = editorial data-journalism instrument; palette = warm-ink neutrals + single ember accent + glacier-cyan cool pole (values below, Task 2); type = serif display + grotesk body + mono data; signature = warming-stripes + provenance chips reframed as confidence cues. Keep the Structural scales, Motion, Accessibility, and Dataviz-rule sections. No em-dashes. Note at top that this supersedes the prior locked identity per SPEC 0031 / ADR-F.
 
@@ -122,7 +122,7 @@ Expected: FAIL - the current build still renders `SAMPLE DATA` / `#20` and `page
 - [ ] **Step 4: Commit.**
 
 ```bash
-git add .ulpi/design/DESIGN.md web/scripts/check-redesign.mjs docs/design/observatory-preview.html docs/design/observatory-preview-template.html
+git add .ulpi/design/DESIGN.md web/scripts/check-redesign.mjs
 git commit -m "docs(design): lock the observatory identity and add the redesign check"
 ```
 
@@ -132,7 +132,7 @@ git commit -m "docs(design): lock the observatory identity and add the redesign 
 
 **Files:**
 - Modify: `web/app/fonts.ts`, `web/app/theme.css:33-163` (the `:root` token block), `web/app/layout.tsx:7,62`
-- Reference: `docs/design/observatory-preview-template.html` (`:root` and `@media (prefers-color-scheme: dark)` blocks)
+- Reference: the approved observatory design preview (now implemented in web/) (`:root` and `@media (prefers-color-scheme: dark)` blocks)
 
 **Interfaces:**
 - Produces: the token contract every component already consumes: `--color-background-{body,surface,card,muted,popover}`, `--color-text-{primary,secondary,disabled,accent}`, `--color-{accent,on-accent,border}`, `--color-{success,warning,danger,info}(-muted|-text)`, `--viz-*`, `--font-{display,body,mono}`, `--radius-*`, `--motion-*`. Names are unchanged; only values change.
@@ -231,7 +231,7 @@ git commit -m "feat(web): apply the observatory palette and serif display"
 
 **Files:**
 - Modify: `web/app/layout.tsx`, `web/app/page.tsx`, `web/app/theme.css` (add shell + section-scaffold classes; port from the template's `header.bar`, `section.act`, `.acthead`, `.reveal` rules)
-- Reference: `docs/design/observatory-preview-template.html` (`<header class="bar">`, `<main>` acts, and the REVEALS IIFE)
+- Reference: the approved observatory design preview (now implemented in web/) (`<header class="bar">`, `<main>` acts, and the REVEALS IIFE)
 
 **Interfaces:**
 - Consumes: the tokens from Task 2.
@@ -297,7 +297,7 @@ git commit -m "feat(web): replace the tab shell with a single-scroll narrative"
 **Files:**
 - Create: `web/components/Hero.tsx`
 - Modify: `web/app/theme.css` (add `.hero`, `.stripes`, `.hero-veil`, `.hero-in`, `.eyebrow`, `h1.title`, `.lede`, `.herostats`, `.hstat`, `.scrollcue`; port from the template)
-- Reference: `docs/design/observatory-preview-template.html` (HERO STRIPES and HERO STATS IIFEs, `.hero*` CSS)
+- Reference: the approved observatory design preview (now implemented in web/) (HERO STRIPES and HERO STATS IIFEs, `.hero*` CSS)
 
 **Interfaces:**
 - Consumes: `web/public/data/forecast.json` (`series.history`, `series.actual`) for stripe temperatures; `web/public/data/metrics.json` (`models`) for the best-RMSE hero stat. Import the JSON directly (static export inlines it), same pattern as `DataStatusBanner`.
@@ -324,7 +324,7 @@ git commit -m "feat(web): add the observatory hero with warming-stripes"
 
 **Files:**
 - Modify: `web/components/forecast/ForecastSection.tsx:76-99` (drop the `forecast-hero-note`), `web/components/forecast/ForecastChart.tsx`, `web/components/SectionHeader.tsx`, `web/app/theme.css` (act/leaderboard styles)
-- Reference: `docs/design/observatory-preview-template.html` (FORECAST CHART IIFE with the `draw()`/ResizeObserver reflow; `.board`/`.row` leaderboard CSS)
+- Reference: the approved observatory design preview (now implemented in web/) (FORECAST CHART IIFE with the `draw()`/ResizeObserver reflow; `.board`/`.row` leaderboard CSS)
 
 **Interfaces:**
 - Consumes: the existing `loadForecast`/`loadMetrics` from `web/lib/contract.ts` (unchanged).
@@ -355,7 +355,7 @@ git commit -m "feat(web): reflow the forecast chart and drop the stale caveat no
 
 **Files:**
 - Modify: `web/components/anomalies/AnomaliesSection.tsx`, `AnomalyMap.tsx`, `SemanticSearch.tsx`, `MethodStrip.tsx`, `RecordsList.tsx`, `web/app/theme.css`
-- Reference: `docs/design/observatory-preview-template.html` (metric cards, ticker, and the SEMANTIC SEARCH IIFE with `highlightOnMap`)
+- Reference: the approved observatory design preview (now implemented in web/) (metric cards, ticker, and the SEMANTIC SEARCH IIFE with `highlightOnMap`)
 
 **Interfaces:**
 - Consumes: `loadAnomalyEmbeddings` and the anomalies contract from `web/lib/contract.ts` (unchanged); the existing `cosine`/`topMatches` logic in `SemanticSearch.tsx` (unchanged algorithm).
@@ -402,7 +402,7 @@ git commit -m "feat(web): restyle the anomalies act and cross-link semantic sear
 
 **Files:**
 - Modify: `web/components/drivers/DriversSection.tsx`, `ShapBar.tsx`, `ShapBeeswarm.tsx`, `web/app/theme.css`
-- Reference: `docs/design/observatory-preview-template.html` (SHAP IIFE + `.shap`/`.srow`/`.sbar` CSS)
+- Reference: the approved observatory design preview (now implemented in web/) (SHAP IIFE + `.shap`/`.srow`/`.sbar` CSS)
 
 **Interfaces:**
 - Consumes: the SHAP contract from `web/lib/contract.ts` (unchanged).
@@ -428,7 +428,7 @@ git commit -m "feat(web): restyle the drivers act with the magnitude-ramp shap b
 **Files:**
 - Create: `web/components/CloseSection.tsx`
 - Modify: `web/components/DataStatusBanner.tsx`, `web/components/MethodologyNote.tsx`, `web/app/theme.css`
-- Reference: `docs/design/observatory-preview-template.html` (`.close`, `.colophon`, `.repro` CSS + markup)
+- Reference: the approved observatory design preview (now implemented in web/) (`.close`, `.colophon`, `.repro` CSS + markup)
 
 **Interfaces:**
 - Consumes: `web/public/data/meta.json` (for the commit + date in the banner and close).
@@ -458,7 +458,7 @@ git commit -m "feat(web): reframe provenance copy and add the reproducibility cl
 
 **Files:**
 - Modify: `web/app/theme.css` (the responsive `@media` blocks + reduced-motion; port the template's responsive section verbatim), any component needing a touch-target or focus fix
-- Reference: `docs/design/observatory-preview-template.html` (the `/* responsive */` and `@media (prefers-reduced-motion: reduce)` blocks)
+- Reference: the approved observatory design preview (now implemented in web/) (the `/* responsive */` and `@media (prefers-reduced-motion: reduce)` blocks)
 
 **Interfaces:**
 - Consumes: everything from Tasks 2-8.

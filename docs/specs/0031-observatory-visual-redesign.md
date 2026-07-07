@@ -35,8 +35,8 @@ as the new locked source of truth.
 
 ## Architecture Decisions
 
-Promoted to `docs/adr/` at the Spec Gate (`adr-f-observatory-identity.md`,
-`adr-g-single-scroll-narrative.md`, `adr-h-nextfont-typography.md`); each is hard to reverse or
+Promoted to `docs/adr/` at the Spec Gate (`0002-observatory-identity.md`,
+`0003-single-scroll-narrative.md`, `0004-nextfont-typography.md`); each is hard to reverse or
 supersedes a prior locked decision. Summarised here.
 
 - **ADR-F. Replace the "instrument console" identity with "Observatory."** Supersedes the

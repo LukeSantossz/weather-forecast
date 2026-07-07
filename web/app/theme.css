@@ -345,9 +345,8 @@ body {
 }
 
 /*
- * header.bar: the slim sticky bar (ported from the "Observatory" design
- * preview template's `<header class="bar">` - docs/design/
- * observatory-preview-template.html). Sticky at DESIGN.md's "fixed" z-index
+ * header.bar: the slim sticky bar (ported from the approved observatory
+ * design preview's `<header class="bar">`). Sticky at DESIGN.md's "fixed" z-index
  * tier (40); `.data-status-banner` below stays at the "sticky" tier (30) and
  * is pushed down by `--bar-height` so the two never overlap on scroll (only
  * the banner was sticky before this task, at top:0, with nothing above it).
@@ -470,8 +469,8 @@ header.bar {
 
 /*
  * Hero (components/Hero.tsx) - the warming-stripes signature (DESIGN.md §
- * Signature), ported from the Observatory preview template's `.hero*` rules
- * (docs/design/observatory-preview-template.html). Renders as a direct child
+ * Signature), ported from the approved observatory design preview's `.hero*`
+ * rules. Renders as a direct child
  * of <body>, before `<main class="shell-container">` (see app/layout.tsx;
  * Task 4 review fix), so `.hero` is full-bleed to the true document/viewport
  * edge, matching the template's unconstrained mockup - no `100vw` break-out
@@ -1312,8 +1311,8 @@ section.act {
  * ==========================================================================
  * Anomalies act - shared "act-level" cards (components/anomalies/
  * MethodStrip.tsx + AnomaliesSection.tsx). Ported verbatim (class names) from
- * the Observatory preview template's `.metricstrip`/`.mcard` and
- * `.ticker`/`.tkrow` (docs/design/observatory-preview-template.html). The rest
+ * the approved observatory design preview's `.metricstrip`/`.mcard` and
+ * `.ticker`/`.tkrow`. The rest
  * of the Anomalies act's styling (map, records list, semantic search) stays
  * component-local in components/anomalies/anomalies.css, per that file's own
  * header comment; these two groups are shared/reusable enough to live here
@@ -1484,9 +1483,8 @@ section.act {
 /*
  * ==========================================================================
  * Close act (components/CloseSection.tsx) - the reproducibility close.
- * Class names ported from the Observatory preview template's `.close` /
- * `.repro` / `.colophon` + its section-scoped footer (docs/design/
- * observatory-preview-template.html). `.close` carries no border-bottom
+ * Class names ported from the approved observatory design preview's `.close` /
+ * `.repro` / `.colophon` + its section-scoped footer. `.close` carries no border-bottom
  * (unlike `.act`, further up this file): it is the last section on the page,
  * nothing needs to divide it from what follows, and its own footer already
  * carries a border-top.

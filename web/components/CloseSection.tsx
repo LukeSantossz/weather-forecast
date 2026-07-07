@@ -1,6 +1,6 @@
 import SectionHeader from './SectionHeader';
 
-// The closing act (ported from docs/design/observatory-preview-template.html's
+// The closing act (ported from the approved observatory design preview's
 // `.close` / `.repro` / `.colophon` + its section-scoped footer). Reproducibility
 // is framed as the argument's conclusion, not a hedge (DESIGN.md § Voice:
 // "reproducibility is the closing argument, not a hedge"): two cards state what

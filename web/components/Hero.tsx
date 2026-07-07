@@ -15,8 +15,7 @@ const forecast = forecastData as Forecast;
 const metrics = metricsData as Metrics;
 
 // Diverging temperature scale (DESIGN.md-locked hex, ported verbatim from the
-// Observatory preview template's HERO STRIPES IIFE - docs/design/
-// observatory-preview-template.html): cool -> neutral -> warm. These three
+// approved observatory design preview's hero-stripes logic): cool -> neutral -> warm. These three
 // hex values are the scale's fixed endpoints/midpoint, not a themed token, so
 // they render identically in light and dark (same convention as the other
 // off-token hex already locked in app/theme.css).

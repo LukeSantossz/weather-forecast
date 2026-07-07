@@ -6,6 +6,7 @@ Provides data loading, preprocessing, and I/O utilities.
 
 from .data_loader import (
     add_region_column,
+    daily_global_mean,
     get_precipitation_column,
     get_temperature_column,
     load_raw_weather,
@@ -15,6 +16,7 @@ from .preprocessing import run_preprocessing_pipeline
 
 __all__ = [
     "load_raw_weather",
+    "daily_global_mean",
     "add_region_column",
     "get_temperature_column",
     "get_precipitation_column",

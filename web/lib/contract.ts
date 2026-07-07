@@ -201,7 +201,6 @@ export async function loadSection<T>(name: SectionName): Promise<T> {
   }
 }
 
-export const loadMeta = (): Promise<Meta> => loadSection<Meta>('meta');
 export const loadForecast = (): Promise<Forecast> => loadSection<Forecast>('forecast');
 export const loadMetrics = (): Promise<Metrics> => loadSection<Metrics>('metrics');
 export const loadAnomalies = (): Promise<Anomalies> => loadSection<Anomalies>('anomalies');

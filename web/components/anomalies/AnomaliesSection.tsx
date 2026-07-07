@@ -46,7 +46,7 @@ function MapSkeleton() {
   );
 }
 
-// The ticker's row count (docs/design/observatory-preview-template.html's
+// The ticker's row count (the approved observatory design preview's
 // `.ticker`, "Most extreme flagged readings"). Not a contract field: derived
 // client-side from the same `records` array RecordsList already sorts by |z|.
 const TICKER_SIZE = 8;

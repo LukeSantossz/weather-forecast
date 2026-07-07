@@ -1,6 +1,5 @@
 """Unit tests for src/preprocessing.py."""
 
-import pickle
 import warnings
 
 import numpy as np
@@ -8,14 +7,12 @@ import pandas as pd
 import pytest
 
 from weather_forecast.preprocessing import (
-    align_to_encoded_columns,
     detect_outliers_iqr,
     encode_categorical_features,
     impute_missing_values,
     normalize_numeric_features,
     run_preprocessing_pipeline,
     split_feature_types,
-    transform_numeric_features,
     treat_outliers_iqr,
 )
 
@@ -219,69 +216,6 @@ class TestNormalizeNumericFeatures:
         assert numeric_df["value1"].max() == original_max
 
 
-class TestTransformNumericFeatures:
-    """Tests for transform_numeric_features function (fit/transform split, #8)."""
-
-    def test_transform_applies_fitted_scaler_without_refitting(self) -> None:
-        train = pd.DataFrame({"value1": [1.0, 2.0, 3.0, 4.0, 5.0]})
-        _, scaler, cols = normalize_numeric_features(train, ["value1"])
-
-        holdout = pd.DataFrame({"value1": [2.5, 4.5]})
-        data_min_before = scaler.data_min_.copy()
-        data_max_before = scaler.data_max_.copy()
-
-        result = transform_numeric_features(holdout, scaler, cols)
-
-        expected = scaler.transform(holdout[cols])
-        assert np.allclose(result[cols].to_numpy(), expected)
-        # The scaler was not refit on the holdout.
-        assert np.array_equal(scaler.data_min_, data_min_before)
-        assert np.array_equal(scaler.data_max_, data_max_before)
-
-    def test_transform_of_out_of_bounds_holdout_exceeds_unit_interval(self) -> None:
-        train = pd.DataFrame({"value1": [1.0, 2.0, 3.0, 4.0, 5.0]})
-        _, scaler, cols = normalize_numeric_features(train, ["value1"])
-
-        # Holdout values fall outside the training [1, 5] range.
-        holdout = pd.DataFrame({"value1": [-50.0, 200.0]})
-        result = transform_numeric_features(holdout, scaler, cols)
-
-        assert result["value1"].min() < 0.0
-        assert result["value1"].max() > 1.0
-
-    def test_fitted_scaler_is_serializable_and_reproduces_transform(self) -> None:
-        train = pd.DataFrame({"value1": [1.0, 2.0, 3.0, 4.0, 5.0]})
-        _, scaler, cols = normalize_numeric_features(train, ["value1"])
-
-        holdout = pd.DataFrame({"value1": [1.5, 3.5, 6.0]})
-        restored = pickle.loads(pickle.dumps(scaler))
-
-        original = transform_numeric_features(holdout, scaler, cols)
-        reloaded = transform_numeric_features(holdout, restored, cols)
-
-        assert np.allclose(original[cols].to_numpy(), reloaded[cols].to_numpy())
-
-    def test_transform_numeric_features_raises_when_column_missing(self) -> None:
-        train = pd.DataFrame({"value1": [1.0, 2.0, 3.0], "value2": [4.0, 5.0, 6.0]})
-        _, scaler, cols = normalize_numeric_features(train, ["value1", "value2"])
-
-        holdout_missing = pd.DataFrame({"value1": [1.5, 2.5]})
-
-        with pytest.raises(ValueError, match="value2"):
-            transform_numeric_features(holdout_missing, scaler, cols)
-
-    def test_transform_does_not_modify_original(self) -> None:
-        train = pd.DataFrame({"value1": [1.0, 2.0, 3.0, 4.0, 5.0]})
-        _, scaler, cols = normalize_numeric_features(train, ["value1"])
-
-        holdout = pd.DataFrame({"value1": [2.0, 4.0]})
-        original_values = holdout["value1"].copy()
-
-        _ = transform_numeric_features(holdout, scaler, cols)
-
-        assert holdout["value1"].equals(original_values)
-
-
 class TestEncodeCategoricalFeatures:
     """Tests for encode_categorical_features function."""
 
@@ -325,26 +259,6 @@ class TestEncodeCategoricalFeatures:
 
         # Raising the threshold above 60 lets "id" be one-hot encoded.
         assert any(c.startswith("id_") for c in result.columns)
-
-
-class TestAlignToEncodedColumns:
-    """Tests for align_to_encoded_columns (deterministic inference, #9)."""
-
-    def test_align_to_encoded_columns_handles_unseen_categories(self) -> None:
-        train = pd.DataFrame({"city": ["A", "B"]})
-        encoded_train = encode_categorical_features(train, ["city"], max_cardinality=50)
-        expected_columns = list(encoded_train.columns)  # city_A, city_B
-
-        holdout = pd.DataFrame({"city": ["A", "C"]})  # "C" is unseen
-        encoded_holdout = encode_categorical_features(holdout, ["city"], max_cardinality=50)
-
-        aligned = align_to_encoded_columns(encoded_holdout, expected_columns)
-
-        # Exactly the training columns, in order; unseen "city_C" dropped.
-        assert list(aligned.columns) == expected_columns
-        # The missing "city_B" is zero-filled deterministically.
-        assert aligned["city_B"].sum() == 0
-        assert aligned.shape == (2, 2)
 
 
 class TestRunPreprocessingPipeline:

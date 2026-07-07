@@ -234,3 +234,28 @@ class TestGetPrecipitationColumn:
 
         with pytest.raises(ValueError, match="No precipitation column found"):
             get_precipitation_column(df)
+
+
+class TestDailyGlobalMean:
+    """Tests for daily_global_mean."""
+
+    def test_averages_temperature_per_day_sorted(self, monkeypatch) -> None:
+        raw = pd.DataFrame(
+            {
+                "last_updated": pd.to_datetime(
+                    ["2024-01-02 06:00", "2024-01-02 18:00", "2024-01-01 12:00"]
+                ),
+                "temperature_celsius": [20.0, 22.0, 10.0],
+            }
+        )
+        monkeypatch.setattr(
+            "weather_forecast.data_loader.load_raw_weather", lambda project_root: raw
+        )
+
+        from weather_forecast.data_loader import daily_global_mean
+
+        out = daily_global_mean(Path("."))
+
+        assert list(out.columns) == ["ds", "y"]
+        assert list(out["ds"]) == list(pd.to_datetime(["2024-01-01", "2024-01-02"]))
+        assert out["y"].tolist() == [10.0, 21.0]

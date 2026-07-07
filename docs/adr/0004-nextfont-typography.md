@@ -1,4 +1,4 @@
-# ADR-H: Production typography via next/font, self-hosted
+# ADR 0004: Production typography via next/font, self-hosted
 
 - Status: Accepted (2026-07-07). Approved at the SPEC 0031 Spec Gate; implemented on
   `feat/observatory-visual-redesign` (PR #59).
@@ -7,7 +7,7 @@
 
 ## Context
 
-The Observatory identity (ADR-F) calls for a serif-display and mono-data pairing, which is
+The Observatory identity (ADR 0002) calls for a serif-display and mono-data pairing, which is
 the data-journalism signature and deliberately distinct from the all-grotesk console. The
 faces must load without a runtime CDN dependency and without layout shift.
 

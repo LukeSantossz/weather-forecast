@@ -78,14 +78,18 @@ The whole pipeline lives in the installable `weather_forecast` package and runs 
 
 ## Engineering Decisions
 
-| Decision | Alternative considered | Why this approach |
-|----------|----------------------|-------------------|
-| IQR clipping for outliers | Z-score removal | Preserves temporal continuity; Z-score drops entire rows, breaking time-series |
-| Parquet for processed data | CSV | Type safety, 3-5x compression, schema enforcement via PyArrow |
-| Column candidates pattern in data_loader | Hardcoded column names | Handles schema variation across Kaggle dataset versions gracefully |
-| PyArrow engine directly | pandas `to_parquet` wrapper | Avoids known Jupyter kernel crash with pandas PyArrow backend |
-| Lag + rolling features (1-21 days) | Raw values only | Captures autoregressive structure; under the leakage-free evaluation (#20) the ML models (RMSE 0.27-0.32) clearly beat the classical baselines (0.73-0.80) |
-| Inverse-RMSE weighted ensemble | Simple average / single best model | Risk diversification; weights are set from validation-set accuracy, not the test set |
+The significant, hard-to-reverse decisions, each recorded as an ADR under
+[`docs/adr/`](docs/adr/) (see [ADR 0001](docs/adr/0001-decision-records-flow.md) for the flow):
+
+| Decision | ADR |
+|----------|-----|
+| IQR clipping for outliers (preserves temporal continuity) | [0005](docs/adr/0005-iqr-outlier-clipping.md) |
+| Parquet for the processed store (type safety, compression) | [0006](docs/adr/0006-parquet-processed-store.md) |
+| Column-candidates loader (handles dataset-version drift) | [0007](docs/adr/0007-column-candidates-loader.md) |
+| PyArrow engine directly (avoids a Jupyter kernel crash) | [0008](docs/adr/0008-pyarrow-engine-direct.md) |
+| Lag + rolling features (captures autoregressive structure) | [0009](docs/adr/0009-lag-rolling-features.md) |
+| Inverse-RMSE weighted ensemble (risk diversification) | [0010](docs/adr/0010-inverse-rmse-ensemble.md) |
+| Observatory identity, single-scroll IA, self-hosted fonts | [0002](docs/adr/0002-observatory-identity.md), [0003](docs/adr/0003-single-scroll-narrative.md), [0004](docs/adr/0004-nextfont-typography.md) |
 
 ## Results
 

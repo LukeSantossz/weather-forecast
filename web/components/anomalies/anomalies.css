@@ -292,9 +292,8 @@
   font-family: var(--font-mono);
 }
 
-/* --- Semantic search (issue #32), restyled to the Observatory
-   .semchip/.semrow/.semscorebar (docs/design/
-   observatory-preview-template.html); the offline cosine-ranking algorithm
+/* --- Semantic search (issue #32), restyled to the approved observatory design
+   preview's .semchip/.semrow/.semscorebar; the offline cosine-ranking algorithm
    in SemanticSearch.tsx is unchanged. --------------------------------- */
 
 .semantic-search {

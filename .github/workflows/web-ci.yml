@@ -16,6 +16,9 @@ jobs:
         working-directory: web
     steps:
       - uses: actions/checkout@v4
+        with:
+          # Full history so origin/main resolves for the redesign check's data-contract diff.
+          fetch-depth: 0
 
       - uses: actions/setup-node@v4
         with:
@@ -28,3 +31,6 @@ jobs:
 
       - name: Build static export (type-checked)
         run: npm run build
+
+      - name: Redesign acceptance checks
+        run: npm run check

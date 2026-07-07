@@ -11,9 +11,8 @@ function formatShare(share_pct: number): string {
   return `${share_pct.toFixed(2)}%`;
 }
 
-// DESIGN.md § Anomaly explorer: the metric trio, ported from the Observatory
-// preview template's `.metricstrip`/`.mcard` (docs/design/
-// observatory-preview-template.html). The counts/shares come straight from the
+// DESIGN.md § Anomaly explorer: the metric trio, ported from the approved
+// observatory design preview's `.metricstrip`/`.mcard`. The counts/shares come straight from the
 // contract's `methods` block (not derived); "both" is the accented hero card
 // since the overlap is the highest-confidence signal. Every card still wears
 // its ProvenanceChip (DESIGN.md § Signature: "every claim/number that has

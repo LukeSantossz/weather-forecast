@@ -1,4 +1,4 @@
-# ADR-G: Single-scroll narrative replaces the tab IA
+# ADR 0003: Single-scroll narrative replaces the tab IA
 
 - Status: Accepted (2026-07-07). Approved at the SPEC 0031 Spec Gate; implemented on
   `feat/observatory-visual-redesign` (PR #59).
