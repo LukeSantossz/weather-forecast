@@ -7,7 +7,7 @@ import { Skeleton } from '@astryxdesign/core/Skeleton';
 import { loadAnomalyModel } from '../../lib/contract';
 import type { AnomalyModel } from '../../lib/contract';
 import { standardize } from '../../lib/inference/features';
-import { scoreSamples, predictIsAnomaly } from '../../lib/inference/isolationForest';
+import { scoreSamples, isAnomalyFromScore } from '../../lib/inference/isolationForest';
 import { zscore } from '../../lib/inference/zscore';
 import type { AnomalyMapHandle, SyntheticMethod } from './AnomalyMap';
 
@@ -79,8 +79,9 @@ export default function AnomalyChecker({ mapRef, mapClick }: AnomalyCheckerProps
     if (!model || values.length !== FEATURES.length) return null;
     const scaled = standardize(values, model);
     const z = zscore(values[0], model.zscore);
+    // One forest traversal per change: derive the verdict from the score, not a second pass.
     const ifScore = scoreSamples(scaled, model.isolation_forest);
-    const ifAnomaly = predictIsAnomaly(scaled, model.isolation_forest);
+    const ifAnomaly = isAnomalyFromScore(ifScore, model.isolation_forest);
     return { z, ifScore, ifAnomaly, both: z.isAnomaly && ifAnomaly };
   }, [model, values]);
 

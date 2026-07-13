@@ -57,6 +57,12 @@ export function scoreSamples(scaled: number[], forest: Forest): number {
 }
 
 // predict flags an anomaly where score_samples - offset < 0, i.e. score_samples < offset.
+// Split so a caller that already has the score (the live checker) does not traverse the forest
+// a second time just to get the verdict.
+export function isAnomalyFromScore(score: number, forest: Forest): boolean {
+  return score - forest.offset < 0;
+}
+
 export function predictIsAnomaly(scaled: number[], forest: Forest): boolean {
-  return scoreSamples(scaled, forest) - forest.offset < 0;
+  return isAnomalyFromScore(scoreSamples(scaled, forest), forest);
 }
