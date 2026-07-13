@@ -11,6 +11,7 @@ import { loadAnomalies, DataLoadError } from '../../lib/contract';
 import type { Anomalies, AnomalyDetectedBy } from '../../lib/contract';
 import MethodStrip from './MethodStrip';
 import RecordsList from './RecordsList';
+import AnomalyChecker from './AnomalyChecker';
 import SemanticSearch from './SemanticSearch';
 import MethodologyNote from '../MethodologyNote';
 // Type-only: erased at compile time, so casting/typing the dynamic import
@@ -213,6 +214,8 @@ export default function AnomaliesSection() {
             selectedIndex={selectedIndex}
             onSelect={setSelectedIndex}
           />
+
+          <AnomalyChecker />
 
           <SemanticSearch mapRef={mapRef} />
         </>
