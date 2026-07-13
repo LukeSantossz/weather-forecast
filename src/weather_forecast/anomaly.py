@@ -145,9 +145,7 @@ def build_anomaly_model(
     domains), ``max_samples`` and ``offset`` (for the ``score_samples`` normalization and the
     predict threshold), and the z-score baseline.
     """
-    fit = fit_anomaly_models(
-        df, seed=seed, contamination=contamination, n_estimators=n_estimators
-    )
+    fit = fit_anomaly_models(df, seed=seed, contamination=contamination, n_estimators=n_estimators)
 
     def _tree(est: Any) -> dict[str, list]:
         t = est.tree_
