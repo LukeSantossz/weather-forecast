@@ -6,6 +6,7 @@
     "dev": "next dev",
     "build": "next build",
     "check": "node scripts/check-redesign.mjs",
+    "test": "vitest run",
     "preview": "npx serve out"
   },
   "dependencies": {
@@ -24,6 +25,7 @@
     "@types/d3-shape": "3.1.8",
     "@types/node": "26.1.0",
     "@types/react": "19.2.17",
-    "typescript": "6.0.3"
+    "typescript": "6.0.3",
+    "vitest": "3.2.7"
   }
 }

@@ -449,3 +449,206 @@
     transition: none !important;
   }
 }
+
+/* --- Live anomaly checker (spec 0033): five sliders driving both methods
+   in-browser. Mirrors the .semantic-search panel shell and the Observatory
+   tokens. --------------------------------------------------------------- */
+
+.anomaly-checker {
+  margin-top: 24px;
+  padding: 20px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-container);
+  background: var(--color-background-surface);
+}
+
+.anomaly-checker-header {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-bottom: 12px;
+}
+
+.anomaly-checker-sub {
+  font-family: var(--font-mono);
+  font-size: 11.5px;
+  color: var(--color-text-secondary);
+}
+
+.anomaly-checker-hint {
+  margin: 0 0 20px;
+  color: var(--color-text-secondary);
+  font-size: 14.5px;
+  max-width: 64ch;
+}
+
+.anomaly-checker-body {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 24px;
+}
+
+@media (min-width: 720px) {
+  .anomaly-checker-body {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  }
+}
+
+.anomaly-checker-sliders {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.anomaly-checker-slider-label {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 12px;
+  margin-bottom: 6px;
+  font-size: 14px;
+  color: var(--color-text-primary);
+}
+
+.anomaly-checker-slider-value {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  font-size: 13px;
+  color: var(--color-text-secondary);
+}
+
+.anomaly-checker-slider input[type='range'] {
+  width: 100%;
+  accent-color: var(--color-accent);
+  cursor: pointer;
+}
+
+.anomaly-checker-slider input[type='range']:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 4px;
+}
+
+.anomaly-checker-readouts {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.anomaly-checker-card {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: baseline;
+  gap: 2px 12px;
+  padding: 12px 14px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-element);
+  background: var(--color-background-surface);
+  transition: border-color var(--motion-fast) var(--ease-out);
+}
+
+.anomaly-checker-card.is-anomaly {
+  border-color: var(--color-danger);
+}
+
+.anomaly-checker-card-label {
+  font-size: 13px;
+  color: var(--color-text-primary);
+}
+
+.anomaly-checker-verdict {
+  grid-row: 1 / span 2;
+  grid-column: 2;
+  align-self: center;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--color-text-secondary);
+}
+
+.anomaly-checker-card.is-anomaly .anomaly-checker-verdict {
+  color: var(--color-danger);
+  font-weight: 600;
+}
+
+.anomaly-checker-card-value {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  font-size: 13px;
+  color: var(--color-text-secondary);
+}
+
+.anomaly-checker-card-note {
+  grid-column: 1 / -1;
+  font-size: 11.5px;
+  color: var(--color-text-secondary);
+}
+
+.anomaly-checker-overlap {
+  padding: 10px 14px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-element);
+  background: var(--color-background-muted);
+  font-family: var(--font-mono);
+  font-size: 12.5px;
+  color: var(--color-text-secondary);
+  transition: border-color var(--motion-fast) var(--ease-out);
+}
+
+.anomaly-checker-overlap.is-both {
+  border-color: var(--color-danger);
+  background: var(--color-danger-muted);
+  color: var(--color-danger);
+  font-weight: 600;
+}
+
+.anomaly-checker-place {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px solid var(--color-border);
+}
+
+.anomaly-checker-place-copy {
+  margin: 0;
+  flex: 1 1 24ch;
+  font-size: 13px;
+  color: var(--color-text-secondary);
+}
+
+.anomaly-checker-clear {
+  flex: none;
+  min-height: 44px;
+  padding: 8px 14px;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--color-text-primary);
+  background: var(--color-background-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-full);
+  cursor: pointer;
+  transition:
+    color var(--motion-fast) var(--ease-out),
+    border-color var(--motion-fast) var(--ease-out);
+}
+
+.anomaly-checker-clear:hover {
+  border-color: var(--color-text-secondary);
+}
+
+.anomaly-checker-clear:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .anomaly-checker-card,
+  .anomaly-checker-overlap,
+  .anomaly-checker-clear {
+    transition: none !important;
+  }
+}

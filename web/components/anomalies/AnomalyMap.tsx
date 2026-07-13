@@ -26,14 +26,24 @@ export interface AnomalyMapProps {
   selectedIndex: number | null;
   /** Clicking a marker selects it (kept in sync with the records list). */
   onSelect: (index: number | null) => void;
+  /** A click on empty map (not on a marker) reports its lat/lon, so the live
+   * checker can drop its synthetic observation there. */
+  onMapClick?: (lat: number, lon: number) => void;
 }
+
+// Which method(s) flagged the synthetic checker reading, driving its marker
+// shape the same way `detected_by` drives the real markers.
+export type SyntheticMethod = 'zscore' | 'isolation_forest' | 'both' | 'none';
 
 // Imperative cross-link for the semantic-search panel (SemanticSearch.tsx):
 // selecting a query ranks records offline, then rings the top matches on this
 // real map via a dedicated `sem-highlights` source, without the map needing to
-// know anything about embeddings/search.
+// know anything about embeddings/search. The checker (AnomalyChecker.tsx) drives
+// `placeSyntheticPoint`/`clearSyntheticPoint` the same way.
 export interface AnomalyMapHandle {
   highlightRecords(records: { lat: number; lon: number }[]): void;
+  placeSyntheticPoint(lat: number, lon: number, tempC: number, method: SyntheticMethod): void;
+  clearSyntheticPoint(): void;
 }
 
 // DESIGN.md § Anomaly explorer: a graphite dark / light map matching the theme,
@@ -81,6 +91,20 @@ const SEM_RING_MAX_RADIUS = 15;
 const SEM_RING_STATIC_RADIUS = 12;
 const SEM_PULSE_DURATION_MS = 1800;
 
+// The live checker's synthetic observation: a dedicated source with a
+// temperature-coloured dot (shaped by the flagging method, like the real
+// markers) plus an accent outer ring marking it as the visitor's placed point.
+const SRC_SYNTH = 'synthetic-point';
+const LAYER_SYNTH_RING = 'synthetic-point-ring';
+const LAYER_SYNTH_DOT = 'synthetic-point-dot';
+
+interface SyntheticPoint {
+  lat: number;
+  lon: number;
+  tempC: number;
+  method: SyntheticMethod;
+}
+
 /** Builds the `sem-highlights` source data; `rank` (1-based) is the only
  * property the ring/dot layers need, matching the brief's handle contract. */
 function toSemFeatureCollection(records: { lat: number; lon: number }[]) {
@@ -92,6 +116,52 @@ function toSemFeatureCollection(records: { lat: number; lon: number }[]) {
       geometry: { type: 'Point' as const, coordinates: [r.lon, r.lat] },
     })),
   };
+}
+
+/** Builds the `synthetic-point` source data: one feature carrying `temp_c`
+ * (for the colour scale) and `method` (for the shape), or empty when cleared. */
+function toSynthFeatureCollection(point: SyntheticPoint | null) {
+  return {
+    type: 'FeatureCollection' as const,
+    features: point
+      ? [
+          {
+            type: 'Feature' as const,
+            properties: { temp_c: point.tempC, method: point.method },
+            geometry: { type: 'Point' as const, coordinates: [point.lon, point.lat] },
+          },
+        ]
+      : [],
+  };
+}
+
+// Diverging temperature scale (DESIGN.md § Dataviz palette): the maplibre
+// interpolate expression mapping `temp_c` to cool -> neutral -> warm, scaled to
+// this record set's real min/max (nudged apart when every record shares one
+// temperature so the stops stay strictly increasing). Shared by the anomaly
+// markers and the synthetic checker point so both read on the same scale.
+function buildTempColorExpr(records: AnomalyRecord[], theme: 'light' | 'dark'): unknown[] {
+  const temps = records.map((r) => r.temp_c);
+  let minTemp = temps.length ? Math.min(...temps) : 0;
+  let maxTemp = temps.length ? Math.max(...temps) : 1;
+  if (minTemp === maxTemp) {
+    minTemp -= 0.5;
+    maxTemp += 0.5;
+  }
+  const midTemp = (minTemp + maxTemp) / 2;
+  const coolHex = theme === 'light' ? TEMP_COOL_LIGHT : TEMP_COOL_DARK;
+  const warmHex = theme === 'light' ? TEMP_WARM_LIGHT : TEMP_WARM_DARK;
+  return [
+    'interpolate',
+    ['linear'],
+    ['get', 'temp_c'],
+    minTemp,
+    coolHex,
+    midTemp,
+    TEMP_NEUTRAL_MID,
+    maxTemp,
+    warmHex,
+  ];
 }
 
 function currentTheme(): 'light' | 'dark' {
@@ -164,7 +234,7 @@ function filterFor(active: Set<AnomalyDetectedBy>): FilterSpecification | null {
 // equivalent. Wrapped in forwardRef so AnomaliesSection can drive
 // `highlightRecords` (the semantic-search cross-link) from a shared ref.
 const AnomalyMap = forwardRef<AnomalyMapHandle, AnomalyMapProps>(function AnomalyMap(
-  { records, selectedIndex, onSelect },
+  { records, selectedIndex, onSelect, onMapClick },
   ref,
 ) {
   const containerRef = useRef<HTMLDivElement | null>(null);
@@ -187,6 +257,10 @@ const AnomalyMap = forwardRef<AnomalyMapHandle, AnomalyMapProps>(function Anomal
   const semHighlightsRef = useRef(toSemFeatureCollection([]));
   const pulseFrameRef = useRef<number | null>(null);
   const pulseStartRef = useRef(0);
+  // Latest synthetic checker point (survives theme-driven source/layer rebuilds
+  // and a place call arriving before the map finished loading).
+  const synthPointRef = useRef<SyntheticPoint | null>(null);
+  const onMapClickRef = useRef(onMapClick);
   // Imperative API published by the mount effect, so the prop-driven effects
   // below can drive the map without re-running setup.
   const apiRef = useRef<{
@@ -198,6 +272,7 @@ const AnomalyMap = forwardRef<AnomalyMapHandle, AnomalyMapProps>(function Anomal
   recordsRef.current = records;
   onSelectRef.current = onSelect;
   selectedRef.current = selectedIndex;
+  onMapClickRef.current = onMapClick;
 
   const [activeMethods, setActiveMethods] = useState<Set<AnomalyDetectedBy>>(new Set(ALL_METHODS));
   activeMethodsRef.current = activeMethods;
@@ -257,31 +332,9 @@ const AnomalyMap = forwardRef<AnomalyMapHandle, AnomalyMapProps>(function Anomal
         const ring = resolveColor('var(--color-background-surface)');
 
         // Diverging temperature scale (DESIGN.md § Dataviz palette), scaled to
-        // this record set's real min/max so the full cool -> warm range is
-        // used. Nudged apart when every record shares one temperature so
-        // `interpolate`'s stops stay strictly increasing.
-        const temps = currentRecords.map((r) => r.temp_c);
-        let minTemp = temps.length ? Math.min(...temps) : 0;
-        let maxTemp = temps.length ? Math.max(...temps) : 1;
-        if (minTemp === maxTemp) {
-          minTemp -= 0.5;
-          maxTemp += 0.5;
-        }
-        const midTemp = (minTemp + maxTemp) / 2;
-        const theme = currentTheme();
-        const coolHex = theme === 'light' ? TEMP_COOL_LIGHT : TEMP_COOL_DARK;
-        const warmHex = theme === 'light' ? TEMP_WARM_LIGHT : TEMP_WARM_DARK;
-        const tempColorExpr = [
-          'interpolate',
-          ['linear'],
-          ['get', 'temp_c'],
-          minTemp,
-          coolHex,
-          midTemp,
-          TEMP_NEUTRAL_MID,
-          maxTemp,
-          warmHex,
-        ];
+        // this record set's real min/max. Shared with the synthetic checker
+        // point via buildTempColorExpr so both read on the same scale.
+        const tempColorExpr = buildTempColorExpr(currentRecords, currentTheme());
         // DESIGN.md § Dataviz palette: "anomaly methods: encoded by marker
         // shape, not hue" -- a filled dot is z-score/both, an open ring
         // (transparent fill, temperature-coloured stroke) is isolation-forest.
@@ -368,6 +421,57 @@ const AnomalyMap = forwardRef<AnomalyMapHandle, AnomalyMapProps>(function Anomal
         }
       };
 
+      // The live checker's synthetic point: a temperature-coloured dot shaped by
+      // the flagging method (open ring for isolation-forest, filled otherwise,
+      // matching the real markers) under an accent ring that marks it as the
+      // visitor's placed reading. Re-added with fresh colours on `load` and after
+      // each theme-driven `setStyle`, like the anomaly and semantic layers.
+      const addSyntheticLayer = () => {
+        const existingSynth = map.getSource(SRC_SYNTH) as GeoJSONSource | undefined;
+        if (existingSynth) {
+          existingSynth.setData(toSynthFeatureCollection(synthPointRef.current));
+        } else {
+          map.addSource(SRC_SYNTH, {
+            type: 'geojson',
+            data: toSynthFeatureCollection(synthPointRef.current),
+          });
+        }
+
+        const accent = resolveColor('var(--color-accent)');
+        const ring = resolveColor('var(--color-background-surface)');
+        const tempColor = buildTempColorExpr(recordsRef.current, currentTheme());
+        const isIsolationForest = ['==', ['get', 'method'], 'isolation_forest'];
+
+        if (!map.getLayer(LAYER_SYNTH_RING)) {
+          map.addLayer({
+            id: LAYER_SYNTH_RING,
+            type: 'circle',
+            source: SRC_SYNTH,
+            paint: {
+              'circle-radius': 13,
+              'circle-color': 'transparent',
+              'circle-stroke-color': accent,
+              'circle-stroke-width': 2,
+              'circle-stroke-opacity': 0.9,
+            },
+          } as unknown as LayerSpecification);
+        }
+        if (!map.getLayer(LAYER_SYNTH_DOT)) {
+          map.addLayer({
+            id: LAYER_SYNTH_DOT,
+            type: 'circle',
+            source: SRC_SYNTH,
+            paint: {
+              'circle-radius': 7,
+              'circle-color': ['case', isIsolationForest, 'transparent', tempColor],
+              'circle-opacity': 0.9,
+              'circle-stroke-width': ['case', isIsolationForest, 2, 1],
+              'circle-stroke-color': ['case', isIsolationForest, tempColor, ring],
+            },
+          } as unknown as LayerSpecification);
+        }
+      };
+
       // rAF-driven pulse (maplibre has no built-in paint-property animation):
       // grows/shrinks the ring's radius and stroke-opacity on a sine wave.
       // Static under reduced motion (DESIGN.md § Accessibility) and stopped
@@ -450,6 +554,7 @@ const AnomalyMap = forwardRef<AnomalyMapHandle, AnomalyMapProps>(function Anomal
       map.on('load', () => {
         addAnomalyLayers();
         addSemHighlightLayer();
+        addSyntheticLayer();
         const recs = recordsRef.current;
         if (recs.length > 0) {
           const bounds = new maplibre.LngLatBounds();
@@ -479,6 +584,16 @@ const AnomalyMap = forwardRef<AnomalyMapHandle, AnomalyMapProps>(function Anomal
         onSelectRef.current(Number((e.features[0].properties as { i: number }).i));
       });
 
+      // A click on empty map (not on a marker) reports its location so the
+      // checker can drop its synthetic observation there. Hit-test the marker
+      // layer so a marker click only selects and never also places a point.
+      map.on('click', (e) => {
+        if (!readyRef.current || !map.getLayer(LAYER_HIT)) return;
+        const onMarker = map.queryRenderedFeatures(e.point, { layers: [LAYER_HIT] });
+        if (onMarker.length > 0) return;
+        onMapClickRef.current?.(e.lngLat.lat, e.lngLat.lng);
+      });
+
       // Re-theme the base map when the console theme toggles; re-add our
       // source/layers (setStyle clears them) with freshly resolved colours.
       themeObserver = new MutationObserver(() => {
@@ -486,6 +601,7 @@ const AnomalyMap = forwardRef<AnomalyMapHandle, AnomalyMapProps>(function Anomal
         map.once('styledata', () => {
           addAnomalyLayers();
           addSemHighlightLayer();
+          addSyntheticLayer();
           applyFilter();
           applySelection();
           updateSemPulse();
@@ -540,6 +656,18 @@ const AnomalyMap = forwardRef<AnomalyMapHandle, AnomalyMapProps>(function Anomal
         const source = mapRef.current?.getSource(SRC_SEM) as GeoJSONSource | undefined;
         source?.setData(fc);
         apiRef.current?.updateSemPulse();
+      },
+      placeSyntheticPoint(lat, lon, tempC, method) {
+        synthPointRef.current = { lat, lon, tempC, method };
+        if (!readyRef.current) return;
+        const source = mapRef.current?.getSource(SRC_SYNTH) as GeoJSONSource | undefined;
+        source?.setData(toSynthFeatureCollection(synthPointRef.current));
+      },
+      clearSyntheticPoint() {
+        synthPointRef.current = null;
+        if (!readyRef.current) return;
+        const source = mapRef.current?.getSource(SRC_SYNTH) as GeoJSONSource | undefined;
+        source?.setData(toSynthFeatureCollection(null));
       },
     }),
     [],

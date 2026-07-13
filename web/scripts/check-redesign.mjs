@@ -55,9 +55,20 @@ for (const ref of BASE_CANDIDATES) {
 if (baseRef === null) {
   fail(`cannot resolve any base ref (${BASE_CANDIDATES.join(', ')}) to verify the data contract`);
 } else {
-  const changed = execSync(`git diff --name-only ${baseRef} -- web/public/data`, { cwd: REPO_ROOT })
-    .toString().trim();
-  if (changed) fail(`data contract changed:\n${changed}`);
+  // Any change to an EXISTING contract file is a violation; only ADDED artifacts are allowed
+  // (a feature may ship a new Python-generated artifact, e.g. anomaly_model.json, without
+  // touching the existing contract). --diff-filter=MDRT keeps the "existing contract stays
+  // byte-identical and in place" guarantee against a plain Modify, a Delete, a Rename-away, or
+  // a Type-change (e.g. file -> symlink), while permitting purely additive (A) files. Copy (C)
+  // is deliberately excluded: a copy leaves the source contract intact and only adds a path,
+  // which is exactly the additive case this check must allow.
+  const changed = execSync(
+    `git diff --name-only --diff-filter=MDRT ${baseRef} -- web/public/data`,
+    { cwd: REPO_ROOT },
+  )
+    .toString()
+    .trim();
+  if (changed) fail(`existing data-contract file changed:\n${changed}`);
 }
 
 if (failed) { console.error('\nredesign check FAILED'); process.exit(1); }
