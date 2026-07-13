@@ -90,6 +90,8 @@ The significant, hard-to-reverse decisions, each recorded as an ADR under
 | Lag + rolling features (captures autoregressive structure) | [0009](docs/adr/0009-lag-rolling-features.md) |
 | Inverse-RMSE weighted ensemble (risk diversification) | [0010](docs/adr/0010-inverse-rmse-ensemble.md) |
 | Observatory identity, single-scroll IA, self-hosted fonts | [0002](docs/adr/0002-observatory-identity.md), [0003](docs/adr/0003-single-scroll-narrative.md), [0004](docs/adr/0004-nextfont-typography.md) |
+| Browser inference by exported artifact (static export, Python owns the model) | [0011](docs/adr/0011-browser-inference-exported-artifact.md) |
+| Tree-traversal as the shared client-side inference primitive | [0012](docs/adr/0012-tree-traversal-primitive.md) |
 
 ## Results
 
