@@ -241,3 +241,44 @@ export async function loadAnomalyEmbeddings(): Promise<AnomalyEmbeddings> {
     throw new Error('Failed to parse anomaly embeddings: response was not valid JSON.', { cause });
   }
 }
+
+// --- anomaly_model.json ---------------------------------------------------
+// The fitted anomaly models serialized for browser-side inference: the
+// z-score baseline and the Isolation Forest (as leaf-valued trees plus the
+// StandardScaler parameters, median fill values, and observed feature
+// ranges). Not a core dashboard section, so it has its own loader.
+
+export interface AnomalyTree {
+  feature: number[];
+  threshold: number[];
+  children_left: number[];
+  children_right: number[];
+  n_node_samples: number[];
+}
+
+export interface AnomalyModel {
+  schema_version: SchemaVersion;
+  generated_at: string;
+  data_status: DataStatus;
+  features: string[];
+  scaler: { mean: number[]; scale: number[] };
+  medians: number[];
+  feature_ranges: { min: number[]; max: number[] };
+  zscore: { mu: number; sigma: number; threshold: number };
+  isolation_forest: { max_samples: number; offset: number; trees: AnomalyTree[] };
+}
+
+/** Fetches the fitted anomaly model; throws on HTTP or parse error. */
+export async function loadAnomalyModel(): Promise<AnomalyModel> {
+  const response = await fetch('/data/anomaly_model.json');
+  if (!response.ok) {
+    throw new Error(
+      `Failed to load anomaly model: HTTP ${response.status} ${response.statusText}.`,
+    );
+  }
+  try {
+    return (await response.json()) as AnomalyModel;
+  } catch (cause) {
+    throw new Error('Failed to parse anomaly model: response was not valid JSON.', { cause });
+  }
+}
