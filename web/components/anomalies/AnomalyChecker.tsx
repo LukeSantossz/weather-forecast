@@ -24,8 +24,11 @@ const FEATURES: { label: string; unit: string; decimals: number }[] = [
   { label: 'Precipitation', unit: 'mm', decimals: 1 },
 ];
 
-function midpoints(model: AnomalyModel): number[] {
-  return model.feature_ranges.min.map((lo, i) => (lo + model.feature_ranges.max[i]) / 2);
+// Open on a typical reading (the per-feature medians the model ships) rather than the range
+// midpoint: the observed ranges are stretched by data outliers, so their midpoint is itself an
+// unrealistic, already-anomalous point. The medians open the checker on a calm, Normal verdict.
+function defaultReading(model: AnomalyModel): number[] {
+  return [...model.medians];
 }
 
 function fmt(value: number, decimals: number): string {
@@ -60,7 +63,7 @@ export default function AnomalyChecker({ mapRef, mapClick }: AnomalyCheckerProps
       .then((result) => {
         if (cancelled) return;
         setModel(result);
-        setValues(midpoints(result));
+        setValues(defaultReading(result));
         setStatus('ready');
       })
       .catch((cause: unknown) => {
