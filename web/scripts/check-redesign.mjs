@@ -57,12 +57,13 @@ if (baseRef === null) {
 } else {
   // Any change to an EXISTING contract file is a violation; only ADDED artifacts are allowed
   // (a feature may ship a new Python-generated artifact, e.g. anomaly_model.json, without
-  // touching the existing contract). The filter therefore lists every non-Added status so the
-  // "existing contract stays byte-identical and in place" guarantee holds against a plain
-  // Modify, a Delete, a Rename-away, a Type-change (e.g. file -> symlink), or a Copy, while
-  // still permitting purely additive (A) files.
+  // touching the existing contract). --diff-filter=MDRT keeps the "existing contract stays
+  // byte-identical and in place" guarantee against a plain Modify, a Delete, a Rename-away, or
+  // a Type-change (e.g. file -> symlink), while permitting purely additive (A) files. Copy (C)
+  // is deliberately excluded: a copy leaves the source contract intact and only adds a path,
+  // which is exactly the additive case this check must allow.
   const changed = execSync(
-    `git diff --name-only --diff-filter=MDRTCB ${baseRef} -- web/public/data`,
+    `git diff --name-only --diff-filter=MDRT ${baseRef} -- web/public/data`,
     { cwd: REPO_ROOT },
   )
     .toString()
