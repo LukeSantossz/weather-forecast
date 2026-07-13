@@ -82,6 +82,9 @@ export default function AnomaliesSection() {
   // only loads on the Anomalies tab even if the panel is merely toggled with
   // `hidden` rather than unmounted.
   const [hasBeenVisible, setHasBeenVisible] = useState(false);
+  // The latest empty-map click, bumped with a fresh `seq` each time so the
+  // checker re-places its synthetic point even when the same spot is clicked.
+  const [mapClick, setMapClick] = useState<{ lat: number; lon: number; seq: number } | null>(null);
   const rootRef = useRef<HTMLDivElement | null>(null);
   // Shared with SemanticSearch: selecting a query rings its top matches on
   // the real map via AnomalyMap's imperative `highlightRecords`.
@@ -181,6 +184,9 @@ export default function AnomaliesSection() {
                 records={data.records}
                 selectedIndex={selectedIndex}
                 onSelect={setSelectedIndex}
+                onMapClick={(lat, lon) =>
+                  setMapClick((prev) => ({ lat, lon, seq: (prev?.seq ?? 0) + 1 }))
+                }
               />
             ) : (
               <MapSkeleton />
@@ -215,7 +221,7 @@ export default function AnomaliesSection() {
             onSelect={setSelectedIndex}
           />
 
-          <AnomalyChecker />
+          <AnomalyChecker mapRef={mapRef} mapClick={mapClick} />
 
           <SemanticSearch mapRef={mapRef} />
         </>
