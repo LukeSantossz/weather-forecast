@@ -231,11 +231,11 @@ npm run build && npx serve out   # or: npm run dev
 
 Provenance is a first-class UI concern: a banner renders `Live model output · commit <sha> · <date>` or `Preview data · layout sample, not model output` from the data's `data_status`, metric rows can show a pending-re-run state instead of a number the project no longer stands behind, and the export code refuses to label synthetic data as real.
 
-Regenerate the real data contract by executing notebooks 04, 06, and 07, plus `scripts/_gen_anomaly_model.py` for the browser-inference artifact and `python -m weather_forecast.semantic_search --build-embeddings web/public/data/anomaly_embeddings.json` for the search embeddings, which the dashboard loads independently and which would otherwise stay stale against the refreshed anomaly records. `python -m weather_forecast.dashboard_export` does **not** regenerate it: its CLI emits only `data_status="sample"` and defaults its output directory to `web/public/data`, so running it in place overwrites the committed real contract with synthetic data.
+Regenerating the real data contract runs from the **repository root** (`cd ..` if you followed the block above). Execute notebooks 04, 06, and 07, plus `scripts/_gen_anomaly_model.py` for the browser-inference artifact and `python -m weather_forecast.semantic_search --build-embeddings web/public/data/anomaly_embeddings.json` for the search embeddings, which the dashboard loads independently and which would otherwise stay stale against the refreshed anomaly records. `python -m weather_forecast.dashboard_export` does **not** regenerate it: its CLI emits only `data_status="sample"` and defaults its output directory to `web/public/data`, so running it in place overwrites the committed real contract with synthetic data.
 
 ## API Reference
 
-A FastAPI service serves the trained pipeline over HTTP ([#16](https://github.com/LukeSantossz/weather-forecast/issues/16)). Install the serving extra and run it locally:
+A FastAPI service serves the trained pipeline over HTTP ([#16](https://github.com/LukeSantossz/weather-forecast/issues/16)). All commands in this section run from the **repository root**. Install the serving extra and run it locally:
 
 ```bash
 pip install -e ".[serving]"
