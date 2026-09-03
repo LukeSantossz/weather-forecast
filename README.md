@@ -106,9 +106,10 @@ First, the Parquet store is optional. Forecasting and anomaly detection read the
 directly; the cleaned Parquet is an export that notebook 02 produces and nothing downstream
 requires (architecture decision EVO-1(b)).
 
-Second, the notebooks own no numbers. They orchestrate, plot and explain, but every model fit,
-window size, metric and ensemble weight comes from the package, so the dashboard's figures and
-`python -m weather_forecast.train` cannot disagree.
+Second, the forecasting notebook owns no numbers. Notebook 06 orchestrates, plots and explains,
+but every model fit, window size, metric and ensemble weight it reports comes from the package, so
+on the same input and configuration its figures and `python -m weather_forecast.train` cannot
+disagree. The Prophet row is the exception: notebook 05 still scores it on its own.
 
 Third, the dashboard has no backend. It is a static export that reads committed JSON, and its
 anomaly checker runs the exported Isolation Forest in the browser. Python owns the fit;
@@ -490,7 +491,7 @@ the core.
 - [x] In-browser anomaly checker: exported Isolation Forest scored client-side, parity-tested against Python to 1e-6
 - [x] GitHub Actions CI: Python test matrix, lint, Docker build, NLP job, and a separate dashboard workflow
 - [x] Dashboard published on Vercel, deploying from `main` on every push ([#64](https://github.com/LukeSantossz/weather-forecast/issues/64))
-- [x] Notebook 06 calls the package for every fit, metric and weight, so the published numbers have one source
+- [x] Notebook 06 calls the package for every fit, metric and weight it reports, so those numbers have one source
 
 ### Pending
 

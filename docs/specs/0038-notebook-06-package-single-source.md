@@ -65,7 +65,7 @@ The real dataset is not required. Build a synthetic `data/raw/GlobalWeatherRepos
 `last_updated` and `temperature_celsius` over at least 400 days in an isolated copy of the
 repository, then, from that copy:
 
-```
+```bash
 cd notebooks
 MPLBACKEND=Agg python -m nbconvert --to notebook --execute --output executed_06.ipynb \
     06_advanced_forecasting.ipynb
