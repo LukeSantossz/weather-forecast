@@ -461,9 +461,11 @@ weather-forecast/
 ## Project Status
 
 **Status: MVP complete.** The pipeline, anomaly detection, serving API, and dashboard all work
-end to end, and every CI gate passes: the 160 Python tests across the 3.10 and 3.11 matrix, ruff,
-mypy, the Docker image build, and the dashboard build, acceptance checks and parity tests. The
-items under Pending are follow-ups, not holes in the core.
+end to end, and every CI gate passes. On Python 3.10 and 3.11 the suite reports 157 passed and 3
+skipped, and the 3 it skips are the model-backed search tests, which run in their own job with the
+`nlp` extra installed. Alongside those: ruff, mypy, the Docker image build, and the dashboard
+build, acceptance checks and parity tests. The items under Pending are follow-ups, not holes in
+the core.
 
 ### Done
 
