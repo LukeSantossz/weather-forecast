@@ -1,9 +1,10 @@
-"""Regenerate web/public/data/anomaly_model.json from the committed raw data.
+"""Regenerate web/public/data/anomaly_model.json from the raw weather CSV.
 
 Provenance helper for the SP1 browser anomaly checker: fits the anomaly models via
-``weather_forecast.anomaly.build_anomaly_model`` on the committed raw weather CSV and writes
-the serialized model to the web data contract. Deterministic (seed 42); rerun after any change
-to the committed data or to ``build_anomaly_model``.
+``weather_forecast.anomaly.build_anomaly_model`` on the raw weather CSV and writes the
+serialized model to the web data contract. The CSV is not committed; place it at
+``data/raw/GlobalWeatherRepository.csv`` first (see the README). Deterministic (seed 42);
+rerun after any change to that data or to ``build_anomaly_model``.
 
     PYTHONPATH=src python scripts/_gen_anomaly_model.py
 """

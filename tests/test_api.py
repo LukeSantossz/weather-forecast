@@ -3,15 +3,22 @@
 Every endpoint is exercised without a network: ``TestClient`` drives the ASGI
 app in-process, and the forecaster is a small persisted fixture under
 ``tmp_path`` pointed to by the ``MODELS_DIR`` env var the app reads at startup.
+
+Skipped unless FastAPI is installed (the ``serving`` extra), the same guard the
+other optional-extra suites use, so an install without that extra still collects.
 """
 
 import numpy as np
 import pandas as pd
-from fastapi.testclient import TestClient
+import pytest
 
-from weather_forecast.api.app import app
-from weather_forecast.models import fit_arima
-from weather_forecast.persistence import save_artifact
+pytest.importorskip("fastapi")
+
+from fastapi.testclient import TestClient  # noqa: E402
+
+from weather_forecast.api.app import app  # noqa: E402
+from weather_forecast.models import fit_arima  # noqa: E402
+from weather_forecast.persistence import save_artifact  # noqa: E402
 
 
 def _persist_forecaster(models_dir, *, version: str = "v1") -> None:

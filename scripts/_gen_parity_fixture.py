@@ -7,8 +7,9 @@ and its verdict. Everything is derived from ``weather_forecast.anomaly.fit_anoma
 same single deterministic fit that ``build_anomaly_model`` serializes into the shipped
 ``anomaly_model.json``, so the JS reimplementation is checked against exactly the model the
 browser loads. The web vitest parity tests assert the JS output matches these values to 1e-6.
-Deterministic (seed 42); rerun together with the exported artifact after any change to the
-committed data, the fit, or the input set.
+The raw CSV this reads is not committed; place it at ``data/raw/GlobalWeatherRepository.csv``
+first (see the README). Deterministic (seed 42); rerun together with the exported artifact
+after any change to that data, the fit, or the input set.
 
     PYTHONPATH=src python scripts/_gen_parity_fixture.py
 """
