@@ -5,16 +5,31 @@ This app is a static, client-only dashboard: `next.config.mjs` sets `output: 'ex
 image optimization endpoint - `images.unoptimized: true` is already set for this reason).
 Vercel can serve that output directly.
 
-## Status - clear to deploy
+## Live
+
+<https://weather-forecast-neon-iota.vercel.app>
+
+Vercel project `weather-forecast` (team `lukesantosszs-projects`), linked to the GitHub repo with
+Root Directory `web` and the Next.js preset. Pushes to `main` deploy to production; pull requests
+get preview deployments. Vercel Authentication is off, so the URL is publicly readable.
+
+One caveat: the committed data contract under `web/public/data/` was generated at commit
+`24b7120`, so the live provenance banner reports that commit rather than the deployed one.
+Regenerating the contract needs the source CSV (see the repository README).
+
+## Status - deployed
 
 The earlier gate (do not go live until the README retracted the leakage-inflated headline,
 issues [#19](https://github.com/LukeSantossz/weather-forecast/issues/19) /
 [#20](https://github.com/LukeSantossz/weather-forecast/issues/20)) has been lifted: both merged,
-and the README and the dashboard now show the same corrected, leakage-free metrics. There is no
-outstanding consistency gate; the site can be made public. Regenerate `web/public/data/*.json`
-from the current commit before publishing so the provenance banner shows the right date and SHA.
+and the README and the dashboard now show the same corrected, leakage-free metrics. The site is
+public. Regenerate `web/public/data/*.json` from the current commit whenever the source CSV is
+available, so the provenance banner shows the right date and SHA.
 
 ## Vercel project setup
+
+This is the setup already applied to the live project; it is kept here as the record of how it
+was configured, and as the recipe if it ever has to be rebuilt.
 
 1. Import the GitHub repo into Vercel as a new project.
 2. **Root Directory:** set to `web` (this repo is not a single-package repo; the Next.js app
