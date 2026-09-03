@@ -156,8 +156,12 @@ produced under evaluation leakage, was withdrawn under #20 and is not reproduced
 The Prophet row is a separate run. There is no Prophet trainer in the package; the figure comes
 from notebook 05, which uses the same 30-day holdout but is scored outside `run_forecast`.
 
-Every number above is in [`web/public/data/metrics.json`](web/public/data/metrics.json), the file
-the dashboard renders. With the dataset in place, one command reproduces the six package rows:
+Every number in the table is in [`web/public/data/metrics.json`](web/public/data/metrics.json),
+the file the dashboard renders, and the holdout window and the 90 days of history before it are in
+[`forecast.json`](web/public/data/forecast.json) beside it. Two figures on this page come from the
+run that produced those files rather than from the files themselves: the dataset's start date, and
+the 211 countries the daily mean averages over. With the dataset in place, one command reproduces
+the six package rows:
 
 ```bash
 python -m weather_forecast.train --project-root .
