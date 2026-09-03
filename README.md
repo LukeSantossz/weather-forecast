@@ -100,13 +100,17 @@ flowchart LR
     end
 ```
 
-Two things in this topology are not obvious.
+Three things in this topology are not obvious.
 
 First, the Parquet store is optional. Forecasting and anomaly detection read the raw CSV
 directly; the cleaned Parquet is an export that notebook 02 produces and nothing downstream
 requires (architecture decision EVO-1(b)).
 
-Second, the dashboard has no backend. It is a static export that reads committed JSON, and its
+Second, the notebooks own no numbers. They orchestrate, plot and explain, but every model fit,
+window size, metric and ensemble weight comes from the package, so the dashboard's figures and
+`python -m weather_forecast.train` cannot disagree.
+
+Third, the dashboard has no backend. It is a static export that reads committed JSON, and its
 anomaly checker runs the exported Isolation Forest in the browser. Python owns the fit;
 JavaScript only walks the trees ([ADR 0011](docs/adr/0011-browser-inference-exported-artifact.md),
 [ADR 0012](docs/adr/0012-tree-traversal-primitive.md)).
@@ -486,10 +490,10 @@ the core.
 - [x] In-browser anomaly checker: exported Isolation Forest scored client-side, parity-tested against Python to 1e-6
 - [x] GitHub Actions CI: Python test matrix, lint, Docker build, NLP job, and a separate dashboard workflow
 - [x] Dashboard published on Vercel, deploying from `main` on every push ([#64](https://github.com/LukeSantossz/weather-forecast/issues/64))
+- [x] Notebook 06 calls the package for every fit, metric and weight, so the published numbers have one source
 
 ### Pending
 
-- [ ] Make the package the single source of the published numbers; notebook 06 re-fits the models inline instead of calling `run_forecast`
 - [ ] Regenerate the committed data contract, which was produced 122 commits before the current `main`
 - [ ] Re-score the Prophet baseline through the package, or drop it from the table
 - [ ] Wire conformal prediction intervals into the forecast output; the module is built and tested but reaches no user-facing surface
@@ -511,10 +515,6 @@ the core.
   or unseen climate regimes is unverified.
 - **Single-holdout evaluation.** The comparison rests on one 30-day window scored once, so the
   ranking and the 0.27 °C figure carry variance nobody has quantified.
-- **Two implementations of the same pipeline.** The notebooks that produce the published
-  dashboard numbers re-fit the forecasting models inline instead of calling the package. The
-  numbers currently agree to the published precision, but nothing enforces that: a change to
-  `models.py` can stale the dashboard while the tests stay green.
 - **The committed data contract is a snapshot.** Because the source CSV is gitignored, CI cannot
   regenerate or verify `web/public/data/`. It has to be refreshed by hand before publishing.
 - **Conformal intervals are unwired.** `conformal.py` is implemented and tested, but no
