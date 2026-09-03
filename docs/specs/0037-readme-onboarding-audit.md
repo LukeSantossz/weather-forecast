@@ -89,7 +89,7 @@ The two code changes are deliberately minimal and carry no behavior change:
 
 Python 3.12.13, in a clean virtual environment at the repository root:
 
-```
+```bash
 pip install -e ".[dev,serving,mlops]"
 pytest tests/ -q
 ruff check . && ruff format --check . && mypy src/
@@ -97,7 +97,7 @@ ruff check . && ruff format --check . && mypy src/
 
 Dashboard, from `web/` with Node.js 25.2.1 and npm 11.6.2:
 
-```
+```bash
 npm ci
 npm run build
 npm run check

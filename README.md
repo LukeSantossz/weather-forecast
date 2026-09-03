@@ -208,7 +208,7 @@ The raw data is not in this repository. It is the Kaggle dataset
 [World Weather Repository (Daily Updating)](https://www.kaggle.com/datasets/nelgiriyewithana/global-weather-repository).
 Download it and save the CSV as:
 
-```
+```text
 data/raw/GlobalWeatherRepository.csv
 ```
 
@@ -461,9 +461,9 @@ weather-forecast/
 ## Project Status
 
 **Status: MVP complete.** The pipeline, anomaly detection, serving API, and dashboard all work
-end to end, and every gate passes: 160 Python tests, ruff, mypy, a Docker build, the dashboard
-build, its acceptance checks, and its parity tests. The items under Pending are follow-ups, not
-holes in the core.
+end to end, and every CI gate passes: the 160 Python tests across the 3.10 and 3.11 matrix, ruff,
+mypy, the Docker image build, and the dashboard build, acceptance checks and parity tests. The
+items under Pending are follow-ups, not holes in the core.
 
 ### Done
 
